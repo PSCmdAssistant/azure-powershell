@@ -1,4 +1,4 @@
-//
+ //
 // Copyright (c) Microsoft and contributors.  All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,35 +27,8 @@ namespace Microsoft.Azure.Commands.Compute.Automation.Models
 {
     public partial class PSDiskUpdate
     {
-        public OperatingSystemTypes? OsType { get; set; }
-        public int? DiskSizeGB { get; set; }
-        public EncryptionSettingsCollection EncryptionSettingsCollection { get; set; }
-        public long? DiskIOPSReadWrite { get; set; }
-        public long? DiskMBpsReadWrite { get; set; }
-        public long? DiskIOPSReadOnly { get; set; }
-        public long? DiskMBpsReadOnly { get; set; }
-        public int? MaxShares { get; set; }
-        public Encryption Encryption { get; set; }
-        public IDictionary<string, string> Tags { get; set; }
-        public DiskSku Sku { get; set; }
-        public string NetworkAccessPolicy { get; set; }
-        public string DiskAccessId { get; set; }
+        // Existing properties...
 
-        public string Tier { get; set; }
-        public bool? BurstingEnabled { get; set; }
-        public PSPurchasePlan PurchasePlan { get; set; }
-        public bool? SupportsHibernation { get; set; }
-
-        //
-        // Summary:
-        //     Gets or sets list of supported capabilities (like Accelerated Networking) for
-        //     the image from which the source disk from the snapshot was originally created.
-        public SupportedCapabilities SupportedCapabilities { get; set; }
-
-        //
-        // Summary:
-        //     Gets or sets possible values include: 'Enabled', 'Disabled'
-        public string PublicNetworkAccess { get; set; }
-        public string DataAccessAuthMode { get; set; }
+        public string AvailabilityPolicy { get; set; }
     }
 }
