@@ -1,4 +1,4 @@
-﻿// ----------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------
 //
 // Copyright Microsoft Corporation
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -92,6 +92,13 @@ namespace Microsoft.Azure.Commands.Compute
             ValueFromPipelineByPropertyName = false)]
         public SwitchParameter WriteAccelerator { get; set; }
 
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "Availability Policy of the Disk")]
+        [ValidateSet("AutomaticReattach", "None")]
+        public string AvailabilityPolicy { get; set; }
+
         public override void ExecuteCmdlet()
         {
             var storageProfile = this.VM.StorageProfile;
@@ -153,6 +160,18 @@ namespace Microsoft.Azure.Commands.Compute
                 }
 
                 dataDisk.WriteAcceleratorEnabled = this.WriteAccelerator.IsPresent;
+
+                if (this.IsParameterBound(c => c.AvailabilityPolicy))
+                {
+                    if (AvailabilityPolicy == "AutomaticReattach")
+                    {
+                        dataDisk.AvailabilityPolicy = AvailabilityPolicy;
+                    }
+                    else if (AvailabilityPolicy == "None")
+                    {
+                        dataDisk.AvailabilityPolicy = null;
+                    }
+                }
             }
 
             this.VM.StorageProfile = storageProfile;
