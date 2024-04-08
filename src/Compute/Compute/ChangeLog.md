@@ -20,6 +20,9 @@
 
 -->
 ## Upcoming Release
+* Added new parameter `GallantSecurity` to `Set-AzDiskSecurityProfile` cmdlet.
+    - This is a string type parameter with possible values: DiskOn, VMOn, or SecurityOff.
+    - This parameter is set on the disk's security profile.
 
 ## Version 7.2.0
 * Added parameters `-scriptUriManagedIdentity`, `-outputBlobManagedIdentity`, `-errorBlobMangedIdentity`, and `-TreatFailureAsDeploymentFailure` to cmdlets `Set-AzVmRunCommand` and `Set-AzVmssRunCommand`. 
