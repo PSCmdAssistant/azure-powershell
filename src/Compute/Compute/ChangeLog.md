@@ -20,6 +20,9 @@
 
 -->
 ## Upcoming Release
+* Updated `Update-AzVmss` cmdlet with new parameters `SecurityPostureId` and `SecurityPostureExcludedExtensions`.
+    - `SecurityPostureId` is a Relative URI string path that maps to the property Vmss.Properties.VirtualMachineProfile.SecurityPostureReference.Id.
+    - `SecurityPostureExcludedExtensions` is an array of VMExtension objects that maps onto the property Vmss.Properties.VirtualMachineProfile.SecurityPostureReference.ExcludedExtensions.
 
 ## Version 7.2.0
 * Added parameters `-scriptUriManagedIdentity`, `-outputBlobManagedIdentity`, `-errorBlobMangedIdentity`, and `-TreatFailureAsDeploymentFailure` to cmdlets `Set-AzVmRunCommand` and `Set-AzVmssRunCommand`. 
