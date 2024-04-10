@@ -1,4 +1,4 @@
-﻿// ----------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------
 //
 // Copyright Microsoft Corporation
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -87,7 +87,7 @@ namespace Microsoft.Azure.Commands.Compute
         public int? DiskSizeInGB { get; set; }
 
         [Parameter(
-            Mandatory = true,
+            Mandatory = false,
             Position = 5,
             ValueFromPipelineByPropertyName = true,
             HelpMessage = HelpMessages.VMDataDiskLun)]
@@ -165,7 +165,7 @@ namespace Microsoft.Azure.Commands.Compute
                     Name = this.Name,
                     Caching = this.Caching,
                     DiskSizeGB = this.DiskSizeInGB,
-                    Lun = this.Lun.GetValueOrDefault(),
+                    Lun = this.Lun.HasValue ? this.Lun.GetValueOrDefault() : storageProfile.DataDisks.Count,
                     Vhd = string.IsNullOrEmpty(this.VhdUri) ? null : new VirtualHardDisk
                     {
                         Uri = this.VhdUri
@@ -209,7 +209,7 @@ namespace Microsoft.Azure.Commands.Compute
                     Name = this.Name,
                     Caching = this.Caching,
                     DiskSizeGB = this.DiskSizeInGB,
-                    Lun = this.Lun.GetValueOrDefault(),
+                    Lun = this.Lun.HasValue ? this.Lun.GetValueOrDefault() : storageProfile.DataDisks.Count,
                     CreateOption = this.CreateOption,
                     ManagedDisk = SetManagedDisk(this.ManagedDiskId, this.DiskEncryptionSetId, this.StorageAccountType),
                     WriteAcceleratorEnabled = this.WriteAccelerator.IsPresent,
@@ -223,3 +223,4 @@ namespace Microsoft.Azure.Commands.Compute
         }
     }
 }
+.

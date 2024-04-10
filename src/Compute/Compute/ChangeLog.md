@@ -20,6 +20,15 @@
 
 -->
 ## Upcoming Release
+* Updated cmdlets `Add-AzVMDataDisk` and `Remove-AzVMDataDisk`.
+    - No new parameter added. Existing parameter LUN will become optional when using -CreateOption Attach.
+    - Disk will be attached without needing LUN number. LUN number will become optional.
+    - Customer will face reduced CRP throttling.
+    - Affected parameter sets: -LUN
+    - Sample syntax: 
+    ```powershell
+    PS C:\> Add-AzVMDataDisk -VM $VirtualMachine -Name 'DataDisk1' -Caching 'ReadOnly'  -CreateOption Attach -SourceResourceId "ARM ID of disk/snapshot" 
+    ```
 
 ## Version 7.2.0
 * Added parameters `-scriptUriManagedIdentity`, `-outputBlobManagedIdentity`, `-errorBlobMangedIdentity`, and `-TreatFailureAsDeploymentFailure` to cmdlets `Set-AzVmRunCommand` and `Set-AzVmssRunCommand`. 
