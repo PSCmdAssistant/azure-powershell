@@ -19,7 +19,17 @@
         - Additional information about change #1
 
 -->
-## Upcoming Release
+* Fixed an issue where `Get-AzVmss` would return an error when the `ResourceGroupName` and `VMScaleSetName` parameters were not provided.
+* Updated the `New-AzVmssConfig` cmdlet to include the `-EnableAutomaticOSUpgrade` parameter for consistency with the `New-AzVmss` cmdlet.
+* Added a new parameter `-TierOption` to the `New-AzSnapshotConfig` cmdlet to allow users to specify the tier of the snapshot.
+* Added a new parameter `-SharingProfile` to the `New-AzCapacityReservationGroup` and `Update-AzCapacityReservationGroup` cmdlets to allow users to specify the sharing profile of the capacity reservation group.
+* Added a new parameter `SourceImageVMId` to the `New-AzGalleryImageVersion` cmdlet to allow users to specify the source image VM ID. Also added error messages for this new parameter and the existing `SourceImageId` parameter to provide more detailed feedback to users.
+* Added breaking change warnings for the May 2024 release. The warnings are for:
+  - `New-AzGalleryImageVersion` defaulting to turn on TrustedLaunchSupported and HyperVGeneration to V2.
+  - `New-AzVM` and `New-AzVmss` will default to the image `Windows Server 2022 Azure Edition` instead of `Windows 2016 Datacenter` by default.
+  - `Get-AzVmss` will no longer allow empty values to `ResourceGroupName` and `VMScaleSetName` to avoid a bug where it will just return nothing.
+* Upgraded Azure.Core to 1.37.0.
+* Az.Compute is updated to use the 2023-07-03 GalleryRP, 2024-03-01 ComputeRP and 2023-10-02 DiskRP API.
 
 ## Version 7.2.0
 * Added parameters `-scriptUriManagedIdentity`, `-outputBlobManagedIdentity`, `-errorBlobMangedIdentity`, and `-TreatFailureAsDeploymentFailure` to cmdlets `Set-AzVmRunCommand` and `Set-AzVmssRunCommand`. 
