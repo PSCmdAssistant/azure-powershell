@@ -19,7 +19,11 @@
         - Additional information about change #1
 
 -->
-## Upcoming Release
+* Added new parameters `-AvailabilityPolicy` to cmdlets `Set-AzVMDataDisk` and `New-AzDiskUpdateConfig`. 
+    - This parameter accepts 2 values - "AutomaticReattach": Will set/update property on disk and "None":Will clear property on disk
+    - This change affects the following parameter sets: { INPUT HERE }
+    - Link to diff between markdown help files: { CHANGED CMDLETS HERE }
+    - Link to API tests for this feature: { ENTER LINK HERE }
 
 ## Version 7.2.0
 * Added parameters `-scriptUriManagedIdentity`, `-outputBlobManagedIdentity`, `-errorBlobMangedIdentity`, and `-TreatFailureAsDeploymentFailure` to cmdlets `Set-AzVmRunCommand` and `Set-AzVmssRunCommand`. 
