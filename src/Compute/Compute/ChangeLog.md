@@ -20,6 +20,9 @@
 
 -->
 ## Upcoming Release
+* Added new parameter `ResourceIdsOnly` to `Get-AzCapacityReservationGroup` cmdlet.
+    - The data type for `ResourceIdsOnly` is a string.
+    - Allowed values for `ResourceIdsOnly` are "CreatedInSubscription", "SharedWithSubscription", and "All".
 
 ## Version 7.2.0
 * Added parameters `-scriptUriManagedIdentity`, `-outputBlobManagedIdentity`, `-errorBlobMangedIdentity`, and `-TreatFailureAsDeploymentFailure` to cmdlets `Set-AzVmRunCommand` and `Set-AzVmssRunCommand`. 
