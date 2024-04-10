@@ -20,6 +20,10 @@
 
 -->
 ## Upcoming Release
+* Updated the default OS image for `New-AzVmss` cmdlet when SecurityType is set to Standard. Now, instead of deploying Windows Server 2016 Gen1 VM/VMSS, it deploys Windows Server 2022 Azure Edition (Gen2).
+    - This change affects all parameter sets of the `New-AzVmss` cmdlet.
+    - Link to diff between markdown help files: `{ ENTER LINK HERE }`
+    - Link to the API tests for this feature: `{ ENTER LINK HERE }`
 
 ## Version 7.2.0
 * Added parameters `-scriptUriManagedIdentity`, `-outputBlobManagedIdentity`, `-errorBlobMangedIdentity`, and `-TreatFailureAsDeploymentFailure` to cmdlets `Set-AzVmRunCommand` and `Set-AzVmssRunCommand`. 
