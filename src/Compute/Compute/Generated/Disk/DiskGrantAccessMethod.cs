@@ -1,4 +1,4 @@
-//
+ //
 // Copyright (c) Microsoft and contributors.  All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -48,6 +48,7 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                     var grantAccessData = new GrantAccessData();
                     grantAccessData.Access = this.Access;
                     grantAccessData.DurationInSeconds = this.DurationInSecond;
+                    grantAccessData.GetSecureVMGuestStateSAS = this.SecureVmGuestStateSas;
 
                     var result = DisksClient.GrantAccess(resourceGroupName, diskName, grantAccessData);
                     var psObject = new PSAccessUri();
@@ -86,7 +87,14 @@ namespace Microsoft.Azure.Commands.Compute.Automation
             Mandatory = false)]
         public int DurationInSecond { get; set; }
 
+        [Parameter(
+            ParameterSetName = "DefaultParameter",
+            Position = 4,
+            Mandatory = false)]
+        public bool SecureVmGuestStateSas { get; set; }
+
         [Parameter(Mandatory = false, HelpMessage = "Run cmdlet in the background")]
         public SwitchParameter AsJob { get; set; }
     }
 }
+
