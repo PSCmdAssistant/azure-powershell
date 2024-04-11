@@ -20,6 +20,11 @@
 
 -->
 ## Upcoming Release
+* Updated cmdlet `New-AzGalleryImageDefinition`
+    - The parameter `HyperVGeneration` now defaults to `V2`.
+    - The `Features` parameter now has the dictionary `{Name='SecurityType';Value='TrustedLaunchSupported'}` passed to it by default.
+* Affected parameter sets: `{ INPUT HERE }`
+* Link to API tests: `{ ENTER LINK HERE }`
 
 ## Version 7.2.0
 * Added parameters `-scriptUriManagedIdentity`, `-outputBlobManagedIdentity`, `-errorBlobMangedIdentity`, and `-TreatFailureAsDeploymentFailure` to cmdlets `Set-AzVmRunCommand` and `Set-AzVmssRunCommand`. 
