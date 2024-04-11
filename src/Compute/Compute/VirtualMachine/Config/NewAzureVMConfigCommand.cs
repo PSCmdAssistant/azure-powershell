@@ -1,4 +1,4 @@
-﻿// ----------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------
 //
 // Copyright Microsoft Corporation
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -210,6 +210,18 @@ namespace Microsoft.Azure.Commands.Compute
            Mandatory = false)]
         public bool? EnableSecureBoot { get; set; } = null;
 
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "The If-Match entity tag (ETag) associated with the VM.")]
+        public string IfMatch { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "The If-None-Match entity tag (ETag) associated with the VM.")]
+        public string IfNotMatch { get; set; }
+
         public override void ExecuteCmdlet()
         {
             var vm = new PSVirtualMachine
@@ -224,7 +236,9 @@ namespace Microsoft.Azure.Commands.Compute
                 Tags = this.Tags != null ? this.Tags.ToDictionary() : null,
                 Zones = this.Zone,
                 EvictionPolicy = this.EvictionPolicy,
-                Priority = this.Priority
+                Priority = this.Priority,
+                IfMatch = this.IfMatch,
+                IfNotMatch = this.IfNotMatch
             };
 
             if (this.IsParameterBound(c => c.IdentityType))

@@ -1,4 +1,4 @@
-﻿// ----------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------
 //
 // Copyright Microsoft Corporation
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -152,9 +152,7 @@ namespace Microsoft.Azure.Commands.Compute
         [ValidateNotNullOrEmpty]
         public string LicenseType { get; set; }
 
-        [Parameter(
-            ParameterSetName = SimpleParameterSet,
-            Mandatory = true)]
+        [Parameter(ParameterSetName = SimpleParameterSet, Mandatory = true)]
         [Parameter(
             ParameterSetName = DiskFileParameterSet,
             Mandatory = true)]
@@ -320,54 +318,12 @@ namespace Microsoft.Azure.Commands.Compute
             ValueFromPipelineByPropertyName = true)]
         public string HostGroupId { get; set; }
 
-        [Parameter(
-            Mandatory = false,
-            HelpMessage = "Name of the SSH Public Key resource.",
-            ParameterSetName = DefaultParameterSet)]
-        [Parameter(
-            Mandatory = false,
-            HelpMessage = "Name of the SSH Public Key resource.",
-            ParameterSetName = SimpleParameterSet)]
-        public string SshKeyName { get; set; }
-
-        [Parameter(
-            Mandatory = false,
-            HelpMessage = "Generate a SSH Public/Private key pair and create a SSH Public Key resource on Azure.",
-            ParameterSetName = DefaultParameterSet)]
-        [Parameter(
-            Mandatory = false,
-            HelpMessage = "Generate a SSH Public/Private key pair and create a SSH Public Key resource on Azure.",
-            ParameterSetName = SimpleParameterSet)]
-        public SwitchParameter GenerateSshKey { get; set; }
-
-        [Parameter(
-            Mandatory = false,
-            ParameterSetName = SimpleParameterSet,
-            HelpMessage = "Id of the capacity reservation Group that is used to allocate.")]
-        [Parameter(
-            Mandatory = false,
-            ParameterSetName = DiskFileParameterSet,
-            HelpMessage = "Id of the capacity reservation Group that is used to allocate.")]
-        [ResourceIdCompleter("Microsoft.Compute/capacityReservationGroups")]
-        public string CapacityReservationGroupId { get; set; }
-
-        [Parameter(
-            Mandatory = false,
-            ParameterSetName = SimpleParameterSet,
-            HelpMessage = "UserData for the VM, which will be Base64 encoded. Customer should not pass any secrets in here.",
-            ValueFromPipelineByPropertyName = true)]
-        [Parameter(
-            Mandatory = false,
-            ParameterSetName = DiskFileParameterSet,
-            HelpMessage = "UserData for the VM, which will be Base64 encoded. Customer should not pass any secrets in here.",
-            ValueFromPipelineByPropertyName = true)]
+        [Parameter(ParameterSetName = SimpleParameterSet, Mandatory = false)]
+        [Parameter(ParameterSetName = DiskFileParameterSet, Mandatory = false)]
         public string UserData { get; set; }
 
-        [Parameter(
-            Mandatory = false,
-            ParameterSetName = SimpleParameterSet,
-            HelpMessage = "Specified the gallery image unique id for vm deployment. This can be fetched from gallery image GET call.")]
-        [ResourceIdCompleter("Microsoft.Compute galleries/images/versions")]
+        [Parameter(ParameterSetName = SimpleParameterSet, Mandatory = false)]
+        [Parameter(ParameterSetName = DiskFileParameterSet, Mandatory = false)]
         public string ImageReferenceId { get; set; }
 
         [Parameter(
@@ -385,12 +341,10 @@ namespace Microsoft.Azure.Commands.Compute
         [Parameter(
             ParameterSetName = SimpleParameterSet,
             Mandatory = false,
-            ValueFromPipelineByPropertyName = true,
             HelpMessage = "The flag that enables or disables hibernation capability on the VM.")]
         [Parameter(
             ParameterSetName = DiskFileParameterSet,
             Mandatory = false,
-            ValueFromPipelineByPropertyName = true,
             HelpMessage = "The flag that enables or disables hibernation capability on the VM.")]
         public SwitchParameter HibernationEnabled { get; set; }
 
@@ -403,7 +357,7 @@ namespace Microsoft.Azure.Commands.Compute
         [Parameter(
             Mandatory = false,
             ValueFromPipelineByPropertyName = true,
-            HelpMessage = "Specifies the vCPU to physical core ratio. When this property is not specified in the request body the default behavior is set to the value of vCPUsPerCore for the VM Size exposed in api response of [List all available virtual machine sizes in a region](https://learn.microsoft.com/en-us/rest/api/compute/resource-skus/list). Setting this property to 1 also means that hyper-threading is disabled.")]
+            HelpMessage = "Specifies the vCPU to physical core ratio. When this property is not specified in the request body the default behavior is set to the value of vCPUsPerCore for the VM Size exposed in api response of [List all available virtual machine sizes in a region](https://learn.microsoft.com/rest/api/compute/resourceskus/list). Setting this property to 1 also means that hyper-threading is disabled.")]
         public int vCPUCountPerCore { get; set; }
 
         [Parameter(
@@ -441,6 +395,18 @@ namespace Microsoft.Azure.Commands.Compute
            ValueFromPipelineByPropertyName = true,
            Mandatory = false)]
         public bool? EnableSecureBoot { get; set; } = null;
+
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "If-Match header that makes the operation conditional. For secrets and public keys, the operation will only proceed if the resource's current ETag on the server matches the value specified in this header.")]
+        public string IfMatch { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "If-None-Match header that makes the operation conditional. For secrets and public keys, the operation will proceed only if the resource does not exist, or the resource's current ETag on the server does not match the value specified in this header.")]
+        public string IfNotMatch { get; set; }
 
         public override void ExecuteCmdlet()
         {
@@ -701,7 +667,9 @@ namespace Microsoft.Azure.Commands.Compute
                         sharedGalleryImageId: _cmdlet.SharedGalleryImageId,
                         securityType: _cmdlet.SecurityType,
                         enableVtpm: _cmdlet.EnableVtpm,
-                        enableSecureBoot: _cmdlet.EnableSecureBoot
+                        enableSecureBoot: _cmdlet.EnableSecureBoot,
+                        ifMatch: _cmdlet.IfMatch,
+                        ifNotMatch: _cmdlet.IfNotMatch
                         );
                 }
                 else
@@ -741,7 +709,9 @@ namespace Microsoft.Azure.Commands.Compute
                         extendedLocation: extLoc,
                         securityType: _cmdlet.SecurityType,
                         enableVtpm: _cmdlet.EnableVtpm,
-                        enableSecureBoot: _cmdlet.EnableSecureBoot
+                        enableSecureBoot: _cmdlet.EnableSecureBoot,
+                        ifMatch: _cmdlet.IfMatch,
+                        ifNotMatch: _cmdlet.IfNotMatch
                     );
                 }
             }
@@ -936,8 +906,8 @@ namespace Microsoft.Azure.Commands.Compute
             // Normal TL defaulting check, minimal params
             if (this.VM.SecurityProfile?.SecurityType == null
              && this.VM.StorageProfile?.ImageReference == null
-             && this.VM.StorageProfile?.OsDisk?.ManagedDisk?.Id == null
-             && this.VM.StorageProfile?.ImageReference?.SharedGalleryImageId == null) //had to add this
+             && this.VM.StorageProfile?.OsDisk?.ManagedDisk?.Id == null //had to add this
+             && this.VM.StorageProfile?.ImageReference?.SharedGalleryImageId == null)
             {
                 defaultTrustedLaunchAndUefi();
                 setTrustedLaunchImage();
@@ -1096,7 +1066,9 @@ namespace Microsoft.Azure.Commands.Compute
                         SecurityProfile = this.VM.SecurityProfile,
                         CapacityReservation = this.VM.CapacityReservation,
                         UserData = this.VM.UserData,
-                        PlatformFaultDomain = this.VM.PlatformFaultDomain
+                        PlatformFaultDomain = this.VM.PlatformFaultDomain,
+                        IfMatch = this.IfMatch,
+                        IfNoneMatch = this.IfNotMatch
                     };
 
                     Dictionary<string, List<string>> auxAuthHeader = null;
@@ -1295,261 +1267,6 @@ namespace Microsoft.Azure.Commands.Compute
             }
         }
 
-        /// <summary>
-        /// Heres whats happening here :
-        /// If "SystemAssignedIdentity" and "UserAssignedIdentity" are both present we set the type of identity to be SystemAssignedUsrAssigned and set the user 
-        /// defined identity in the VM identity object.
-        /// If only "SystemAssignedIdentity" is present, we just set the type of the Identity to "SystemAssigned" and no identity ids are set as its created by Azure
-        /// If only "UserAssignedIdentity" is present, we set the type of the Identity to be "UserAssigned" and set the Identity in the VM identity object.
-        /// If neither is present, we return a null.
-        /// </summary>
-        /// <returns>Returning the Identity generated form the cmdlet parameters "SystemAssignedIdentity" and "UserAssignedIdentity"</returns>
-        private VirtualMachineIdentity GetVMIdentityFromArgs()
-        {
-            var isUserAssignedEnabled = !string.IsNullOrWhiteSpace(UserAssignedIdentity);
-            return (SystemAssignedIdentity.IsPresent || isUserAssignedEnabled)
-                ? new VirtualMachineIdentity
-                {
-                    Type = !isUserAssignedEnabled ?
-                           CM.ResourceIdentityType.SystemAssigned :
-                           (SystemAssignedIdentity.IsPresent ? CM.ResourceIdentityType.SystemAssignedUserAssigned : CM.ResourceIdentityType.UserAssigned),
-
-                    UserAssignedIdentities = isUserAssignedEnabled
-                                             ? new Dictionary<string, UserAssignedIdentitiesValue>()
-                                             {
-                                                 { UserAssignedIdentity, new UserAssignedIdentitiesValue() }
-                                             }
-                                             : null,
-                }
-                : null;
-        }
-
-        private string GetBginfoExtension()
-        {
-            var canonicalizedLocation = this.Location.Canonicalize();
-
-            var publishers =
-                ComputeClient.ComputeManagementClient.VirtualMachineImages.ListPublishers(canonicalizedLocation);
-
-            var publisher = publishers.FirstOrDefault(e => e.Name.Equals(VirtualMachineBGInfoExtensionContext.ExtensionDefaultPublisher));
-
-            if (publisher == null || !publisher.Name.Equals(VirtualMachineBGInfoExtensionContext.ExtensionDefaultPublisher))
-            {
-                return null;
-            }
-
-            var virtualMachineImageClient = ComputeClient.ComputeManagementClient.VirtualMachineExtensionImages;
-
-
-            var imageTypes =
-                virtualMachineImageClient.ListTypes(canonicalizedLocation,
-                    VirtualMachineBGInfoExtensionContext.ExtensionDefaultPublisher);
-
-            var extensionType = imageTypes.FirstOrDefault(
-                e => e.Name.Equals(VirtualMachineBGInfoExtensionContext.ExtensionDefaultName));
-
-            if (extensionType == null || !extensionType.Name.Equals(VirtualMachineBGInfoExtensionContext.ExtensionDefaultName))
-            {
-                return null;
-            }
-
-            var bginfoVersions =
-                virtualMachineImageClient.ListVersions(canonicalizedLocation,
-                    VirtualMachineBGInfoExtensionContext.ExtensionDefaultPublisher,
-                    VirtualMachineBGInfoExtensionContext.ExtensionDefaultName);
-
-            if (bginfoVersions != null
-                && bginfoVersions.Count > 0)
-            {
-                return bginfoVersions.Max(ver =>
-                {
-                    Version result;
-                    return (Version.TryParse(ver.Name, out result))
-                        ? string.Format("{0}.{1}", result.Major, result.Minor)
-                        : VirtualMachineBGInfoExtensionContext.ExtensionDefaultVersion;
-                });
-            }
-
-            return null;
-        }
-
-        private bool IsLinuxOs()
-        {
-            if (this.VM == null)
-            {
-                return false;
-            }
-
-            if ((this.VM.StorageProfile != null)
-                && (this.VM.StorageProfile.OsDisk != null)
-                && (this.VM.StorageProfile.OsDisk.OsType != null))
-            {
-                return (this.VM.StorageProfile.OsDisk.OsType.Equals(OperatingSystemTypes.Linux));
-            }
-
-            return ((this.VM.OSProfile != null)
-                    && (this.VM.OSProfile.LinuxConfiguration != null));
-        }
-
-        private string GetOrCreateStorageAccountForBootDiagnostics()
-        {
-            var storageAccountName = GetStorageAccountNameFromStorageProfile();
-            var storageClient =
-                    AzureSession.Instance.ClientFactory.CreateArmClient<StorageManagementClient>(DefaultProfile.DefaultContext,
-                        AzureEnvironment.Endpoint.ResourceManager);
-
-            if (!string.IsNullOrEmpty(storageAccountName))
-            {
-                try
-                {
-                    var storageAccountList = storageClient.StorageAccounts.List();
-                    if (storageAccountList != null)
-                    {
-                        var osDiskStorageAccount = storageAccountList.First(e => e.Name.Equals(storageAccountName));
-
-                        if (osDiskStorageAccount != null
-                            && osDiskStorageAccount.Sku() != null
-                            && !osDiskStorageAccount.SkuName().ToLowerInvariant().Contains("premium"))
-                        {
-                            return osDiskStorageAccount.PrimaryEndpoints.Blob;
-                        }
-                    }
-                }
-                catch (Exception e)
-                {
-                    if (e.Message.Contains("ResourceNotFound"))
-                    {
-                        WriteWarning(string.Format(
-                            Properties.Resources.StorageAccountNotFoundForBootDiagnostics, storageAccountName));
-                    }
-                    else
-                    {
-                        WriteWarning(string.Format(
-                            Properties.Resources.ErrorDuringGettingStorageAccountForBootDiagnostics, storageAccountName, e.Message));
-                    }
-                }
-            }
-
-            var storagePrimaryEndpointBlob = CreateStandardStorageAccount(storageClient);
-            return storagePrimaryEndpointBlob;
-            
-        }
-
-        private string GetStorageAccountNameFromStorageProfile()
-        {
-            if (this.VM == null
-                || this.VM.StorageProfile == null
-                || this.VM.StorageProfile.OsDisk == null
-                || this.VM.StorageProfile.OsDisk.Vhd == null
-                || this.VM.StorageProfile.OsDisk.Vhd.Uri == null)
-            {
-                return null;
-            }
-
-            return GetStorageAccountNameFromUriString(this.VM.StorageProfile.OsDisk.Vhd.Uri);
-        }
-
-        private StorageAccount TryToChooseExistingStandardStorageAccount(StorageManagementClient client)
-        {
-            IEnumerable<StorageAccount> storageAccountList = client.StorageAccounts.ListByResourceGroup(this.ResourceGroupName);
-            if (storageAccountList == null || storageAccountList.Count() == 0)
-            {
-                storageAccountList = client.StorageAccounts.List().Where(e => e.Location.Canonicalize().Equals(this.Location.Canonicalize()));
-                if (storageAccountList == null || storageAccountList.Count() == 0)
-                {
-                    return null;
-                }
-            }
-
-            try
-            {
-                return storageAccountList.First(
-                    e => e.Location.Canonicalize().Equals(this.Location.Canonicalize())
-                      && e.Sku() != null
-                      && !e.SkuName().ToLowerInvariant().Contains("premium"));
-            }
-            catch (InvalidOperationException e)
-            {
-                WriteWarning(string.Format(
-                            Properties.Resources.ErrorDuringChoosingStandardStorageAccount, e.Message));
-                return null;
-            }
-        }
-
-        private string CreateStandardStorageAccount(StorageManagementClient client)
-        {
-            string storageAccountName;
-
-            var i = 0;
-            do
-            {
-                storageAccountName = GetRandomStorageAccountName(i);
-                i++;
-            }
-            while (i < 10 && (bool)!client.StorageAccounts.CheckNameAvailability(storageAccountName).NameAvailable);
-
-            SM.ExtendedLocation extendedLocation = null;
-            if (this.EdgeZone != null)
-            {
-                extendedLocation = new SM.ExtendedLocation { Name = this.EdgeZone, Type = CM.ExtendedLocationTypes.EdgeZone };
-            }
-
-            var storaeAccountParameter = new StorageAccountCreateParameters
-            {
-                Kind = "StorageV2",
-                Location = this.Location ?? this.VM.Location,
-                ExtendedLocation = extendedLocation
-            };
-            storaeAccountParameter.SetAsStandardGRS();
-
-            try
-            {
-                client.StorageAccounts.Create(this.ResourceGroupName, storageAccountName, storaeAccountParameter);
-                var getresponse = client.StorageAccounts.GetProperties(this.ResourceGroupName, storageAccountName);
-                WriteWarning(string.Format(Properties.Resources.CreatingStorageAccountForBootDiagnostics, storageAccountName));
-
-                return getresponse.PrimaryEndpoints.Blob;
-            }
-            catch (Exception e)
-            {
-                // Failed to create a storage account for boot diagnostics.
-                WriteWarning(string.Format(Properties.Resources.ErrorDuringCreatingStorageAccountForBootDiagnostics, e));
-                return null;
-            }
-        }
-
-        private string GetRandomStorageAccountName(int interation)
-        {
-            const int maxSubLength = 5;
-            const int maxResLength = 6;
-            const int maxVMLength = 4;
-
-            var subscriptionName = VirtualMachineCmdletHelper.GetTruncatedStr(this.DefaultContext.Subscription.Name, maxSubLength);
-            var resourcename = VirtualMachineCmdletHelper.GetTruncatedStr(this.ResourceGroupName, maxResLength);
-            var vmname = VirtualMachineCmdletHelper.GetTruncatedStr(this.VM.Name, maxVMLength);
-            var datetimestr = DateTime.Now.ToString("MMddHHmm");
-
-            var output = subscriptionName + resourcename + vmname + datetimestr + interation;
-
-            output = new string((from c in output where char.IsLetterOrDigit(c) select c).ToArray());
-
-            return output.ToLowerInvariant();
-        }
-
-        private static string GetStorageAccountNameFromUriString(string uriStr)
-        {
-            Uri uri;
-
-            if (!Uri.TryCreate(uriStr, UriKind.RelativeOrAbsolute, out uri))
-            {
-                return null;
-            }
-
-            var storageUri = uri.Authority;
-            var index = storageUri.IndexOf('.');
-            return storageUri.Substring(0, index);
-        }
-
         private SshPublicKey createPublicKeyObject(string username)
         {
             string publicKeyPath = "/home/" + username + "/.ssh/authorized_keys";
@@ -1620,23 +1337,6 @@ namespace Microsoft.Azure.Commands.Compute
 
                 return publicKey;
             }
-        }
-
-        private VirtualMachine addSshPublicKey(VirtualMachine parameters)
-        {
-            SshPublicKey sshPublicKey = createPublicKeyObject(parameters.OsProfile.AdminUsername);
-            List<SshPublicKey> sshPublicKeys = new List<SshPublicKey>()
-            {
-                sshPublicKey
-            };
-            if (parameters.OsProfile.LinuxConfiguration.Ssh == null)
-            {
-                SshConfiguration sshConfig = new SshConfiguration();
-                parameters.OsProfile.LinuxConfiguration.Ssh = sshConfig;
-            }
-            parameters.OsProfile.LinuxConfiguration.Ssh.PublicKeys = sshPublicKeys;
-
-            return parameters;
         }
 
         private void cleanUp()

@@ -1,4 +1,4 @@
-//
+None //
 // Copyright (c) Microsoft and contributors.  All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -401,5 +401,21 @@ namespace Microsoft.Azure.Commands.Compute.Automation
             ParameterSetName = SimpleParameterSet,
             HelpMessage = "Whether OS upgrades should automatically be applied to scale set instances in a rolling fashion when a newer version of the image becomes available.")]
         public SwitchParameter EnableAutomaticOSUpgrade{ get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            HelpMessage = "The ETag of the VM or VMSS. This is only used for the If-Match or If-None-Match headers.")]
+        public string ETag { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            HelpMessage = "The If-Match header. The operation will be performed only if the ETag of the VM or VMSS on the service matches this value.")]
+        public string IfMatch { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            HelpMessage = "The If-None-Match header. The operation will be performed only if the ETag of the VM or VMSS on the service does not match this value.")]
+        public string IfNoneMatch { get; set; }
     }
 }
+
