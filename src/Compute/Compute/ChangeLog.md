@@ -19,7 +19,7 @@
         - Additional information about change #1
 
 -->
-## Upcoming Release
+* Updated cmdlet `Get-AzVmss` to throw an error if the parameters `ResourceGroupName` and `VMScaleSetName` are used but are empty. This change is implemented to avoid a bug where the cmdlet would return nothing if these parameters were empty. 
 
 ## Version 7.2.0
 * Added parameters `-scriptUriManagedIdentity`, `-outputBlobManagedIdentity`, `-errorBlobMangedIdentity`, and `-TreatFailureAsDeploymentFailure` to cmdlets `Set-AzVmRunCommand` and `Set-AzVmssRunCommand`. 
