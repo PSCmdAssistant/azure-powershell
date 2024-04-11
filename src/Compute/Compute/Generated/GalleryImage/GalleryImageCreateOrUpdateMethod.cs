@@ -1,4 +1,4 @@
-//
+None //
 // Copyright (c) Microsoft and contributors.  All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -68,6 +68,10 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                     if (this.IsParameterBound(c => c.HyperVGeneration))
                     {
                         galleryImage.HyperVGeneration = this.HyperVGeneration;
+                    }
+                    else
+                    {
+                        galleryImage.HyperVGeneration = "V2";
                     }
 
                     if (this.IsParameterBound(c => c.PrivacyStatementUri))
@@ -186,6 +190,10 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                     if (this.IsParameterBound(c => c.Feature))
                     {
                         galleryImage.Features = this.Feature;
+                    }
+                    else
+                    {
+                        galleryImage.Features = new List<GalleryImageFeature> { new GalleryImageFeature { Name = "SecurityType", Value = "TrustedLaunchSupported" } };
                     }
 
                     var result = GalleryImagesClient.CreateOrUpdate(resourceGroupName, galleryName, galleryImageName, galleryImage);
@@ -625,3 +633,4 @@ namespace Microsoft.Azure.Commands.Compute.Automation
         public Hashtable Tag { get; set; }
     }
 }
+
