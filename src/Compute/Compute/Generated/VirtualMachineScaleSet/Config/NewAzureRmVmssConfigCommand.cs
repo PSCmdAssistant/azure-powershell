@@ -1,4 +1,4 @@
-//
+None //
 // Copyright (c) Microsoft and contributors.  All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -347,6 +347,16 @@ namespace Microsoft.Azure.Commands.Compute.Automation
            Mandatory = false)]
         public bool? EnableSecureBoot { get; set; } = null;
 
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true)]
+        public string SecurityPostureId { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true)]
+        public string[] SecurityPostureExcludedExtension { get; set; }
+
         protected override void ProcessRecord()
         {
             if (ShouldProcess("VirtualMachineScaleSet", "New"))
@@ -389,6 +399,9 @@ namespace Microsoft.Azure.Commands.Compute.Automation
 
             // PriorityMix
             PriorityMixPolicy vPriorityMixPolicy = null;
+
+            // SecurityPosture
+            SecurityPosture vSecurityPosture = null;
 
             if (this.IsParameterBound(c => c.SkuName))
             {
@@ -915,6 +928,24 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                 vVirtualMachineProfile.ScheduledEventsProfile.OsImageNotificationProfile.NotBeforeTimeout = this.OSImageScheduledEventNotBeforeTimeoutInMinutes;
             }
 
+            if (this.IsParameterBound(c => c.SecurityPostureId))
+            {
+                if (vSecurityPosture == null)
+                {
+                    vSecurityPosture = new SecurityPosture();
+                }
+                vSecurityPosture.Id = this.SecurityPostureId;
+            }
+
+            if (this.IsParameterBound(c => c.SecurityPostureExcludedExtension))
+            {
+                if (vSecurityPosture == null)
+                {
+                    vSecurityPosture = new SecurityPosture();
+                }
+                vSecurityPosture.ExcludedExtensions = this.SecurityPostureExcludedExtension;
+            }
+
             var vVirtualMachineScaleSet = new PSVirtualMachineScaleSet
             {
                 Overprovision = this.IsParameterBound(c => c.Overprovision) ? this.Overprovision : (bool?)null,
@@ -937,10 +968,12 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                 Identity = vIdentity,
                 OrchestrationMode = this.IsParameterBound(c => c.OrchestrationMode) ? this.OrchestrationMode : null,
                 SpotRestorePolicy = this.IsParameterBound(c => c.EnableSpotRestore) ? new SpotRestorePolicy(true, this.SpotRestoreTimeout) : null,
-                PriorityMixPolicy = vPriorityMixPolicy 
+                PriorityMixPolicy = vPriorityMixPolicy,
+                SecurityPosture = vSecurityPosture
             };
 
             WriteObject(vVirtualMachineScaleSet);
         }
     }
 }
+
