@@ -1,4 +1,4 @@
-//
+ //
 // Copyright (c) Microsoft and contributors.  All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -57,5 +57,11 @@ namespace Microsoft.Azure.Commands.Compute.Automation.Models
         //     Gets or sets possible values include: 'Enabled', 'Disabled'
         public string PublicNetworkAccess { get; set; }
         public string DataAccessAuthMode { get; set; }
+
+        //
+        // Summary:
+        //     Gets or sets the availability policy of the disk.
+        public AvailabilityPolicy AvailabilityPolicy { get; set; }
     }
 }
+.None
