@@ -30,6 +30,6 @@ namespace Microsoft.Azure.Commands.Compute.Automation.Models
         public string SecurityPostureId { get; set; }
 
         // Gets or sets the list of Security Posture Excluded Extensions.
-        public string[] SecurityPostureExcludedExtension { get; set; }
+        public string[] SecurityPostureExcludeExtension { get; set; }
     }
-}None
+}

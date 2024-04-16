@@ -31,6 +31,7 @@ using Microsoft.WindowsAzure.Commands.Utilities.Common;
 using Microsoft.Azure.Commands.Compute.Common;
 using Microsoft.WindowsAzure.Commands.Common.CustomAttributes;
 using Microsoft.Azure.Management.Compute;
+using Microsoft.Azure.Commands.Compute.Models;
 
 namespace Microsoft.Azure.Commands.Compute.Automation
 {
@@ -257,6 +258,21 @@ namespace Microsoft.Azure.Commands.Compute.Automation
            Mandatory = false)]
         public bool? EnableSecureBoot { get; set; } = null;
 
+
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            ParameterSetName = SimpleParameterSet,
+            HelpMessage = "The security posture reference id in the form of /CommunityGalleries/{communityGalleryName}/securityPostures/{securityPostureName}/versions/{major.minor.patch}|{major.*}|latest")]
+        public string SecurityPostureId { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            ParameterSetName = SimpleParameterSet,
+            HelpMessage = "List of virtual machine extensions to exclude when applying the Security Posture.")]
+        public PSVirtualMachineExtension[] SecurityPostureExcludeExtension { get; set; }
+
         const int FirstPortRangeStart = 50000;
 
         sealed class Parameters : IParameters<VirtualMachineScaleSet>
@@ -396,7 +412,7 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                         _cmdlet.WriteInformation(ValidateBase64EncodedString.UserDataEncodeNotification, new string[] { "PSHOST" });
                     }
                 }
-                
+
                 if (_cmdlet.IsParameterBound(c => c.SecurityType))
                 {
                     if (_cmdlet.SecurityType?.ToLower() == ConstantValues.TrustedLaunchSecurityType || _cmdlet.SecurityType?.ToLower() == ConstantValues.ConfidentialVMSecurityType)
@@ -424,6 +440,14 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                             auxAuthHeader = new Dictionary<string, List<string>>(auxHeaderDictionary);
                         }
                     }
+                }
+
+                VirtualMachineExtension[] securityPostureExcludeExtension = new VirtualMachineExtension[_cmdlet.SecurityPostureExcludeExtension.Length];
+                for (int i = 0; i < _cmdlet.SecurityPostureExcludeExtension.Length; i++)
+                {
+                    VirtualMachineExtension vmExtension = new VirtualMachineExtension();
+                    ComputeAutomationAutoMapperProfile.Mapper.Map<PSVirtualMachineExtension, VirtualMachineExtension>(_cmdlet.SecurityPostureExcludeExtension[i], vmExtension);
+                    securityPostureExcludeExtension[i] = vmExtension;
                 }
 
                 return resourceGroup.CreateVirtualMachineScaleSetConfig(
@@ -465,7 +489,9 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                     securityType: _cmdlet.SecurityType,
                     enableVtpm: _cmdlet.EnableVtpm,
                     enableSecureBoot: _cmdlet.EnableSecureBoot,
-                    enableAutomaticOSUpgradePolicy:  _cmdlet.EnableAutomaticOSUpgrade == true ? true : (bool?)null
+                    enableAutomaticOSUpgradePolicy:  _cmdlet.EnableAutomaticOSUpgrade == true ? true : (bool?)null,
+                    securityPostureId: _cmdlet.SecurityPostureId,
+                    securityPostureExcludeExtension: _cmdlet.IsParameterBound(c => c.SecurityPostureExcludeExtension) ? securityPostureExcludeExtension : null
                     );
             }
 
@@ -561,6 +587,14 @@ namespace Microsoft.Azure.Commands.Compute.Automation
 
                 var hostGroup = resourceGroup.CreateDedicatedHostGroupSubResourceFunc(_cmdlet.HostGroupId);
 
+                VirtualMachineExtension[] securityPostureExcludeExtension = new VirtualMachineExtension[_cmdlet.SecurityPostureExcludeExtension.Length];
+                for (int i = 0; i < _cmdlet.SecurityPostureExcludeExtension.Length; i++)
+                {
+                    VirtualMachineExtension vmExtension = new VirtualMachineExtension();
+                    ComputeAutomationAutoMapperProfile.Mapper.Map<PSVirtualMachineExtension, VirtualMachineExtension>(_cmdlet.SecurityPostureExcludeExtension[i], vmExtension);
+                    securityPostureExcludeExtension[i] = vmExtension;
+                }   
+
                 return resourceGroup.CreateVirtualMachineScaleSetConfigOrchestrationModeFlexible(
                     name: _cmdlet.VMScaleSetName,
                     subnet: subnet,
@@ -591,7 +625,9 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                     securityType: _cmdlet.SecurityType,
                     enableVtpm: _cmdlet.EnableVtpm,
                     enableSecureBoot: _cmdlet.EnableSecureBoot,
-                    enableAutomaticOSUpgradePolicy: _cmdlet.EnableAutomaticOSUpgrade == true ? true : (bool?)null
+                    enableAutomaticOSUpgradePolicy: _cmdlet.EnableAutomaticOSUpgrade == true ? true : (bool?)null,
+                    securityPostureId: _cmdlet.SecurityPostureId,
+                    securityPostureExcludeExtension: _cmdlet.IsParameterBound(c => c.SecurityPostureExcludeExtension) ? securityPostureExcludeExtension : null
                     );
             }
         }

@@ -22,6 +22,8 @@ using System;
 using Microsoft.Azure.Commands.Common.Strategies;
 using CM = Microsoft.Azure.Management.Compute.Models;
 using Microsoft.Azure.Commands.Compute.Common;
+using Microsoft.Azure.Commands.Compute.Models;
+using Microsoft.Azure.Commands.Compute.Automation.Models;
 
 namespace Microsoft.Azure.Commands.Compute.Strategies.ComputeRp
 {
@@ -73,6 +75,8 @@ namespace Microsoft.Azure.Commands.Compute.Strategies.ComputeRp
             Dictionary<string, List<string>> auxAuthHeader,
             string diskControllerType,
             string sharedImageGalleryId,
+            string securityPostureId,
+            VirtualMachineExtension[] securityPostureExcludeExtension,
             string securityType = null,
             bool? enableVtpm = null,
             bool? enableSecureBoot = null,
@@ -174,7 +178,12 @@ namespace Microsoft.Azure.Commands.Compute.Strategies.ComputeRp
                             {
                                 CapacityReservationGroup = new Microsoft.Azure.Management.Compute.Models.SubResource(capacityReservationId)
                             },
-                            UserData = userData
+                            UserData = userData,
+                            SecurityPostureReference = (securityPostureId == null && securityPostureExcludeExtension == null) ? null : new SecurityPostureReference
+                            {
+                                Id = securityPostureId,
+                                ExcludeExtensions = securityPostureExcludeExtension
+                            }
                         },
                         ProximityPlacementGroup = proximityPlacementGroup(engine),
                         HostGroup = hostGroup(engine),
@@ -220,6 +229,8 @@ namespace Microsoft.Azure.Commands.Compute.Strategies.ComputeRp
             string edgeZone,
             string orchestrationMode,
             string capacityReservationId,
+            string securityPostureId,
+            VirtualMachineExtension[] securityPostureExcludeExtension,
             bool? enableVtpm = null,
             bool? enableSecureBoot = null,
             string securityType = null,
@@ -302,6 +313,11 @@ namespace Microsoft.Azure.Commands.Compute.Strategies.ComputeRp
                         CapacityReservation = (capacityReservationId == null) ? null : new CapacityReservationProfile
                         {
                             CapacityReservationGroup = new Microsoft.Azure.Management.Compute.Models.SubResource(capacityReservationId)
+                        },
+                        SecurityPostureReference = (securityPostureId == null && securityPostureExcludeExtension == null) ? null : new SecurityPostureReference
+                        {
+                            Id = securityPostureId,
+                            ExcludeExtensions = securityPostureExcludeExtension
                         }
                     },
                     ProximityPlacementGroup = proximityPlacementGroup(engine),

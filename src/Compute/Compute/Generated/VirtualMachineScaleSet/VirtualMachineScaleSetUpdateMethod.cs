@@ -420,7 +420,7 @@ namespace Microsoft.Azure.Commands.Compute.Automation
             Mandatory = false,
             ValueFromPipelineByPropertyName = true,
             HelpMessage = "List of virtual machine extensions to exclude when applying the Security Posture.")]
-        public PSVirtualMachineExtension[] SecurityPostureExcludedExtension { get; set; }
+        public PSVirtualMachineExtension[] SecurityPostureExcludeExtension { get; set; }
 
         private void BuildPatchObject()
         {
@@ -1529,7 +1529,7 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                 this.VirtualMachineScaleSet.VirtualMachineProfile.SecurityPostureReference.Id = this.SecurityPostureId;
             }
 
-            if (this.IsParameterBound(c => c.SecurityPostureExcludedExtension))
+            if (this.IsParameterBound(c => c.SecurityPostureExcludeExtension))
             {
                 if (this.VirtualMachineScaleSet.VirtualMachineProfile == null)
                 {
@@ -1539,7 +1539,7 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                 {
                     this.VirtualMachineScaleSet.VirtualMachineProfile.SecurityPostureReference = new PSSecurityPostureReference();
                 }
-                this.VirtualMachineScaleSet.VirtualMachineProfile.SecurityPostureReference.ExcludeExtensions = this.SecurityPostureExcludedExtension;
+                this.VirtualMachineScaleSet.VirtualMachineProfile.SecurityPostureReference.ExcludeExtensions = this.SecurityPostureExcludeExtension;
             }
 
             if (this.IsParameterBound(c => c.EnableAutomaticRepair))
