@@ -20,7 +20,7 @@
 
 -->
 ## Upcoming Release
-* Added parameters `-SecurityPostureId` and `-SecurityPostureExcludedExtension` for cmdlets `New-AzVmss` and `New-AzVmssConfig`.
+* Added parameters `-SecurityPostureId` and `-SecurityPostureExcludedExtension` for cmdlets `New-AzVmss`, `New-AzVmssConfig` and `Update-AzVmss`.
 
 ## Version 7.2.0
 * Added parameters `-scriptUriManagedIdentity`, `-outputBlobManagedIdentity`, `-errorBlobMangedIdentity`, and `-TreatFailureAsDeploymentFailure` to cmdlets `Set-AzVmRunCommand` and `Set-AzVmssRunCommand`. 

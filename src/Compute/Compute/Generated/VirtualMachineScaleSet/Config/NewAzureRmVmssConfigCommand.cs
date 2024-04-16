@@ -1,4 +1,4 @@
-None //
+//
 // Copyright (c) Microsoft and contributors.  All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,6 +32,7 @@ using Microsoft.WindowsAzure.Commands.Common.CustomAttributes;
 using Microsoft.WindowsAzure.Commands.Utilities.Common;
 using CM = Microsoft.Azure.Commands.Compute.Models;
 using Microsoft.Azure.Commands.Compute.Common;
+using Microsoft.Azure.Commands.Compute.Models;
 
 namespace Microsoft.Azure.Commands.Compute.Automation
 {
@@ -113,7 +114,7 @@ namespace Microsoft.Azure.Commands.Compute.Automation
             Mandatory = false,
             Position = 10,
             ValueFromPipelineByPropertyName = true)]
-        public PSVirtualMachineScaleSetExtension[] Extension { get; set; }
+        public Microsoft.Azure.Commands.Compute.Automation.Models.PSVirtualMachineScaleSetExtension[] Extension { get; set; }
 
         [Parameter(
             Mandatory = false)]
@@ -349,13 +350,15 @@ namespace Microsoft.Azure.Commands.Compute.Automation
 
         [Parameter(
             Mandatory = false,
-            ValueFromPipelineByPropertyName = true)]
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "The security posture reference id in the form of /CommunityGalleries/{communityGalleryName}/securityPostures/{securityPostureName}/versions/{major.minor.patch}|{major.*}|latest")]
         public string SecurityPostureId { get; set; }
 
         [Parameter(
             Mandatory = false,
-            ValueFromPipelineByPropertyName = true)]
-        public string[] SecurityPostureExcludedExtension { get; set; }
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "List of virtual machine extensions to exclude when applying the Security Posture.")]
+        public PSVirtualMachineExtension[] SecurityPostureExcludedExtension { get; set; }
 
         protected override void ProcessRecord()
         {
@@ -400,8 +403,6 @@ namespace Microsoft.Azure.Commands.Compute.Automation
             // PriorityMix
             PriorityMixPolicy vPriorityMixPolicy = null;
 
-            // SecurityPosture
-            SecurityPosture vSecurityPosture = null;
 
             if (this.IsParameterBound(c => c.SkuName))
             {
@@ -930,20 +931,28 @@ namespace Microsoft.Azure.Commands.Compute.Automation
 
             if (this.IsParameterBound(c => c.SecurityPostureId))
             {
-                if (vSecurityPosture == null)
+                if (vVirtualMachineProfile == null)
                 {
-                    vSecurityPosture = new SecurityPosture();
+                    vVirtualMachineProfile = new PSVirtualMachineScaleSetVMProfile();
                 }
-                vSecurityPosture.Id = this.SecurityPostureId;
+                if (vVirtualMachineProfile.SecurityPostureReference == null)
+                {
+                    vVirtualMachineProfile.SecurityPostureReference = new PSSecurityPostureReference();
+                }
+                vVirtualMachineProfile.SecurityPostureReference.Id = this.SecurityPostureId;
             }
 
             if (this.IsParameterBound(c => c.SecurityPostureExcludedExtension))
             {
-                if (vSecurityPosture == null)
+                if (vVirtualMachineProfile == null)
                 {
-                    vSecurityPosture = new SecurityPosture();
+                    vVirtualMachineProfile = new PSVirtualMachineScaleSetVMProfile();
                 }
-                vSecurityPosture.ExcludedExtensions = this.SecurityPostureExcludedExtension;
+                if (vVirtualMachineProfile.SecurityPostureReference == null)
+                {
+                    vVirtualMachineProfile.SecurityPostureReference = new PSSecurityPostureReference();
+                }
+                vVirtualMachineProfile.SecurityPostureReference.ExcludeExtensions = this.SecurityPostureExcludedExtension;
             }
 
             var vVirtualMachineScaleSet = new PSVirtualMachineScaleSet
@@ -968,8 +977,7 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                 Identity = vIdentity,
                 OrchestrationMode = this.IsParameterBound(c => c.OrchestrationMode) ? this.OrchestrationMode : null,
                 SpotRestorePolicy = this.IsParameterBound(c => c.EnableSpotRestore) ? new SpotRestorePolicy(true, this.SpotRestoreTimeout) : null,
-                PriorityMixPolicy = vPriorityMixPolicy,
-                SecurityPosture = vSecurityPosture
+                PriorityMixPolicy = vPriorityMixPolicy
             };
 
             WriteObject(vVirtualMachineScaleSet);
