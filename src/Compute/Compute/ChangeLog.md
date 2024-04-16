@@ -20,14 +20,7 @@
 
 -->
 ## Upcoming Release
-* Enhanced `New-AzVmss` and `New-AzVmssConfig` cmdlets with new parameters.
-    - Added `SecurityPostureId` parameter of type string to both cmdlets.
-    - Added `SecurityPostureExcludedExtension` parameter of type string array to both cmdlets.
-* Updated business logic of the cmdlets to incorporate the new parameters.
-    - The `SecurityPostureId` parameter allows users to specify a security posture for the virtual machine scale set.
-    - The `SecurityPostureExcludedExtension` parameter allows users to specify any extensions that should be excluded from the security posture.
-* Affected parameter sets: `{ INPUT HERE }`
-* Link to API tests for this feature: `{ ENTER LINK HERE }`
+* Added parameters `-SecurityPostureId` and `-SecurityPostureExcludedExtension` for cmdlets `New-AzVmss` and `New-AzVmssConfig`.
 
 ## Version 7.2.0
 * Added parameters `-scriptUriManagedIdentity`, `-outputBlobManagedIdentity`, `-errorBlobMangedIdentity`, and `-TreatFailureAsDeploymentFailure` to cmdlets `Set-AzVmRunCommand` and `Set-AzVmssRunCommand`. 
