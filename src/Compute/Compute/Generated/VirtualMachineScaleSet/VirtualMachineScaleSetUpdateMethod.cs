@@ -32,6 +32,7 @@ using Microsoft.Azure.Management.Compute.Models;
 using Microsoft.WindowsAzure.Commands.Common.CustomAttributes;
 using Microsoft.WindowsAzure.Commands.Utilities.Common;
 using Microsoft.Azure.Commands.Compute.Common;
+using Microsoft.Azure.Commands.Compute.Models;
 
 namespace Microsoft.Azure.Commands.Compute.Automation
 {
@@ -408,6 +409,18 @@ namespace Microsoft.Azure.Commands.Compute.Automation
            ValueFromPipelineByPropertyName = true,
            Mandatory = false)]
         public bool? EnableSecureBoot { get; set; } = null;
+
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "The security posture reference id in the form of /CommunityGalleries/{communityGalleryName}/securityPostures/{securityPostureName}/versions/{major.minor.patch}|{major.*}|latest")]
+        public string SecurityPostureId { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "List of virtual machine extensions to exclude when applying the Security Posture.")]
+        public PSVirtualMachineExtension[] SecurityPostureExcludedExtension { get; set; }
 
         private void BuildPatchObject()
         {
@@ -1501,6 +1514,32 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                     this.VirtualMachineScaleSet.VirtualMachineProfile.OsProfile.LinuxConfiguration = new LinuxConfiguration();
                 }
                 this.VirtualMachineScaleSet.VirtualMachineProfile.OsProfile.LinuxConfiguration.DisablePasswordAuthentication = this.DisablePasswordAuthentication;
+            }
+
+            if (this.IsParameterBound(c => c.SecurityPostureId))
+            {
+                if (this.VirtualMachineScaleSet.VirtualMachineProfile == null)
+                {
+                    this.VirtualMachineScaleSet.VirtualMachineProfile = new PSVirtualMachineScaleSetVMProfile();
+                }
+                if (this.VirtualMachineScaleSet.VirtualMachineProfile.SecurityPostureReference == null)
+                {
+                    this.VirtualMachineScaleSet.VirtualMachineProfile.SecurityPostureReference = new PSSecurityPostureReference();
+                }
+                this.VirtualMachineScaleSet.VirtualMachineProfile.SecurityPostureReference.Id = this.SecurityPostureId;
+            }
+
+            if (this.IsParameterBound(c => c.SecurityPostureExcludedExtension))
+            {
+                if (this.VirtualMachineScaleSet.VirtualMachineProfile == null)
+                {
+                    this.VirtualMachineScaleSet.VirtualMachineProfile = new PSVirtualMachineScaleSetVMProfile();
+                }
+                if (this.VirtualMachineScaleSet.VirtualMachineProfile.SecurityPostureReference == null)
+                {
+                    this.VirtualMachineScaleSet.VirtualMachineProfile.SecurityPostureReference = new PSSecurityPostureReference();
+                }
+                this.VirtualMachineScaleSet.VirtualMachineProfile.SecurityPostureReference.ExcludeExtensions = this.SecurityPostureExcludedExtension;
             }
 
             if (this.IsParameterBound(c => c.EnableAutomaticRepair))
