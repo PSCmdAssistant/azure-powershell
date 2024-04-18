@@ -25,11 +25,5 @@ namespace Microsoft.Azure.Commands.Compute.Automation.Models
     {
         // Gets or sets the FQDN.
         public string FullyQualifiedDomainName { get; set; }
-
-        // Gets or sets the Security Posture ID.
-        public string SecurityPostureId { get; set; }
-
-        // Gets or sets the list of Security Posture Excluded Extensions.
-        public string[] SecurityPostureExcludeExtension { get; set; }
     }
 }
