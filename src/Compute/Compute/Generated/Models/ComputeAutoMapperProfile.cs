@@ -228,8 +228,6 @@ namespace Microsoft.Azure.Commands.Compute.Automation.Models
                 cfg.CreateMap<TO.PSCapacityReservation, TO.PSCapacityReservationList>();
                 cfg.CreateMap<FROM.RestorePoint, TO.PSRestorePoint>();
                 cfg.CreateMap<FROM.RestorePointCollection, TO.PSRestorePointCollection>();
-                cfg.CreateMap<FROM.SecurityPostureReference, TO.PSSecurityPostureReference>();
-                cfg.CreateMap<TO.PSSecurityPostureReference, FROM.SecurityPostureReference>();
             });
             _mapper = config.CreateMapper();
         }
