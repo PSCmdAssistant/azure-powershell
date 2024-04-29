@@ -19,7 +19,11 @@
         - Additional information about change #1
 
 -->
-## Upcoming Release
+* Added new parameters to cmdlets `New-AzVmss` and `New-AzVM`. The new parameters include `-SecurityType` and `-ImageAlias`. The `-SecurityType` parameter is of type string and accepts the value 'Standard'. The `-ImageAlias` parameter is also of type string and is set to 'Win2022AzureEdition' when `-SecurityType` is set to 'Standard'.
+    - The new business logic for these parameters is that when the user explicitly sets the `-SecurityType` to 'Standard', the `-ImageAlias` is automatically set to 'Win2022AzureEdition'.
+    - The changes affect all parameter sets on the cmdlet.
+    - Link to diff between markdown help files: `{ ENTER LINK HERE }`
+    - Link to API tests for this feature: `{ ENTER LINK HERE }`
 
 ## Version 7.2.0
 * Added parameters `-scriptUriManagedIdentity`, `-outputBlobManagedIdentity`, `-errorBlobMangedIdentity`, and `-TreatFailureAsDeploymentFailure` to cmdlets `Set-AzVmRunCommand` and `Set-AzVmssRunCommand`. 
