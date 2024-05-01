@@ -442,12 +442,16 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                     }
                 }
 
-                VirtualMachineExtension[] securityPostureExcludeExtension = new VirtualMachineExtension[_cmdlet.SecurityPostureExcludeExtension.Length];
-                for (int i = 0; i < _cmdlet.SecurityPostureExcludeExtension.Length; i++)
+                VirtualMachineExtension[] securityPostureExcludeExtension = null;
+                if (_cmdlet.IsParameterBound(c => c.SecurityPostureExcludeExtension))
                 {
-                    VirtualMachineExtension vmExtension = new VirtualMachineExtension();
-                    ComputeAutomationAutoMapperProfile.Mapper.Map<PSVirtualMachineExtension, VirtualMachineExtension>(_cmdlet.SecurityPostureExcludeExtension[i], vmExtension);
-                    securityPostureExcludeExtension[i] = vmExtension;
+                    securityPostureExcludeExtension = new VirtualMachineExtension[_cmdlet.SecurityPostureExcludeExtension.Length];
+                    for (int i = 0; i < _cmdlet.SecurityPostureExcludeExtension.Length; i++)
+                    {
+                        VirtualMachineExtension vmExtension = new VirtualMachineExtension();
+                        ComputeAutomationAutoMapperProfile.Mapper.Map<PSVirtualMachineExtension, VirtualMachineExtension>(_cmdlet.SecurityPostureExcludeExtension[i], vmExtension);
+                        securityPostureExcludeExtension[i] = vmExtension;
+                    }
                 }
 
                 return resourceGroup.CreateVirtualMachineScaleSetConfig(
@@ -587,13 +591,17 @@ namespace Microsoft.Azure.Commands.Compute.Automation
 
                 var hostGroup = resourceGroup.CreateDedicatedHostGroupSubResourceFunc(_cmdlet.HostGroupId);
 
-                VirtualMachineExtension[] securityPostureExcludeExtension = new VirtualMachineExtension[_cmdlet.SecurityPostureExcludeExtension.Length];
-                for (int i = 0; i < _cmdlet.SecurityPostureExcludeExtension.Length; i++)
+                VirtualMachineExtension[] securityPostureExcludeExtension = null;
+                if (_cmdlet.IsParameterBound(c => c.SecurityPostureExcludeExtension))
                 {
-                    VirtualMachineExtension vmExtension = new VirtualMachineExtension();
-                    ComputeAutomationAutoMapperProfile.Mapper.Map<PSVirtualMachineExtension, VirtualMachineExtension>(_cmdlet.SecurityPostureExcludeExtension[i], vmExtension);
-                    securityPostureExcludeExtension[i] = vmExtension;
-                }   
+                    securityPostureExcludeExtension = new VirtualMachineExtension[_cmdlet.SecurityPostureExcludeExtension.Length];
+                    for (int i = 0; i < _cmdlet.SecurityPostureExcludeExtension.Length; i++)
+                    {
+                        VirtualMachineExtension vmExtension = new VirtualMachineExtension();
+                        ComputeAutomationAutoMapperProfile.Mapper.Map<PSVirtualMachineExtension, VirtualMachineExtension>(_cmdlet.SecurityPostureExcludeExtension[i], vmExtension);
+                        securityPostureExcludeExtension[i] = vmExtension;
+                    }
+                }
 
                 return resourceGroup.CreateVirtualMachineScaleSetConfigOrchestrationModeFlexible(
                     name: _cmdlet.VMScaleSetName,
