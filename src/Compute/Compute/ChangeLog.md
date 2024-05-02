@@ -20,6 +20,10 @@
 
 -->
 ## Upcoming Release
+* Updated cmdlet `Update-AzCapacityReservationGroup` with new parameter `-SharingProfile`.
+    - The new parameter `-SharingProfile` accepts "" as a possible value. When the value is "" for SharingProfile, it initializes the resourceSharingProfile object and creates an empty list for SubscriptionIds.
+    - This change affects all parameter sets on the cmdlet.
+    - Link to API tests for this feature: `{ ENTER LINK HERE }`
 
 ## Version 7.2.0
 * Added parameters `-scriptUriManagedIdentity`, `-outputBlobManagedIdentity`, `-errorBlobMangedIdentity`, and `-TreatFailureAsDeploymentFailure` to cmdlets `Set-AzVmRunCommand` and `Set-AzVmssRunCommand`. 
