@@ -20,6 +20,11 @@
 
 -->
 ## Upcoming Release
+* Modified the `Set-AzDiskSecurityProfile` cmdlet.
+    - Added a new parameter `Shield`, a string, with the possible values of On, Off, Away. On is the default value. 
+    - Updated the business logic of the cmdlet and parameters.
+    - Affected parameter sets on the cmdlet are updated.
+    - Link to the API tests for this feature is provided.
 
 ## Version 7.2.0
 * Added parameters `-scriptUriManagedIdentity`, `-outputBlobManagedIdentity`, `-errorBlobMangedIdentity`, and `-TreatFailureAsDeploymentFailure` to cmdlets `Set-AzVmRunCommand` and `Set-AzVmssRunCommand`. 
