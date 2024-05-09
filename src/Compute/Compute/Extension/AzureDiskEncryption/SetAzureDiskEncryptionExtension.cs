@@ -26,6 +26,7 @@ using System.Collections;
 using System.Globalization;
 using System.Management.Automation;
 using Newtonsoft.Json;
+using Microsoft.Azure.Commands.Compute.Automation.Models;
 
 namespace Microsoft.Azure.Commands.Compute.Extension.AzureDiskEncryption
 {

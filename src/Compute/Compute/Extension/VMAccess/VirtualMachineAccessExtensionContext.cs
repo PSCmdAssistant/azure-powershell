@@ -15,6 +15,7 @@
 //using Microsoft.Azure.Commands.Compute.Models;
 using Newtonsoft.Json;
 using System.Security;
+using Microsoft.Azure.Commands.Compute.Automation.Models;
 
 namespace Microsoft.Azure.Commands.Compute.Models
 {

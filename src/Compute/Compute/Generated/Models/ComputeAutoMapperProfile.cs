@@ -228,6 +228,8 @@ namespace Microsoft.Azure.Commands.Compute.Automation.Models
                 cfg.CreateMap<TO.PSCapacityReservation, TO.PSCapacityReservationList>();
                 cfg.CreateMap<FROM.RestorePoint, TO.PSRestorePoint>();
                 cfg.CreateMap<FROM.RestorePointCollection, TO.PSRestorePointCollection>();
+                cfg.CreateMap<FROM.VirtualMachineExtension, TO.PSVirtualMachineExtension>();
+                cfg.CreateMap<TO.PSVirtualMachineExtension, FROM.VirtualMachineExtension>();
             });
             _mapper = config.CreateMapper();
         }

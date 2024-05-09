@@ -14,6 +14,7 @@
 
 using Microsoft.Azure.Commands.Compute.Models;
 using System.Collections;
+using Microsoft.Azure.Commands.Compute.Automation.Models;
 
 namespace Microsoft.Azure.Commands.Compute.Extension.DSC
 {

@@ -17,7 +17,7 @@ using Microsoft.Rest.Azure;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 
-namespace Microsoft.Azure.Commands.Compute.Models
+namespace Microsoft.Azure.Commands.Compute.Automation.Models
 {
     public class PSVirtualMachineExtension
     {
