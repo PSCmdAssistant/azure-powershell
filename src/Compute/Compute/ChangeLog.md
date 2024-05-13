@@ -20,6 +20,11 @@
 
 -->
 ## Upcoming Release
+* Added new parameter `ResourceIdsOnly` to `Get-AzCapacityReservationGroup` cmdlet.
+    - The data type of `ResourceIdsOnly` is a string.
+    - Allowed values for `ResourceIdsOnly` are "CreatedInSubscription", "SharedWithSubscription" and "All".
+* Added `Etag` property to PSVirtualMachine and PSVirtualMachineScaleSet objects.   
+* Added parameters `-IfMatch` and `-IfNoneMatch` to `Update-AzVM`, `Update-AzVmss`, `New-AzVm`, `New-AzVmss`, `New-AzVmConfig`, and `New-AzVmssConfig` cmdlets.
 * Added `Etag` property to PSVirtualMachine and PSVirtualMachineScaleSet objects.   
 * Added parameters `-IfMatch` and `-IfNoneMatch` to `Update-AzVM`, `Update-AzVmss`, `New-AzVm`, `New-AzVmss`, `New-AzVmConfig`, and `New-AzVmssConfig` cmdlets.
 
