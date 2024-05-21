@@ -20,6 +20,10 @@
 
 -->
 ## Upcoming Release
+* Enhanced `Set-AzDiskSecurityProfile` cmdlet with a new parameter `Shield`.
+    - The `Shield` parameter is a string type and accepts the values 'On', 'Off', 'Away'. The default value is 'On'.
+* Added `Etag` property to PSVirtualMachine and PSVirtualMachineScaleSet objects.   
+* Added parameters `-IfMatch` and `-IfNoneMatch` to `Update-AzVM`, `Update-AzVmss`, `New-AzVm`, `New-AzVmss`, `New-AzVmConfig`, and `New-AzVmssConfig` cmdlets.
 * Added `Etag` property to PSVirtualMachine and PSVirtualMachineScaleSet objects.   
 * Added parameters `-IfMatch` and `-IfNoneMatch` to `Update-AzVM`, `Update-AzVmss`, `New-AzVm`, `New-AzVmss`, `New-AzVmConfig`, and `New-AzVmssConfig` cmdlets.
 
