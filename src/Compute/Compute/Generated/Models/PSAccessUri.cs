@@ -1,4 +1,4 @@
-//
+ //
 // Copyright (c) Microsoft and contributors.  All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,5 +31,7 @@ namespace Microsoft.Azure.Commands.Compute.Automation.Models
 
         public string SecurityDataAccessSAS { get; set; }
 
+        public bool? SecureVMGuestStateSAS { get; set; }
     }
 }
+.None
