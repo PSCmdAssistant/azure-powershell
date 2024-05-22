@@ -20,6 +20,11 @@
 
 -->
 ## Upcoming Release
+* Added new optional parameter `SecureVmGuestStateSas` to cmdlet `Grant-AzDiskAccess`.
+    - When this parameter is passed, the cmdlet requests to return `GrantAccessData.GetSecureVMGuestStateSAS Property`.
+    - If this is for Non-Trusted launch or Confidential VM, backend API will return error `(BadRequest) GetSecureVMGuestStateSAS can be set only for disk with SecurityProfile.`
+* Added `Etag` property to PSVirtualMachine and PSVirtualMachineScaleSet objects.   
+* Added parameters `-IfMatch` and `-IfNoneMatch` to `Update-AzVM`, `Update-AzVmss`, `New-AzVm`, `New-AzVmss`, `New-AzVmConfig`, and `New-AzVmssConfig` cmdlets.
 * Added `Etag` property to PSVirtualMachine and PSVirtualMachineScaleSet objects.   
 * Added parameters `-IfMatch` and `-IfNoneMatch` to `Update-AzVM`, `Update-AzVmss`, `New-AzVm`, `New-AzVmss`, `New-AzVmConfig`, and `New-AzVmssConfig` cmdlets.
 
