@@ -19,7 +19,11 @@
         - Additional information about change #1
 
 -->
-## Upcoming Release
+* Added new business logic to `New-AzVmss` cmdlet
+    - When the user passes in the securityType of Standard, and if the Image is null then set the image to Win2022AzureEdition.
+* Affected parameter sets: 
+    - New-AzVmssConfig, New-AzVmss
+* Link to API tests: `{ ENTER LINK HERE }`
 * Added `Etag` property to PSVirtualMachine and PSVirtualMachineScaleSet objects.   
 * Added parameters `-IfMatch` and `-IfNoneMatch` to `Update-AzVM`, `Update-AzVmss`, `New-AzVm`, `New-AzVmss`, `New-AzVmConfig`, and `New-AzVmssConfig` cmdlets.
 
