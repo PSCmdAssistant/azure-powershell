@@ -1,4 +1,4 @@
-﻿// ----------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------
 //
 // Copyright Microsoft Corporation
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -42,6 +42,12 @@ namespace Microsoft.Azure.Commands.Compute
         [ValidateNotNullOrEmpty]
         public string[] DataDiskNames { get; set; }
 
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = false,
+            HelpMessage = "Force detach the data disk")]
+        public SwitchParameter ForceDetach { get; set; }
+
         public override void ExecuteCmdlet()
         {
             if (this.ShouldProcess("DataDisk", VerbsCommon.Remove))
@@ -61,7 +67,16 @@ namespace Microsoft.Azure.Commands.Compute
                     {
                         foreach (var diskName in DataDiskNames)
                         {
-                            disks.RemoveAll(d => string.Equals(d.Name, diskName, comp));
+                            var disk = disks.Find(d => string.Equals(d.Name, diskName, comp));
+                            if (disk != null)
+                            {
+                                if (ForceDetach.IsPresent)
+                                {
+                                    disk.DetachOption = "ForceDetach";
+                                    disk.ToBeDetached = true;
+                                }
+                                disks.Remove(disk);
+                            }
                         }
                     }
                     storageProfile.DataDisks = disks;
@@ -74,3 +89,4 @@ namespace Microsoft.Azure.Commands.Compute
         }
     }
 }
+None
