@@ -1,4 +1,4 @@
-//
+None //
 // Copyright (c) Microsoft and contributors.  All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -347,6 +347,18 @@ namespace Microsoft.Azure.Commands.Compute.Automation
            Mandatory = false)]
         public bool? EnableSecureBoot { get; set; } = null;
 
+        [Parameter(
+            Mandatory = false,
+            HelpMessage = "Enable Resilient VM Create",
+            ValueFromPipelineByPropertyName = true)]
+        public bool? EnableResilientVMCreate { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            HelpMessage = "Enable Resilient VM Delete",
+            ValueFromPipelineByPropertyName = true)]
+        public bool? EnableResilientVMDelete { get; set; }
+
         protected override void ProcessRecord()
         {
             if (ShouldProcess("VirtualMachineScaleSet", "New"))
@@ -389,6 +401,9 @@ namespace Microsoft.Azure.Commands.Compute.Automation
 
             // PriorityMix
             PriorityMixPolicy vPriorityMixPolicy = null;
+
+            // ResiliencyPolicy
+            ResiliencyPolicy vResiliencyPolicy = null;
 
             if (this.IsParameterBound(c => c.SkuName))
             {
@@ -915,6 +930,24 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                 vVirtualMachineProfile.ScheduledEventsProfile.OsImageNotificationProfile.NotBeforeTimeout = this.OSImageScheduledEventNotBeforeTimeoutInMinutes;
             }
 
+            if (this.IsParameterBound(c => c.EnableResilientVMCreate))
+            {
+                if (vResiliencyPolicy == null)
+                {
+                    vResiliencyPolicy = new ResiliencyPolicy();
+                }
+                vResiliencyPolicy.EnableResilientVMCreate = this.EnableResilientVMCreate;
+            }
+
+            if (this.IsParameterBound(c => c.EnableResilientVMDelete))
+            {
+                if (vResiliencyPolicy == null)
+                {
+                    vResiliencyPolicy = new ResiliencyPolicy();
+                }
+                vResiliencyPolicy.EnableResilientVMDelete = this.EnableResilientVMDelete;
+            }
+
             var vVirtualMachineScaleSet = new PSVirtualMachineScaleSet
             {
                 Overprovision = this.IsParameterBound(c => c.Overprovision) ? this.Overprovision : (bool?)null,
@@ -937,7 +970,8 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                 Identity = vIdentity,
                 OrchestrationMode = this.IsParameterBound(c => c.OrchestrationMode) ? this.OrchestrationMode : null,
                 SpotRestorePolicy = this.IsParameterBound(c => c.EnableSpotRestore) ? new SpotRestorePolicy(true, this.SpotRestoreTimeout) : null,
-                PriorityMixPolicy = vPriorityMixPolicy
+                PriorityMixPolicy = vPriorityMixPolicy,
+                ResiliencyPolicy = vResiliencyPolicy
             };
 
             WriteObject(vVirtualMachineScaleSet);

@@ -20,6 +20,9 @@
 
 -->
 ## Upcoming Release
+* Added new parameters `EnableResilientVMCreate` and `EnableResilientVMDelete` to `New-AzVmssConfig` cmdlet to enable Resilient VM Create and/or Resilient VM Delete on scale sets during a VMSS update or VMSS create operation.
+* Added `Etag` property to PSVirtualMachine and PSVirtualMachineScaleSet objects.   
+* Added parameters `-IfMatch` and `-IfNoneMatch` to `Update-AzVM`, `Update-AzVmss`, `New-AzVm`, `New-AzVmss`, `New-AzVmConfig`, and `New-AzVmssConfig` cmdlets.
 * Added `Etag` property to PSVirtualMachine and PSVirtualMachineScaleSet objects.   
 * Added parameters `-IfMatch` and `-IfNoneMatch` to `Update-AzVM`, `Update-AzVmss`, `New-AzVm`, `New-AzVmss`, `New-AzVmConfig`, and `New-AzVmssConfig` cmdlets.
 
