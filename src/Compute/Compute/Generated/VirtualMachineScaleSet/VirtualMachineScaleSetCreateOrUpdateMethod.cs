@@ -1,4 +1,4 @@
-//
+None //
 // Copyright (c) Microsoft and contributors.  All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -74,15 +74,20 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                             {
                                 // TL defaulting for default param set, config object.
                                 // if security type not set, 
-                                // if parameters.VirtualMachineProfile.StorageProfile.ImageReference.SharedGalleryImageId == null
-                                // if parameters.VirtualMachineProfile.StorageProfile.ImageReference.Id == null
-                                // if parameters.VirtualMachineProfile.StorageProfile.OsDisk == null
+
                                 if (this.VirtualMachineScaleSet.VirtualMachineProfile?.SecurityProfile?.SecurityType == null
                                     && this.VirtualMachineScaleSet.VirtualMachineProfile?.StorageProfile?.ImageReference == null
                                     && this.VirtualMachineScaleSet.VirtualMachineProfile?.StorageProfile?.OsDisk == null)
                                 {
                                     trustedLaunchDefaultingSecurityValues();
                                     trustedLaunchDefaultingImageValues();
+                                }
+                                // if securityType is Standard explicitly.
+                                else if (this.VirtualMachineScaleSet.VirtualMachineProfile?.SecurityProfile?.SecurityType?.ToLower() == ConstantValues.StandardSecurityType
+                                    && this.VirtualMachineScaleSet.VirtualMachineProfile?.StorageProfile?.ImageReference == null
+                                    && this.VirtualMachineScaleSet.VirtualMachineProfile?.StorageProfile?.OsDisk == null)
+                                {
+                                    this.ImageName = ConstantValues.TrustedLaunchDefaultImageAlias;
                                 }
 
                                 if (this.VirtualMachineScaleSet.VirtualMachineProfile?.SecurityProfile?.SecurityType == null
@@ -97,6 +102,7 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                                     specificImageRespone = retrieveSpecificImageFromNotId();
                                     setHyperVGenForImageCheckAndTLDefaulting(specificImageRespone);
                                 }
+
                             }
 
                             string resourceGroupName = this.ResourceGroupName;
@@ -130,6 +136,18 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                                 {
                                     parameters.VirtualMachineProfile.SecurityProfile.UefiSettings = new UefiSettings(true, true);
                                 }
+                            }
+
+                            if (parameters.VirtualMachineProfile?.SecurityProfile?.SecurityType == null
+                                && parameters.VirtualMachineProfile?.StorageProfile?.ImageReference?.Publisher != null
+                                && parameters.VirtualMachineProfile?.StorageProfile?.ImageReference?.Offer != null
+                                && parameters.VirtualMachineProfile?.StorageProfile?.ImageReference?.Sku != null
+                                && parameters.VirtualMachineProfile?.StorageProfile?.ImageReference?.Version != null)
+                            {
+                                // retrieve the image that this points to and check if it is HyperVGeneration V2.
+                                Microsoft.Rest.Azure.AzureOperationResponse<VirtualMachineImage> specificImageRespone;
+                                specificImageRespone = retrieveSpecificImageFromNotId();
+                                setHyperVGenForImageCheckAndTLDefaulting(specificImageRespone);
                             }
 
                             // For Cross-tenant RBAC sharing
@@ -411,6 +429,16 @@ namespace Microsoft.Azure.Commands.Compute.Automation
             Mandatory = false,
             HelpMessage = "Used to make a request conditional for the GET and HEAD methods. The server will only return the requested resources if none of the listed ETag values match the current entity. Used to make a request conditional for the GET and HEAD methods. The server will only return the requested resources if none of the listed ETag values match the current entity. Set to '*' to allow a new record set to be created, but to prevent updating an existing record set. Other values will result in error from server as they are not supported.")]
         public string IfNoneMatch { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            HelpMessage = "Enable or disable the Proxy Agent on the VM.")]
+        public bool EnableProxyAgent { get; set; } = false;
+
+        [Parameter(
+            Mandatory = false,
+            HelpMessage = "Set the Proxy Agent mode to either 'Enforce' or 'Audit'.")]
+        public string ProxyAgentMode { get; set; } = "Enforce";
     }
 }
 
