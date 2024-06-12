@@ -20,6 +20,9 @@
 
 -->
 ## Upcoming Release
+* Updated the New-AzGalleryImageDefinition cmdlet to default the HyperVGeneration parameter to V2 and the Features parameter to have the dictionary {Name='SecurityType';Value='TrustedLaunchSupported'} passed to it by default.
+* Added `Etag` property to PSVirtualMachine and PSVirtualMachineScaleSet objects.   
+* Added parameters `-IfMatch` and `-IfNoneMatch` to `Update-AzVM`, `Update-AzVmss`, `New-AzVm`, `New-AzVmss`, `New-AzVmConfig`, and `New-AzVmssConfig` cmdlets.
 * Added `Etag` property to PSVirtualMachine and PSVirtualMachineScaleSet objects.   
 * Added parameters `-IfMatch` and `-IfNoneMatch` to `Update-AzVM`, `Update-AzVmss`, `New-AzVm`, `New-AzVmss`, `New-AzVmConfig`, and `New-AzVmssConfig` cmdlets.
 
