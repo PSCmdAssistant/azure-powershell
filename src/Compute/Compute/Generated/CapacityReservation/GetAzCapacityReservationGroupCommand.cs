@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (c) Microsoft and contributors.  All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -67,6 +67,12 @@ namespace Microsoft.Azure.Commands.Compute.Automation
             ValueFromPipelineByPropertyName = true,
             HelpMessage = "Get the Instance View of the Capacity Reservation Group.")]
         public SwitchParameter InstanceView { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            HelpMessage = "Get the Resource Ids only.")]
+        [ValidateSet("CreatedInSubscription", "SharedWithSubscription", "All")]
+        public string ResourceIdsOnly { get; set; }
 
         public override void ExecuteCmdlet()
         {
@@ -148,3 +154,4 @@ namespace Microsoft.Azure.Commands.Compute.Automation
         }
     }
 }
+

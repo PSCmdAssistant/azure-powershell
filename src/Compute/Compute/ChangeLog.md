@@ -20,6 +20,8 @@
 
 -->
 ## Upcoming Release
+* Added new parameter `ResourceIdsOnly` to cmdlet `Get-AzCapacityReservationGroup`.
+* Added parameter `-IdentityType` to cmdlet `Update-AzDiskEncryptionSet`. 
 * Added parameter `-IdentityType` to cmdlet `Update-AzDiskEncryptionSet`. 
 
 ## Version 8.0.0
