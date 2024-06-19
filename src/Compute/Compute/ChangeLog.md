@@ -20,6 +20,8 @@
 
 -->
 ## Upcoming Release
+* Added `-Redeploy` parameter to `UpdateAzHost` cmdlet to redeploy a dedicated host to a new node.
+* Added parameter `-IdentityType` to cmdlet `Update-AzDiskEncryptionSet`. 
 * Added parameter `-IdentityType` to cmdlet `Update-AzDiskEncryptionSet`. 
 
 ## Version 8.0.0

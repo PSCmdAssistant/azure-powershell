@@ -1,4 +1,4 @@
-//
+None //
 // Copyright (c) Microsoft and contributors.  All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -78,6 +78,10 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                         parameters.Sku = new Sku(this.Sku, null, null);
                     }
 
+                    if (this.IsParameterBound(c => c.Redeploy))
+                    {
+                        DedicatedHostsClient.Redeploy(resourceGroupName, hostGroupName, Name);
+                    }
 
                     var result = DedicatedHostsClient.Update(resourceGroupName, hostGroupName, Name, parameters);
                     var psObject = new PSHost();
@@ -124,6 +128,10 @@ namespace Microsoft.Azure.Commands.Compute.Automation
         public DedicatedHostLicenseTypes LicenseType { get; set; }
 
         [Parameter(
+            Mandatory = false)]
+        public SwitchParameter Redeploy { get; set; }
+
+        [Parameter(
             ParameterSetName = "ResourceIdParameter",
             Position = 0,
             Mandatory = true,
@@ -132,3 +140,4 @@ namespace Microsoft.Azure.Commands.Compute.Automation
 
     }
 }
+

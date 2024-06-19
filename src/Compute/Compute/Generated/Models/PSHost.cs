@@ -1,4 +1,4 @@
-//
+ //
 // Copyright (c) Microsoft and contributors.  All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -56,4 +56,4 @@ namespace Microsoft.Azure.Commands.Compute.Automation.Models
         public IDictionary<string, string> Tags { get; set; }
 
     }
-}
+}None
