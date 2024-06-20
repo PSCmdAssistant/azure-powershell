@@ -1,4 +1,4 @@
-//
+None //
 // Copyright (c) Microsoft and contributors.  All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -91,7 +91,8 @@ namespace Microsoft.Azure.Commands.Compute.Automation
             ParameterSetName = "DefaultParameter",
             Position = 2,
             Mandatory = true,
-            ValueFromPipeline = true)]
+            ValueFromPipeline = true,
+            HelpMessage = "Specifies a disk update object with changed properties compared to the original psdisk object.")]
         public PSDiskUpdate DiskUpdate { get; set; }
 
         [Parameter(
@@ -107,3 +108,4 @@ namespace Microsoft.Azure.Commands.Compute.Automation
         public SwitchParameter AsJob { get; set; }
     }
 }
+
