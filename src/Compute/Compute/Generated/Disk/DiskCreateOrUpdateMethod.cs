@@ -27,7 +27,7 @@ using System.Management.Automation;
 using Microsoft.Azure.Commands.Compute.Automation.Models;
 using Microsoft.Azure.Commands.ResourceManager.Common.ArgumentCompleters;
 using Microsoft.Azure.Management.Compute;
-using Microsoft.Azure.Management.Compute.Models;
+using ComputeModels = Microsoft.Azure.Management.Compute.Models;
 using Microsoft.WindowsAzure.Commands.Utilities.Common;
 using Microsoft.Azure.Commands.Common.Strategies;
 using Microsoft.Azure.Commands.Compute.Models;
@@ -127,7 +127,7 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                         // If SecurityType already exists, so user set it, don't change it.
                         if (disk.SecurityProfile == null)
                         {
-                            disk.SecurityProfile = new DiskSecurityProfile();
+                            disk.SecurityProfile = new ComputeModels.DiskSecurityProfile();
                         }
                         if (disk.SecurityProfile.SecurityType == null)
                         {

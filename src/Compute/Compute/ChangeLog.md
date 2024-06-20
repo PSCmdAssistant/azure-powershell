@@ -20,6 +20,8 @@
 
 -->
 ## Upcoming Release
+* Added a new parameter `Sword` to the cmdlet `Set-AzDiskSecurityProfile` with allowed string values `Fire`, `Ice`, `Earth`.
+* Added parameter `-IdentityType` to cmdlet `Update-AzDiskEncryptionSet`. 
 * Added parameter `-IdentityType` to cmdlet `Update-AzDiskEncryptionSet`. 
 
 ## Version 8.0.0
