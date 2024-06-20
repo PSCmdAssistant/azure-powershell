@@ -1,4 +1,4 @@
-//
+ //
 // Copyright (c) Microsoft and contributors.  All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -78,11 +78,17 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                         parameters.Sku = new Sku(this.Sku, null, null);
                     }
 
-
-                    var result = DedicatedHostsClient.Update(resourceGroupName, hostGroupName, Name, parameters);
-                    var psObject = new PSHost();
-                    ComputeAutomationAutoMapperProfile.Mapper.Map<DedicatedHost, PSHost>(result, psObject);
-                    WriteObject(psObject);
+                    if (this.IsParameterBound(c => c.Redeploy))
+                    {
+                        DedicatedHostsClient.Redeploy(resourceGroupName, hostGroupName, Name);
+                    }
+                    else
+                    {
+                        var result = DedicatedHostsClient.Update(resourceGroupName, hostGroupName, Name, parameters);
+                        var psObject = new PSHost();
+                        ComputeAutomationAutoMapperProfile.Mapper.Map<DedicatedHost, PSHost>(result, psObject);
+                        WriteObject(psObject);
+                    }
                 }
             });
         }
@@ -130,5 +136,10 @@ namespace Microsoft.Azure.Commands.Compute.Automation
             ValueFromPipelineByPropertyName = true)]
         public string ResourceId { get; set; }
 
+        [Parameter(
+            Mandatory = false)]
+        public SwitchParameter Redeploy { get; set; }
+
     }
 }
+
