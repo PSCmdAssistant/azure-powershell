@@ -20,6 +20,7 @@
 
 -->
 ## Upcoming Release
+* Updated the description of the DiskUpdate parameter in the Update-AzDisk cmdlet to specify a disk update object with changed properties compared to the original psdisk object.
 * Added parameter `-IdentityType` to cmdlet `Update-AzDiskEncryptionSet`. 
 
 ## Version 8.0.0
