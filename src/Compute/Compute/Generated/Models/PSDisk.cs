@@ -1,4 +1,4 @@
-//
+ //
 // Copyright (c) Microsoft and contributors.  All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,19 +26,10 @@ using Microsoft.Azure.Management.Compute.Models;
 
 namespace Microsoft.Azure.Commands.Compute.Automation.Models
 {
-    public partial class PSDisk
+    public partial class PSDiskUpdate
     {
-        // Gets or sets the property of 'ResourceGroupName'
-        public string ResourceGroupName
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(Id)) return null;
-                Regex r = new Regex(@"(.*?)/resourcegroups/(?<rgname>\S+)/providers/(.*?)", RegexOptions.IgnoreCase);
-                Match m = r.Match(Id);
-                return m.Success ? m.Groups["rgname"].Value : null;
-            }
-        }
+        // Specifies a disk update object with changed properties compared to the original psdisk object.
+        public string Description { get; set; }
 
         public string ManagedBy { get; set; }
         public IList<string> ManagedByExtended { get; set; }
@@ -81,3 +72,4 @@ namespace Microsoft.Azure.Commands.Compute.Automation.Models
         public bool? OptimizedForFrequentAttach { get; set; }
     }
 }
+.
