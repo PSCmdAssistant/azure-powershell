@@ -20,6 +20,9 @@
 
 -->
 ## Upcoming Release
+* Added `-Redeploy` parameter to `UpdateAzHost` cmdlet to redeploy a dedicated host to a new node.
+* Added parameter `-SourceResourceId` to cmdlet `Add-AzVMDataDisk`.
+* Added parameter `-IdentityType` to cmdlet `Update-AzDiskEncryptionSet`. 
 * Added parameter `-SourceResourceId` to cmdlet `Add-AzVMDataDisk`.
 * Added parameter `-IdentityType` to cmdlet `Update-AzDiskEncryptionSet`. 
 
