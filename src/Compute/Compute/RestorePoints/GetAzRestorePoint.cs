@@ -1,4 +1,4 @@
-﻿// ----------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------
 //
 // Copyright Microsoft Corporation
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -56,6 +56,10 @@ namespace Microsoft.Azure.Commands.Compute.Automation
             ValueFromPipelineByPropertyName = true)]
         public SwitchParameter InstanceView { get; set; }
 
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true)]
+        public string Location { get; set; }
 
         public override void ExecuteCmdlet()
         {
@@ -66,6 +70,7 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                 string restorePointName = this.Name;
                 string restorePointCollectionName = this.RestorePointCollectionName;
                 bool instanceViewTrue = this.InstanceView.IsPresent;
+                string location = this.Location;
 
                 if (instanceViewTrue == true)
                 {
@@ -85,3 +90,4 @@ namespace Microsoft.Azure.Commands.Compute.Automation
         }
     }
 }
+
