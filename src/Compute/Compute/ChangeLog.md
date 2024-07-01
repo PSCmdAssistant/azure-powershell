@@ -20,6 +20,9 @@
 
 -->
 ## Upcoming Release
+* Added a new parameter `-Location` of type string to the cmdlet `Get-AzRestorePoint`.
+* Added parameter `-SourceResourceId` to cmdlet `Add-AzVMDataDisk`.
+* Added parameter `-IdentityType` to cmdlet `Update-AzDiskEncryptionSet`. 
 * Added parameter `-SourceResourceId` to cmdlet `Add-AzVMDataDisk`.
 * Added parameter `-IdentityType` to cmdlet `Update-AzDiskEncryptionSet`. 
 
