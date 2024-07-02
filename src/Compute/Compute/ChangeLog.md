@@ -20,6 +20,9 @@
 
 -->
 ## Upcoming Release
+* Updated the description of the DiskUpdate parameter in the Update-AzDisk cmdlet to specify a disk update object with changed properties compared to the original psdisk object.
+* Added parameter `-SourceResourceId` to cmdlet `Add-AzVMDataDisk`.
+* Added parameter `-IdentityType` to cmdlet `Update-AzDiskEncryptionSet`. 
 * Added parameter `-SourceResourceId` to cmdlet `Add-AzVMDataDisk`.
 * Added parameter `-IdentityType` to cmdlet `Update-AzDiskEncryptionSet`. 
 
