@@ -1,4 +1,4 @@
-// 
+ // 
 // Copyright (c) Microsoft and contributors.  All rights reserved.
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,5 +26,11 @@ namespace Microsoft.Azure.Commands.Compute.Automation.Models
         // Gets or sets the FQDN.
         public string FullyQualifiedDomainName { get; set; }
 
+        // Gets or sets the EnableResilientVMCreate.
+        public bool? EnableResilientVMCreate { get; set; }
+
+        // Gets or sets the EnableResilientVMDelete.
+        public bool? EnableResilientVMDelete { get; set; }
     }
 }
+.
