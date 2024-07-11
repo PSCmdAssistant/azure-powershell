@@ -20,6 +20,10 @@
 
 -->
 ## Upcoming Release
+* Enhanced the `Set-AzVMOSDisk` cmdlet by adding a new argument `NvmeDisk` to the `DiffDiskPlacement` parameter, enabling the use of VM's local SSD storage for the operating system.
+* Added parameter `-SourceResourceId` to cmdlet `Add-AzVMDataDisk`.
+* Added parameter `-IdentityType` to cmdlet `Update-AzDiskEncryptionSet`.
+* Added `Invoke-AzSpotPlacementScore` cmdlet, which calls the latest Spot Placement Score API. Set the original `Invoke-AzSpotPlacementRecommender` as alias to avoid breaking changes.
 * Added parameter `-SourceResourceId` to cmdlet `Add-AzVMDataDisk`.
 * Added parameter `-IdentityType` to cmdlet `Update-AzDiskEncryptionSet`.
 * Added `Invoke-AzSpotPlacementScore` cmdlet, which calls the latest Spot Placement Score API. Set the original `Invoke-AzSpotPlacementRecommender` as alias to avoid breaking changes.
