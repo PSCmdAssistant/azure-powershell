@@ -1,4 +1,4 @@
-//
+ //
 // Copyright (c) Microsoft and contributors.  All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -66,7 +66,7 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                     }
                     else
                     {
-                        result = VirtualMachineScaleSetVMsClient.ReimageWithHttpMessagesAsync(resourceGroupName, vmScaleSetName, instanceId: instanceId, vmScaleSetVMReimageInput: null).GetAwaiter().GetResult();
+                        result = VirtualMachineScaleSetVMsClient.ReimageWithHttpMessagesAsync(resourceGroupName, vmScaleSetName, instanceId: instanceId, vmScaleSetVMReimageInput: new VirtualMachineScaleSetVMReimageParameters { ForceUpdate = this.ForceUpdateOSDiskForEphemeral }).GetAwaiter().GetResult();
                     }
 
                     PSOperationStatusResponse output = new PSOperationStatusResponse
@@ -131,7 +131,13 @@ namespace Microsoft.Azure.Commands.Compute.Automation
             Mandatory = true)]
         public SwitchParameter SimulateEviction { get; set; }
 
+        [Parameter(
+            ParameterSetName = "DefaultParameter",
+            Mandatory = false)]
+        public bool ForceUpdateOSDiskForEphemeral { get; set; }
+
         [Parameter(Mandatory = false, HelpMessage = "Run cmdlet in the background")]
         public SwitchParameter AsJob { get; set; }
     }
 }
+

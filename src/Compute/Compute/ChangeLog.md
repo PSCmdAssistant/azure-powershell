@@ -20,6 +20,7 @@
 
 -->
 ## Upcoming Release
+* Added a new boolean parameter `forceUpdateOSDiskForEphemeral` to the `Set-AzVmssVM` cmdlet, enabling the base disk to be updated to the version mentioned in VMSS OS image version during reimage.
 
 ## Version 8.1.0
 * Added parameter `-SourceResourceId` to cmdlet `Add-AzVMDataDisk`.
