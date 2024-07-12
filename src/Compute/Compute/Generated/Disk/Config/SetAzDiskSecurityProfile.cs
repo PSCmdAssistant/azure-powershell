@@ -77,7 +77,7 @@ namespace Microsoft.Azure.Commands.Compute
             {
                 if(this.Disk.SecurityProfile == null)
                 {
-                    this.Disk.SecurityProfile = new DiskSecurityProfile();
+                    this.Disk.SecurityProfile = new Microsoft.Azure.Management.Compute.Models.DiskSecurityProfile();
                 }
                 this.Disk.SecurityProfile.SecurityType = SecurityType;
             }
@@ -87,7 +87,7 @@ namespace Microsoft.Azure.Commands.Compute
             {
                 if (this.Disk.SecurityProfile == null)
                 {
-                    this.Disk.SecurityProfile = new DiskSecurityProfile();
+                    this.Disk.SecurityProfile = new Microsoft.Azure.Management.Compute.Models.DiskSecurityProfile();
                 }
                 this.Disk.SecurityProfile.SecurityType = SecurityType;
             }
@@ -96,7 +96,7 @@ namespace Microsoft.Azure.Commands.Compute
             {
                 if (this.Disk.SecurityProfile == null)
                 {
-                    this.Disk.SecurityProfile = new DiskSecurityProfile();
+                    this.Disk.SecurityProfile = new Microsoft.Azure.Management.Compute.Models.DiskSecurityProfile();
                 }
                 this.Disk.SecurityProfile.SecureVMDiskEncryptionSetId = this.SecureVMDiskEncryptionSet;
             }
@@ -105,7 +105,7 @@ namespace Microsoft.Azure.Commands.Compute
             {
                 if (this.Disk.SecurityProfile == null)
                 {
-                    this.Disk.SecurityProfile = new DiskSecurityProfile();
+                    this.Disk.SecurityProfile = new Microsoft.Azure.Management.Compute.Models.DiskSecurityProfile();
                 }
                 this.Disk.SecurityProfile.Shield = this.Shield;
             }
@@ -115,4 +115,3 @@ namespace Microsoft.Azure.Commands.Compute
     }
 
 }.
-
