@@ -20,6 +20,7 @@
 
 -->
 ## Upcoming Release
+* Made LUN parameter optional in Add-AzVMDataDisk and Remove-AzVMDataDisk cmdlets when using -CreateOption Attach, reducing customer facing CRP throttling.
 
 ## Version 8.1.0
 * Added parameter `-SourceResourceId` to cmdlet `Add-AzVMDataDisk`.

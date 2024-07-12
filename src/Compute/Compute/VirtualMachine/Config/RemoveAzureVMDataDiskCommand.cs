@@ -1,4 +1,5 @@
-﻿// ----------------------------------------------------------------------------------
+
+// ----------------------------------------------------------------------------------
 //
 // Copyright Microsoft Corporation
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -42,6 +43,15 @@ namespace Microsoft.Azure.Commands.Compute
         [ValidateNotNullOrEmpty]
         public string[] DataDiskNames { get; set; }
 
+        [Alias("LUN")]
+        [Parameter(
+            Mandatory = false,
+            Position = 2,
+            ValueFromPipelineByPropertyName = false,
+            HelpMessage = HelpMessages.VMDataDiskLUN)]
+        [ValidateNotNullOrEmpty]
+        public int? LUN { get; set; }
+
         public override void ExecuteCmdlet()
         {
             if (this.ShouldProcess("DataDisk", VerbsCommon.Remove))
@@ -53,7 +63,7 @@ namespace Microsoft.Azure.Commands.Compute
                     var disks = storageProfile.DataDisks.ToList();
                     var comp = StringComparison.OrdinalIgnoreCase;
 
-                    if (DataDiskNames == null)
+                    if (DataDiskNames == null && LUN == null)
                     {
                         disks.Clear();
                     }
@@ -62,6 +72,11 @@ namespace Microsoft.Azure.Commands.Compute
                         foreach (var diskName in DataDiskNames)
                         {
                             disks.RemoveAll(d => string.Equals(d.Name, diskName, comp));
+                        }
+
+                        if (LUN != null)
+                        {
+                            disks.RemoveAll(d => d.Lun == LUN);
                         }
                     }
                     storageProfile.DataDisks = disks;
