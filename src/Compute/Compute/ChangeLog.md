@@ -20,6 +20,7 @@
 
 -->
 ## Upcoming Release
+* Added new parameter `Shield` to cmdlet `Set-AzDiskSecurityProfile` with allowed values: ShieldOn, ShieldGone, ShieldDown.
 
 ## Version 8.1.0
 * Added parameter `-SourceResourceId` to cmdlet `Add-AzVMDataDisk`.
