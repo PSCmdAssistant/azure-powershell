@@ -27,7 +27,7 @@ using System.Management.Automation;
 using Microsoft.Azure.Commands.Compute.Automation.Models;
 using Microsoft.Azure.Commands.ResourceManager.Common.ArgumentCompleters;
 using Microsoft.Azure.Management.Compute;
-using Microsoft.Azure.Management.Compute.Models;
+using ComputeModels = Microsoft.Azure.Management.Compute.Models;
 using Microsoft.WindowsAzure.Commands.Utilities.Common;
 using Microsoft.Azure.Commands.Common.Strategies;
 using Microsoft.Azure.Commands.Compute.Models;
@@ -53,8 +53,8 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                 {
                     string resourceGroupName = this.ResourceGroupName;
                     string diskName = this.DiskName;
-                    Disk disk = new Disk();
-                    ComputeAutomationAutoMapperProfile.Mapper.Map<PSDisk, Disk>(this.Disk, disk);
+                    ComputeModels.Disk disk = new ComputeModels.Disk();
+                    ComputeAutomationAutoMapperProfile.Mapper.Map<PSDisk, ComputeModels.Disk>(this.Disk, disk);
 
                     Dictionary<string, List<string>> auxAuthHeader = null;
                     if (!string.IsNullOrEmpty(disk.CreationData?.GalleryImageReference?.Id))
@@ -127,7 +127,7 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                         // If SecurityType already exists, so user set it, don't change it.
                         if (disk.SecurityProfile == null)
                         {
-                            disk.SecurityProfile = new DiskSecurityProfile();
+                            disk.SecurityProfile = new ComputeModels.DiskSecurityProfile();
                         }
                         if (disk.SecurityProfile.SecurityType == null)
                         {
@@ -158,7 +158,7 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                     
                 }
                     
-                Disk result;
+                ComputeModels.Disk result;
                 if (auxAuthHeader != null)
                 {
                     var res = this.DisksClient.CreateOrUpdateWithHttpMessagesAsync(
@@ -174,7 +174,7 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                     result = DisksClient.CreateOrUpdate(resourceGroupName, diskName, disk);
                 }
                 var psObject = new PSDisk();
-                ComputeAutomationAutoMapperProfile.Mapper.Map<Disk, PSDisk>(result, psObject);
+                ComputeAutomationAutoMapperProfile.Mapper.Map<ComputeModels.Disk, PSDisk>(result, psObject);
                 WriteObject(psObject);
             }
         });
@@ -206,4 +206,4 @@ namespace Microsoft.Azure.Commands.Compute.Automation
         [Parameter(Mandatory = false, HelpMessage = "Run cmdlet in the background")]
         public SwitchParameter AsJob { get; set; }
     }
-}
+}.
