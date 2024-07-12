@@ -1,4 +1,4 @@
-﻿// ----------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------
 //
 // Copyright Microsoft Corporation
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -54,6 +54,13 @@ namespace Microsoft.Azure.Commands.Compute
            HelpMessage = "ResourceId of the disk encryption set to use for enabling encryption at rest.")]
         public string SecureVMDiskEncryptionSet { get; set; }
 
+        [Parameter(
+           Mandatory = false,
+           ValueFromPipelineByPropertyName = true,
+           HelpMessage = "Shield status of the disk. Possible values include: ShieldOn, ShieldGone, ShieldDown.")]
+        [PSArgumentCompleter("ShieldOn", "ShieldGone", "ShieldDown")]
+        public string Shield { get; set; }
+
         protected override void ProcessRecord()
         {
             if (ShouldProcess("DiskSecurityProfile", "Set"))
@@ -70,7 +77,7 @@ namespace Microsoft.Azure.Commands.Compute
             {
                 if(this.Disk.SecurityProfile == null)
                 {
-                    this.Disk.SecurityProfile = new DiskSecurityProfile();
+                    this.Disk.SecurityProfile = new Microsoft.Azure.Management.Compute.Models.DiskSecurityProfile();
                 }
                 this.Disk.SecurityProfile.SecurityType = SecurityType;
             }
@@ -80,7 +87,7 @@ namespace Microsoft.Azure.Commands.Compute
             {
                 if (this.Disk.SecurityProfile == null)
                 {
-                    this.Disk.SecurityProfile = new DiskSecurityProfile();
+                    this.Disk.SecurityProfile = new Microsoft.Azure.Management.Compute.Models.DiskSecurityProfile();
                 }
                 this.Disk.SecurityProfile.SecurityType = SecurityType;
             }
@@ -89,13 +96,22 @@ namespace Microsoft.Azure.Commands.Compute
             {
                 if (this.Disk.SecurityProfile == null)
                 {
-                    this.Disk.SecurityProfile = new DiskSecurityProfile();
+                    this.Disk.SecurityProfile = new Microsoft.Azure.Management.Compute.Models.DiskSecurityProfile();
                 }
                 this.Disk.SecurityProfile.SecureVMDiskEncryptionSetId = this.SecureVMDiskEncryptionSet;
+            }
+
+            if (this.IsParameterBound(c => c.Shield))
+            {
+                if (this.Disk.SecurityProfile == null)
+                {
+                    this.Disk.SecurityProfile = new Microsoft.Azure.Management.Compute.Models.DiskSecurityProfile();
+                }
+                this.Disk.SecurityProfile.Shield = this.Shield;
             }
 
             WriteObject(this.Disk);
         }
     }
 
-}
+}.
