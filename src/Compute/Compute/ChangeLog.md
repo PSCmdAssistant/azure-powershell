@@ -20,6 +20,7 @@
 
 -->
 ## Upcoming Release
+* Added a new parameter `-Location` of type string to the cmdlet `Get-AzRestorePoint`.
 
 ## Version 8.1.0
 * Added parameter `-SourceResourceId` to cmdlet `Add-AzVMDataDisk`.
