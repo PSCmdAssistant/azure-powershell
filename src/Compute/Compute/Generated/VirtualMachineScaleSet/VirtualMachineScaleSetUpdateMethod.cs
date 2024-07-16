@@ -1,4 +1,4 @@
-//
+ //
 // Copyright (c) Microsoft and contributors.  All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -421,7 +421,22 @@ namespace Microsoft.Azure.Commands.Compute.Automation
             HelpMessage = "Used to make a request conditional for the GET and HEAD methods. The server will only return the requested resources if none of the listed ETag values match the current entity. Used to make a request conditional for the GET and HEAD methods. The server will only return the requested resources if none of the listed ETag values match the current entity. Set to '*' to allow a new record set to be created, but to prevent updating an existing record set. Other values will result in error from server as they are not supported.")]
         public string IfNoneMatch { get; set; }
 
-        private void BuildPatchObject()
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "Enable Resilient VM Create on the scale set.")]
+        public bool EnableResilientVMCreate { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "Enable Resilient VM Delete on the scale set.")]
+        public bool EnableResilientVMDelete { get; set; }
+    }
+}
+ 
+
+private void BuildPatchObject()
         {
             if (this.IsParameterBound(c => c.AutomaticOSUpgrade))
             {
@@ -1263,150 +1278,301 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                 this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile.EncryptionAtHost = this.EncryptionAtHost;
             }
 
-            if (this.VirtualMachineScaleSetUpdate != null
-                && this.VirtualMachineScaleSetUpdate.ProximityPlacementGroup != null
-                && string.IsNullOrEmpty(this.VirtualMachineScaleSetUpdate.ProximityPlacementGroup.Id))
+            if (this.VirtualMachineScaleSet.VirtualMachineProfile == null)
             {
-                this.VirtualMachineScaleSetUpdate.ProximityPlacementGroup.Id = null;
+                this.VirtualMachineScaleSet.VirtualMachineProfile = new PSVirtualMachineScaleSetVMProfile();
             }
-            
-            if (this.IsParameterBound(c => c.UserData))
-            {
-                if (!ValidateBase64EncodedString.ValidateStringIsBase64Encoded(this.UserData))
-                {
-                    this.UserData = ValidateBase64EncodedString.EncodeStringToBase64(this.UserData);
-                    this.WriteInformation(ValidateBase64EncodedString.UserDataEncodeNotification, new string[] { "PSHOST" });
-                }
-
-                if (this.VirtualMachineScaleSet.VirtualMachineProfile == null)
-                {
-                    this.VirtualMachineScaleSet.VirtualMachineProfile = new PSVirtualMachineScaleSetVMProfile();
-                }
-                this.VirtualMachineScaleSet.VirtualMachineProfile.UserData = this.UserData;
-            }
-
-            if (this.IsParameterBound(c => c.OSImageScheduledEventEnabled))
-            {
-                if (this.VirtualMachineScaleSetUpdate == null)
-                {
-                    this.VirtualMachineScaleSetUpdate = new VirtualMachineScaleSetUpdate();
-                }
-                if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile == null)
-                {
-                    this.VirtualMachineScaleSetUpdate.VirtualMachineProfile = new VirtualMachineScaleSetUpdateVMProfile();
-                }
-                if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.ScheduledEventsProfile == null)
-                {
-                    this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.ScheduledEventsProfile = new ScheduledEventsProfile();
-                }
-                if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.ScheduledEventsProfile.OsImageNotificationProfile == null)
-                {
-                    this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.ScheduledEventsProfile.OsImageNotificationProfile = new OSImageNotificationProfile();
-                }                
-                this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.ScheduledEventsProfile.OsImageNotificationProfile.Enable = this.OSImageScheduledEventEnabled;
-            }
-
-            if (this.IsParameterBound(c => c.OSImageScheduledEventNotBeforeTimeoutInMinutes))
-            {
-                if (this.VirtualMachineScaleSetUpdate == null)
-                {
-                    this.VirtualMachineScaleSetUpdate = new VirtualMachineScaleSetUpdate();
-                }
-                if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile == null)
-                {
-                    this.VirtualMachineScaleSetUpdate.VirtualMachineProfile = new VirtualMachineScaleSetUpdateVMProfile();
-                }
-                if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.ScheduledEventsProfile == null)
-                {
-                    this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.ScheduledEventsProfile = new ScheduledEventsProfile();
-                }
-                if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.ScheduledEventsProfile.OsImageNotificationProfile == null)
-                {
-                    this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.ScheduledEventsProfile.OsImageNotificationProfile = new OSImageNotificationProfile();
-                }
-                this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.ScheduledEventsProfile.OsImageNotificationProfile.NotBeforeTimeout = this.OSImageScheduledEventNotBeforeTimeoutInMinutes;
-            }
-
-            // SecurityType, includes TrustedLaunch and ConfidentialVM and Standard. 
-            if (this.IsParameterBound(c => c.SecurityType))
-            {
-                if (this.VirtualMachineScaleSetUpdate == null)
-                {
-                    this.VirtualMachineScaleSetUpdate = new VirtualMachineScaleSetUpdate();
-                }
-                if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile == null)
-                {
-                    this.VirtualMachineScaleSetUpdate.VirtualMachineProfile = new VirtualMachineScaleSetUpdateVMProfile();
-                }
-                if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile == null)
-                {
-                    this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile = new SecurityProfile();
-                }
-                if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile.UefiSettings == null)
-                {
-                    this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile.UefiSettings = new UefiSettings();
-                }
-                this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile.SecurityType = this.SecurityType;
-                if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile.SecurityType?.ToLower() == ConstantValues.TrustedLaunchSecurityType || this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile.SecurityType?.ToLower() == ConstantValues.ConfidentialVMSecurityType)
-                {
-                    this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile.UefiSettings.VTpmEnabled = this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile.UefiSettings.VTpmEnabled == null ? true : this.EnableVtpm;
-                    this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile.UefiSettings.SecureBootEnabled = this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile.UefiSettings.SecureBootEnabled == null ? true : this.EnableSecureBoot;
-                }
-            }
-            // Only used for SecurityType == TrustedLaunch
-            if (this.IsParameterBound(c => c.EnableVtpm))
-            {
-                if (this.VirtualMachineScaleSetUpdate == null)
-                {
-                    this.VirtualMachineScaleSetUpdate = new VirtualMachineScaleSetUpdate();
-                }
-                if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile == null)
-                {
-                    this.VirtualMachineScaleSetUpdate.VirtualMachineProfile = new VirtualMachineScaleSetUpdateVMProfile();
-                }
-                if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile == null)
-                {
-                    this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile = new SecurityProfile();
-                }
-                if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile.UefiSettings == null)
-                {
-                    this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile.UefiSettings = new UefiSettings();
-                }
-                this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile.UefiSettings.VTpmEnabled = this.EnableVtpm;
-            }
-            // Only used for SecurityType == TrustedLaunch
-            if (this.IsParameterBound(c => c.EnableSecureBoot))
-            {
-                if (this.VirtualMachineScaleSetUpdate == null)
-                {
-                    this.VirtualMachineScaleSetUpdate = new VirtualMachineScaleSetUpdate();
-                }
-                if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile == null)
-                {
-                    this.VirtualMachineScaleSetUpdate.VirtualMachineProfile = new VirtualMachineScaleSetUpdateVMProfile();
-                }
-                if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile == null)
-                {
-                    this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile = new SecurityProfile();
-                }
-                if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile.UefiSettings == null)
-                {
-                    this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile.UefiSettings = new UefiSettings();
-                }
-                this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile.UefiSettings.SecureBootEnabled = this.EnableSecureBoot;
-            }
-
-            if (this.VirtualMachineScaleSetUpdate != null
-                && this.VirtualMachineScaleSetUpdate.VirtualMachineProfile != null
-                && this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.OsProfile != null
-                && this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.OsProfile.WindowsConfiguration != null
-                && this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.OsProfile.LinuxConfiguration != null)
-            {
-                throw new ArgumentException(Microsoft.Azure.Commands.Compute.Properties.Resources.BothWindowsAndLinuxConfigurationsSpecified);
-            }
+            this.VirtualMachineScaleSet.VirtualMachineProfile.UserData = this.UserData;
         }
 
-        private void BuildPutObject()
+        if (this.IsParameterBound(c => c.OSImageScheduledEventEnabled))
+        {
+            if (this.VirtualMachineScaleSetUpdate == null)
+            {
+                this.VirtualMachineScaleSetUpdate = new VirtualMachineScaleSetUpdate();
+            }
+            if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile == null)
+            {
+                this.VirtualMachineScaleSetUpdate.VirtualMachineProfile = new VirtualMachineScaleSetUpdateVMProfile();
+            }
+            if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.ScheduledEventsProfile == null)
+            {
+                this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.ScheduledEventsProfile = new ScheduledEventsProfile();
+            }
+            if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.ScheduledEventsProfile.OsImageNotificationProfile == null)
+            {
+                this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.ScheduledEventsProfile.OsImageNotificationProfile = new OSImageNotificationProfile();
+            }                
+            this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.ScheduledEventsProfile.OsImageNotificationProfile.Enable = this.OSImageScheduledEventEnabled;
+        }
+
+        if (this.IsParameterBound(c => c.OSImageScheduledEventNotBeforeTimeoutInMinutes))
+        {
+            if (this.VirtualMachineScaleSetUpdate == null)
+            {
+                this.VirtualMachineScaleSetUpdate = new VirtualMachineScaleSetUpdate();
+            }
+            if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile == null)
+            {
+                this.VirtualMachineScaleSetUpdate.VirtualMachineProfile = new VirtualMachineScaleSetUpdateVMProfile();
+            }
+            if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.ScheduledEventsProfile == null)
+            {
+                this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.ScheduledEventsProfile = new ScheduledEventsProfile();
+            }
+            if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.ScheduledEventsProfile.OsImageNotificationProfile == null)
+            {
+                this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.ScheduledEventsProfile.OsImageNotificationProfile = new OSImageNotificationProfile();
+            }
+            this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.ScheduledEventsProfile.OsImageNotificationProfile.NotBeforeTimeout = this.OSImageScheduledEventNotBeforeTimeoutInMinutes;
+        }
+
+        // SecurityType, includes TrustedLaunch and ConfidentialVM and Standard. 
+        if (this.IsParameterBound(c => c.SecurityType))
+        {
+            if (this.VirtualMachineScaleSetUpdate == null)
+            {
+                this.VirtualMachineScaleSetUpdate = new VirtualMachineScaleSetUpdate();
+            }
+            if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile == null)
+            {
+                this.VirtualMachineScaleSetUpdate.VirtualMachineProfile = new VirtualMachineScaleSetUpdateVMProfile();
+            }
+            if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile == null)
+            {
+                this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile = new SecurityProfile();
+            }
+            if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile.UefiSettings == null)
+            {
+                this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile.UefiSettings = new UefiSettings();
+            }
+            this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile.SecurityType = this.SecurityType;
+            if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile.SecurityType?.ToLower() == ConstantValues.TrustedLaunchSecurityType || this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile.SecurityType?.ToLower() == ConstantValues.ConfidentialVMSecurityType)
+            {
+                this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile.UefiSettings.VTpmEnabled = this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile.UefiSettings.VTpmEnabled == null ? true : this.EnableVtpm;
+                this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile.UefiSettings.SecureBootEnabled = this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile.UefiSettings.SecureBootEnabled == null ? true : this.EnableSecureBoot;
+            }
+        }
+        // Only used for SecurityType == TrustedLaunch
+        if (this.IsParameterBound(c => c.EnableVtpm))
+        {
+            if (this.VirtualMachineScaleSetUpdate == null)
+            {
+                this.VirtualMachineScaleSetUpdate = new VirtualMachineScaleSetUpdate();
+            }
+            if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile == null)
+            {
+                this.VirtualMachineScaleSetUpdate.VirtualMachineProfile = new VirtualMachineScaleSetUpdateVMProfile();
+            }
+            if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile == null)
+            {
+                this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile = new SecurityProfile();
+            }
+            if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile.UefiSettings == null)
+            {
+                this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile.UefiSettings = new UefiSettings();
+            }
+            this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile.UefiSettings.VTpmEnabled = this.EnableVtpm;
+        }
+        // Only used for SecurityType == TrustedLaunch
+        if (this.IsParameterBound(c => c.EnableSecureBoot))
+        {
+            if (this.VirtualMachineScaleSetUpdate == null)
+            {
+                this.VirtualMachineScaleSetUpdate = new VirtualMachineScaleSetUpdate();
+            }
+            if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile == null)
+            {
+                this.VirtualMachineScaleSetUpdate.VirtualMachineProfile = new VirtualMachineScaleSetUpdateVMProfile();
+            }
+            if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile == null)
+            {
+                this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile = new SecurityProfile();
+            }
+            if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile.UefiSettings == null)
+            {
+                this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile.UefiSettings = new UefiSettings();
+            }
+            this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile.UefiSettings.SecureBootEnabled = this.EnableSecureBoot;
+        }
+
+        if (this.IsParameterBound(c => c.EnableResilientVMCreate))
+        {
+            if (this.VirtualMachineScaleSetUpdate == null)
+            {
+                this.VirtualMachineScaleSetUpdate = new VirtualMachineScaleSetUpdate();
+            }
+            if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile == null)
+            {
+                this.VirtualMachineScaleSetUpdate.VirtualMachineProfile = new VirtualMachineScaleSetUpdateVMProfile();
+            }
+            if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.ResilientVMCreate == null)
+            {
+                this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.ResilientVMCreate = new ResilientVMCreate();
+            }
+            this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.ResilientVMCreate.Enabled = this.EnableResilientVMCreate;
+        }
+
+        if (this.IsParameterBound(c => c.EnableResilientVMDelete))
+        {
+            if (this.VirtualMachineScaleSetUpdate == null)
+            {
+                this.VirtualMachineScaleSetUpdate = new VirtualMachineScaleSetUpdate();
+            }
+            if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile == null)
+            {
+                this.VirtualMachineScaleSetUpdate.VirtualMachineProfile = new VirtualMachineScaleSetUpdateVMProfile();
+            }
+            if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.ResilientVMDelete == null)
+            {
+                this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.ResilientVMDelete = new ResilientVMDelete();
+            }
+            this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.ResilientVMDelete.Enabled = this.EnableResilientVMDelete;
+        }
+
+        if (this.VirtualMachineScaleSetUpdate != null
+            && this.VirtualMachineScaleSetUpdate.ProximityPlacementGroup != null
+            && string.IsNullOrEmpty(this.VirtualMachineScaleSetUpdate.ProximityPlacementGroup.Id))
+        {
+            this.VirtualMachineScaleSetUpdate.ProximityPlacementGroup.Id = null;
+        }
+        
+        if (this.IsParameterBound(c => c.UserData))
+        {
+            if (!ValidateBase64EncodedString.ValidateStringIsBase64Encoded(this.UserData))
+            {
+                this.UserData = ValidateBase64EncodedString.EncodeStringToBase64(this.UserData);
+                this.WriteInformation(ValidateBase64EncodedString.UserDataEncodeNotification, new string[] { "PSHOST" });
+            }
+
+            if (this.VirtualMachineScaleSet.VirtualMachineProfile == null)
+            {
+                this.VirtualMachineScaleSet.VirtualMachineProfile = new PSVirtualMachineScaleSetVMProfile();
+            }
+            this.VirtualMachineScaleSet.VirtualMachineProfile.UserData = this.UserData;
+        }
+
+        if (this.IsParameterBound(c => c.OSImageScheduledEventEnabled))
+        {
+            if (this.VirtualMachineScaleSetUpdate == null)
+            {
+                this.VirtualMachineScaleSetUpdate = new VirtualMachineScaleSetUpdate();
+            }
+            if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile == null)
+            {
+                this.VirtualMachineScaleSetUpdate.VirtualMachineProfile = new VirtualMachineScaleSetUpdateVMProfile();
+            }
+            if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.ScheduledEventsProfile == null)
+            {
+                this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.ScheduledEventsProfile = new ScheduledEventsProfile();
+            }
+            if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.ScheduledEventsProfile.OsImageNotificationProfile == null)
+            {
+                this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.ScheduledEventsProfile.OsImageNotificationProfile = new OSImageNotificationProfile();
+            }                
+            this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.ScheduledEventsProfile.OsImageNotificationProfile.Enable = this.OSImageScheduledEventEnabled;
+        }
+
+        if (this.IsParameterBound(c => c.OSImageScheduledEventNotBeforeTimeoutInMinutes))
+        {
+            if (this.VirtualMachineScaleSetUpdate == null)
+            {
+                this.VirtualMachineScaleSetUpdate = new VirtualMachineScaleSetUpdate();
+            }
+            if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile == null)
+            {
+                this.VirtualMachineScaleSetUpdate.VirtualMachineProfile = new VirtualMachineScaleSetUpdateVMProfile();
+            }
+            if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.ScheduledEventsProfile == null)
+            {
+                this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.ScheduledEventsProfile = new ScheduledEventsProfile();
+            }
+            if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.ScheduledEventsProfile.OsImageNotificationProfile == null)
+            {
+                this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.ScheduledEventsProfile.OsImageNotificationProfile = new OSImageNotificationProfile();
+            }
+            this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.ScheduledEventsProfile.OsImageNotificationProfile.NotBeforeTimeout = this.OSImageScheduledEventNotBeforeTimeoutInMinutes;
+        }
+
+        // SecurityType, includes TrustedLaunch and ConfidentialVM and Standard. 
+        if (this.IsParameterBound(c => c.SecurityType))
+        {
+            if (this.VirtualMachineScaleSetUpdate == null)
+            {
+                this.VirtualMachineScaleSetUpdate = new VirtualMachineScaleSetUpdate();
+            }
+            if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile == null)
+            {
+                this.VirtualMachineScaleSetUpdate.VirtualMachineProfile = new VirtualMachineScaleSetUpdateVMProfile();
+            }
+            if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile == null)
+            {
+                this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile = new SecurityProfile();
+            }
+            if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile.UefiSettings == null)
+            {
+                this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile.UefiSettings = new UefiSettings();
+            }
+            this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile.SecurityType = this.SecurityType;
+            if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile.SecurityType?.ToLower() == ConstantValues.TrustedLaunchSecurityType || this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile.SecurityType?.ToLower() == ConstantValues.ConfidentialVMSecurityType)
+            {
+                this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile.UefiSettings.VTpmEnabled = this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile.UefiSettings.VTpmEnabled == null ? true : this.EnableVtpm;
+                this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile.UefiSettings.SecureBootEnabled = this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile.UefiSettings.SecureBootEnabled == null ? true : this.EnableSecureBoot;
+            }
+        }
+        // Only used for SecurityType == TrustedLaunch
+        if (this.IsParameterBound(c => c.EnableVtpm))
+        {
+            if (this.VirtualMachineScaleSetUpdate == null)
+            {
+                this.VirtualMachineScaleSetUpdate = new VirtualMachineScaleSetUpdate();
+            }
+            if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile == null)
+            {
+                this.VirtualMachineScaleSetUpdate.VirtualMachineProfile = new VirtualMachineScaleSetUpdateVMProfile();
+            }
+            if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile == null)
+            {
+                this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile = new SecurityProfile();
+            }
+            if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile.UefiSettings == null)
+            {
+                this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile.UefiSettings = new UefiSettings();
+            }
+            this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile.UefiSettings.VTpmEnabled = this.EnableVtpm;
+        }
+        // Only used for SecurityType == TrustedLaunch
+        if (this.IsParameterBound(c => c.EnableSecureBoot))
+        {
+            if (this.VirtualMachineScaleSetUpdate == null)
+            {
+                this.VirtualMachineScaleSetUpdate = new VirtualMachineScaleSetUpdate();
+            }
+            if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile == null)
+            {
+                this.VirtualMachineScaleSetUpdate.VirtualMachineProfile = new VirtualMachineScaleSetUpdateVMProfile();
+            }
+            if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile == null)
+            {
+                this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile = new SecurityProfile();
+            }
+            if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile.UefiSettings == null)
+            {
+                this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile.UefiSettings = new UefiSettings();
+            }
+            this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile.UefiSettings.SecureBootEnabled = this.EnableSecureBoot;
+        }
+
+        if (this.VirtualMachineScaleSetUpdate != null
+            && this.VirtualMachineScaleSetUpdate.ProximityPlacementGroup != null
+            && string.IsNullOrEmpty(this.VirtualMachineScaleSetUpdate.ProximityPlacementGroup.Id))
+        {
+            this.VirtualMachineScaleSetUpdate.ProximityPlacementGroup.Id = null;
+        }
+    }
+ 
+
+private void BuildPutObject()
         {
             if (this.IsParameterBound(c => c.AutomaticOSUpgrade))
             {
@@ -2162,6 +2328,25 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                     this.VirtualMachineScaleSet.VirtualMachineProfile.SecurityProfile.UefiSettings = new UefiSettings();
                 }
                 this.VirtualMachineScaleSet.VirtualMachineProfile.SecurityProfile.UefiSettings.SecureBootEnabled = this.EnableSecureBoot;
+            }
+
+            // New parameters for Resilient VM Create and Delete
+            if (this.IsParameterBound(c => c.EnableResilientVMCreate))
+            {
+                if (this.VirtualMachineScaleSet.VirtualMachineProfile == null)
+                {
+                    this.VirtualMachineScaleSet.VirtualMachineProfile = new PSVirtualMachineScaleSetVMProfile();
+                }
+                this.VirtualMachineScaleSet.VirtualMachineProfile.EnableResilientVMCreate = this.EnableResilientVMCreate;
+            }
+
+            if (this.IsParameterBound(c => c.EnableResilientVMDelete))
+            {
+                if (this.VirtualMachineScaleSet.VirtualMachineProfile == null)
+                {
+                    this.VirtualMachineScaleSet.VirtualMachineProfile = new PSVirtualMachineScaleSetVMProfile();
+                }
+                this.VirtualMachineScaleSet.VirtualMachineProfile.EnableResilientVMDelete = this.EnableResilientVMDelete;
             }
 
             if (this.VirtualMachineScaleSet != null
