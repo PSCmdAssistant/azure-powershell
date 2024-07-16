@@ -20,6 +20,8 @@
 
 -->
 ## Upcoming Release
+* Added new parameters `EnableResilientVMCreate` and `EnableResilientVMDelete` to cmdlets `Update-AzVmss` and `New-AzVmssConfig` to enable Resilient VM Create and/or Resilient VM Delete on their scale sets during a VMSS update or VMSS create operation.
+* Renamed parameter `-VmId` to `-SourceId` and added `-VmId` as an alias to `New-AzRestorePointCollection` cmdlet.
 * Renamed parameter `-VmId` to `-SourceId` and added `-VmId` as an alias to `New-AzRestorePointCollection` cmdlet.
 
 ## Version 8.1.0
