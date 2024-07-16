@@ -26,5 +26,10 @@ namespace Microsoft.Azure.Commands.Compute.Automation.Models
         // Gets or sets the FQDN.
         public string FullyQualifiedDomainName { get; set; }
 
+        // Gets or sets the flag for Resilient VM Create.
+        public bool EnableResilientVMCreate { get; set; }
+
+        // Gets or sets the flag for Resilient VM Delete.
+        public bool EnableResilientVMDelete { get; set; }
     }
 }
