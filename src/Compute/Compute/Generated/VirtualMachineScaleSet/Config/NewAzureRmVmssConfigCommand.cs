@@ -1,4 +1,4 @@
- //
+//
 // Copyright (c) Microsoft and contributors.  All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -907,7 +907,7 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                 {
                     vVirtualMachineProfile.ScheduledEventsProfile.OsImageNotificationProfile = new OSImageNotificationProfile();
                 }
-                vVirtualMachineProfile.ScheduledEventsProfile.OsImageNotificationProfile.Enable = this.OSImageScheduledEventEnabled;
+                vVirtualMachineProfile.ScheduledEventsProfile.OsImageNotificationProfile.Enable = this.OSImageScheduledEventEnabled.IsPresent;
             }
 
             if (this.IsParameterBound(c => c.OSImageScheduledEventNotBeforeTimeoutInMinutes))
@@ -929,9 +929,9 @@ namespace Microsoft.Azure.Commands.Compute.Automation
 
             var vVirtualMachineScaleSet = new PSVirtualMachineScaleSet
             {
-                Overprovision = this.IsParameterBound(c => c.Overprovision) ? this.Overprovision : (bool?)null,
+                Overprovision = this.IsParameterBound(c => c.Overprovision) ? this.Overprovision.GetValueOrDefault() : (bool?)null,
                 DoNotRunExtensionsOnOverprovisionedVMs = this.SkipExtensionsOnOverprovisionedVMs.IsPresent ? true : (bool?)null,
-                SinglePlacementGroup = this.IsParameterBound(c => c.SinglePlacementGroup) ? this.SinglePlacementGroup : (bool?)null,
+                SinglePlacementGroup = this.IsParameterBound(c => c.SinglePlacementGroup) ? this.SinglePlacementGroup.GetValueOrDefault() : (bool?)null,
                 ZoneBalance = this.ZoneBalance.IsPresent ? true : (bool?)null,
                 PlatformFaultDomainCount = this.IsParameterBound(c => c.PlatformFaultDomainCount) ? this.PlatformFaultDomainCount : (int?)null,
                 Zones = this.IsParameterBound(c => c.Zone) ? this.Zone : null,
@@ -950,12 +950,11 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                 OrchestrationMode = this.IsParameterBound(c => c.OrchestrationMode) ? this.OrchestrationMode : null,
                 SpotRestorePolicy = this.IsParameterBound(c => c.EnableSpotRestore) ? new SpotRestorePolicy(true, this.SpotRestoreTimeout) : null,
                 PriorityMixPolicy = vPriorityMixPolicy,
-                EnableResilientVMCreate = this.IsParameterBound(c => c.EnableResilientVMCreate) ? this.EnableResilientVMCreate : (bool?)null,
-                EnableResilientVMDelete = this.IsParameterBound(c => c.EnableResilientVMDelete) ? this.EnableResilientVMDelete : (bool?)null
+                EnableResilientVMCreate = this.IsParameterBound(c => c.EnableResilientVMCreate) ? this.EnableResilientVMCreate.GetValueOrDefault() : (bool?)null,
+                EnableResilientVMDelete = this.IsParameterBound(c => c.EnableResilientVMDelete) ? this.EnableResilientVMDelete.GetValueOrDefault() : (bool?)null
             };
 
             WriteObject(vVirtualMachineScaleSet);
         }
     }
 }
-
