@@ -20,6 +20,8 @@
 
 -->
 ## Upcoming Release
+* Added new parameter `Shield` to `Set-AzDiskSecurityProfile` cmdlet with three allowed values: ShieldOn, ShieldGone, ShieldDown.
+* Renamed parameter `-VmId` to `-SourceId` and added `-VmId` as an alias to `New-AzRestorePointCollection` cmdlet.
 * Renamed parameter `-VmId` to `-SourceId` and added `-VmId` as an alias to `New-AzRestorePointCollection` cmdlet.
 
 ## Version 8.1.0
