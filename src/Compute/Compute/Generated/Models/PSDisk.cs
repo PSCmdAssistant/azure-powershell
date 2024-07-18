@@ -80,4 +80,11 @@ namespace Microsoft.Azure.Commands.Compute.Automation.Models
         public double? CompletionPercent { get; set; }
         public bool? OptimizedForFrequentAttach { get; set; }
     }
+
+    public partial class DiskSecurityProfile
+    {
+        public string SecurityType { get; set; }
+        public string SecureVMDiskEncryptionSetId { get; set; }
+        public string Shield { get; set; }
+    }
 }
