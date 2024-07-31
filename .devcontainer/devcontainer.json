@@ -12,7 +12,7 @@
 			"NODE_VERSION": "lts/*"
 		}
 	},
-
+	"postCreateCommand": "dotnet build src/Compute/Compute.sln",
 	"customizations": {
 		"vscode": {
 			"extensions": [
