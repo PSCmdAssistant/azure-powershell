@@ -1,0 +1,28 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "compute",
+        "type": "coreclr",
+        "request": "launch",
+        "program": "/usr/bin/pwsh",
+        "args": [
+          "-NoExit",
+          "-Command",
+          "Import-Module /workspaces/azure-powershell/artifacts/Debug/Az.Accounts/Az.Accounts.psd1; Import-Module /workspaces/azure-powershell/artifacts/Debug/Az.Compute/Az.Compute.psd1; $DebugPreference='Continue'; $PSDefaultParameterValues['*:LogLevel'] = 'None'; [System.Environment]::SetEnvironmentVariable('POWERSHELL_TELEMETRY_OPTOUT', '1', [System.EnvironmentVariableTarget]::Process)"        ],
+        "cwd": "${workspaceFolder}/artifacts/Debug/Az.Compute",
+        "stopAtEntry": false,
+        "console": "internalConsole",
+        "internalConsoleOptions": "neverOpen",
+        "env": {
+          "POWERSHELL_TELEMETRY_OPTOUT": "1"
+        },
+        "logging": {
+          "moduleLoad": false, // Disable module load messages
+          "engineLogging": false, // Disable engine logging
+          "trace": false // Disable trace logging
+        }
+      }
+    ]
+  }
+  
