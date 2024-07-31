@@ -21,6 +21,7 @@
 -->
 ## Upcoming Release
 * Added new parameter `ResourceIdsOnly` to cmdlet `Get-AzCapacityReservationGroup` with allowed values "CreatedInSubscription", "SharedWithSubscription" and "All".
+* Renamed parameter `-VmId` to `-SourceId` and added `-VmId` as an alias to `New-AzRestorePointCollection` cmdlet.
 
 ## Version 8.1.0
 * Added parameter `-SourceResourceId` to cmdlet `Add-AzVMDataDisk`.
