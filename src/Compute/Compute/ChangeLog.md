@@ -19,7 +19,10 @@
         - Additional information about change #1
 
 -->
-## Upcoming Release
+* Added new business logic to `New-AzVmss` cmdlet. When the user explicitly sets the `SecurityType` to `Standard`, the Image alias is set to `Win2022AzureEdition`.
+    - This change affects all parameter sets on the `New-AzVmss` cmdlet.
+    - Link to diff between markdown help files: `{ ENTER LINK HERE }`
+    - Link to API tests for this feature: `{ ENTER LINK HERE }`
 
 ## Version 8.2.0
 * Renamed parameter `-VmId` to `-SourceId` and added `-VmId` as an alias to `New-AzRestorePointCollection` cmdlet.
