@@ -20,6 +20,9 @@
 
 -->
 ## Upcoming Release
+* Added new parameter `GallantSecurity` to `Set-AzDiskSecurityProfile` cmdlet.
+    - This is a string type parameter with possible values: DiskOn, VMOn, or SecurityOff.
+    - This parameter is set on the disk's security profile.
 
 ## Version 8.2.0
 * Renamed parameter `-VmId` to `-SourceId` and added `-VmId` as an alias to `New-AzRestorePointCollection` cmdlet.
