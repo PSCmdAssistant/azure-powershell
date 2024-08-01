@@ -20,6 +20,15 @@
 
 -->
 ## Upcoming Release
+* Added new parameters to Set-AzVMAccessExtension cmdlet
+    - CheckDisk: switch-> check_disk (public configuration)
+    - RepairDisk: switch -> repair_disk (public configuration)
+    - SSHKey: string -> ssh_key (protected configuration)
+    - ResetSSH: switch -> reset_ssh (protected configuration)
+    - RemoveUser: string -> remove_user (protected configuration)
+    - AccountExpiration: string -> expiration (protected configuration)
+    - These parameters are only applicable to the Linux version of VMAccess.
+    - More information can be found here: [README for VMAccess](https://github.com/Azure/azure-linux-extensions/tree/master/VMAccess)
 
 ## Version 8.2.0
 * Renamed parameter `-VmId` to `-SourceId` and added `-VmId` as an alias to `New-AzRestorePointCollection` cmdlet.

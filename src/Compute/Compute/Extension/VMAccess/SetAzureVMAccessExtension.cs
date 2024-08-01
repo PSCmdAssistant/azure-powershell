@@ -1,17 +1,4 @@
-﻿// ----------------------------------------------------------------------------------
-//
-// Copyright Microsoft Corporation
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// http://www.apache.org/licenses/LICENSE-2.0
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-// ----------------------------------------------------------------------------------
-
+csharp
 using Microsoft.Azure.Commands.Compute.Common;
 using Microsoft.Azure.Commands.Compute.Models;
 using Microsoft.Azure.Management.Compute.Models;
@@ -27,6 +14,12 @@ namespace Microsoft.Azure.Commands.Compute
     {
         private const string userNameKey = "UserName";
         private const string passwordKey = "Password";
+        private const string checkDiskKey = "check_disk";
+        private const string repairDiskKey = "repair_disk";
+        private const string sshKey = "ssh_key";
+        private const string resetSSHKey = "reset_ssh";
+        private const string removeUserKey = "remove_user";
+        private const string accountExpirationKey = "expiration";
 
         [Parameter(
            Mandatory = false,
@@ -34,6 +27,42 @@ namespace Microsoft.Azure.Commands.Compute
            HelpMessage = "Credential")]
         [ValidateNotNullOrEmpty]
         public PSCredential Credential { get; set; }
+
+        [Parameter(
+           Mandatory = false,
+           ValueFromPipelineByPropertyName = true,
+           HelpMessage = "Check Disk")]
+        public SwitchParameter CheckDisk { get; set; }
+
+        [Parameter(
+           Mandatory = false,
+           ValueFromPipelineByPropertyName = true,
+           HelpMessage = "Repair Disk")]
+        public SwitchParameter RepairDisk { get; set; }
+
+        [Parameter(
+           Mandatory = false,
+           ValueFromPipelineByPropertyName = true,
+           HelpMessage = "SSH Key")]
+        public string SSHKey { get; set; }
+
+        [Parameter(
+           Mandatory = false,
+           ValueFromPipelineByPropertyName = true,
+           HelpMessage = "Reset SSH")]
+        public SwitchParameter ResetSSH { get; set; }
+
+        [Parameter(
+           Mandatory = false,
+           ValueFromPipelineByPropertyName = true,
+           HelpMessage = "Remove User")]
+        public string RemoveUser { get; set; }
+
+        [Parameter(
+           Mandatory = false,
+           ValueFromPipelineByPropertyName = true,
+           HelpMessage = "Account Expiration")]
+        public string AccountExpiration { get; set; }
 
         public override void ExecuteCmdlet()
         {
@@ -50,6 +79,36 @@ namespace Microsoft.Azure.Commands.Compute
                     {
                         publicSettings.Add(userNameKey, Credential.UserName ?? "");
                         privateSettings.Add(passwordKey, ConversionUtilities.SecureStringToString(Credential.Password));
+                    }
+
+                    if (CheckDisk.IsPresent)
+                    {
+                        publicSettings.Add(checkDiskKey, true);
+                    }
+
+                    if (RepairDisk.IsPresent)
+                    {
+                        publicSettings.Add(repairDiskKey, true);
+                    }
+
+                    if (!string.IsNullOrEmpty(SSHKey))
+                    {
+                        privateSettings.Add(sshKey, SSHKey);
+                    }
+
+                    if (ResetSSH.IsPresent)
+                    {
+                        privateSettings.Add(resetSSHKey, true);
+                    }
+
+                    if (!string.IsNullOrEmpty(RemoveUser))
+                    {
+                        privateSettings.Add(removeUserKey, RemoveUser);
+                    }
+
+                    if (!string.IsNullOrEmpty(AccountExpiration))
+                    {
+                        privateSettings.Add(accountExpirationKey, AccountExpiration);
                     }
 
                     if (string.IsNullOrEmpty(this.Location))
