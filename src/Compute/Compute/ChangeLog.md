@@ -20,6 +20,9 @@
 
 -->
 ## Upcoming Release
+* Added new parameter `ResourceIdsOnly` to `Get-AzCapacityReservationGroup` cmdlet.
+    - The data type for `ResourceIdsOnly` is string.
+    - Allowed values for `ResourceIdsOnly` are "CreatedInSubscription", "SharedWithSubscription", and "All".
 
 ## Version 8.2.0
 * Renamed parameter `-VmId` to `-SourceId` and added `-VmId` as an alias to `New-AzRestorePointCollection` cmdlet.
