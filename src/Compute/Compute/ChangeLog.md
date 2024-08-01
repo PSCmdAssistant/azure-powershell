@@ -20,6 +20,10 @@
 
 -->
 ## Upcoming Release
+* Updated cmdlet `Update-AzCapacityReservationGroup` with new parameter `-SharingProfile`.
+    - The new parameter `-SharingProfile` accepts "" as a possible value. When the value is "" for SharingProfile, it initializes the resourceSharingProfile object and creates an empty list for SubscriptionIds.
+    - This change affects all parameter sets on the cmdlet.
+    - Link to API tests for this feature: `{ ENTER LINK HERE }`
 
 ## Version 8.2.0
 * Renamed parameter `-VmId` to `-SourceId` and added `-VmId` as an alias to `New-AzRestorePointCollection` cmdlet.
