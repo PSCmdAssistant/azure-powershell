@@ -20,6 +20,8 @@
 
 -->
 ## Upcoming Release
+* Added new parameter `-AvailabilityPolicy` to cmdlets `Set-AzVMDataDisk` and `New-AzDiskUpdateConfig`.
+    - This parameter accepts 2 values - "AutomaticReattach": Will set/update property on disk and "None":Will clear property on disk
 
 ## Version 8.2.0
 * Renamed parameter `-VmId` to `-SourceId` and added `-VmId` as an alias to `New-AzRestorePointCollection` cmdlet.
