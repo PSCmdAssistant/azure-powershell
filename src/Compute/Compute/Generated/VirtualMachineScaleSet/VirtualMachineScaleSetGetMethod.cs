@@ -1,4 +1,4 @@
-//
+ //
 // Copyright (c) Microsoft and contributors.  All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -48,6 +48,11 @@ namespace Microsoft.Azure.Commands.Compute.Automation
             {
                 string resourceGroupName = this.ResourceGroupName;
                 string vmScaleSetName = this.VMScaleSetName;
+
+                if (string.IsNullOrWhiteSpace(resourceGroupName) || string.IsNullOrWhiteSpace(vmScaleSetName))
+                {
+                    throw new ArgumentException("ResourceGroupName and VMScaleSetName cannot be empty");
+                }
 
                 if (ShouldGetByName(resourceGroupName, vmScaleSetName))
                 {
@@ -186,6 +191,7 @@ namespace Microsoft.Azure.Commands.Compute.Automation
         [SupportsWildcards]
         [ValidateNotNullOrEmpty]
         [Alias("Name")]
+        [ValidateNotNullOrEmpty]
         public string VMScaleSetName { get; set; }
 
         [Parameter(
@@ -213,3 +219,4 @@ namespace Microsoft.Azure.Commands.Compute.Automation
         public string ResourceId { get; set; }
     }
 }
+
