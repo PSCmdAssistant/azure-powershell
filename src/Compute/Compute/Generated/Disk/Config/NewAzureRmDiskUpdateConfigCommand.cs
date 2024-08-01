@@ -1,4 +1,4 @@
-//
+ //
 // Copyright (c) Microsoft and contributors.  All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -179,6 +179,12 @@ namespace Microsoft.Azure.Commands.Compute.Automation
         [PSArgumentCompleter("X64", "Arm64")]
         public string Architecture { get; set; }
 
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "Availability Policy for the disk. Possible values are \"AutomaticReattach\" and \"None\".")]
+        [PSArgumentCompleter("AutomaticReattach", "None")]
+        public string AvailabilityPolicy { get; set; }
 
         protected override void ProcessRecord()
         {
@@ -322,10 +328,13 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                 SupportsHibernation = this.IsParameterBound(c => c.SupportsHibernation) ? SupportsHibernation : null,
                 SupportedCapabilities = vSupportedCapabilities,
                 PublicNetworkAccess = this.IsParameterBound(c => c.PublicNetworkAccess) ? PublicNetworkAccess : null,
-                DataAccessAuthMode = this.IsParameterBound(c => c.DataAccessAuthMode) ? DataAccessAuthMode : null
+                DataAccessAuthMode = this.IsParameterBound(c => c.DataAccessAuthMode) ? DataAccessAuthMode : null,
+                AvailabilityPolicy = this.IsParameterBound(c => c.AvailabilityPolicy) ? AvailabilityPolicy : null
             };
 
             WriteObject(vDiskUpdate);
         }
     }
 }
+.
+
