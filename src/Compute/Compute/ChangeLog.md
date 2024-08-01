@@ -20,6 +20,9 @@
 
 -->
 ## Upcoming Release
+* Updated cmdlet `Update-AzVmss` with new parameters.
+    - Added `SecurityPostureId`, a Relative URI string path. This parameter maps to the property Vmss.Properties.VirtualMachineProfile.SecurityPostureReference.Id.
+    - Added `SecurityPostureExcludedExtensions`, an array of VMExtension objects. This parameter maps onto the property Vmss.Properties.VirtualMachineProfile.SecurityPostureReference.ExcludedExtensions.
 
 ## Version 8.2.0
 * Renamed parameter `-VmId` to `-SourceId` and added `-VmId` as an alias to `New-AzRestorePointCollection` cmdlet.
