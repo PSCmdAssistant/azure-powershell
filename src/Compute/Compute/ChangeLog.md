@@ -20,6 +20,7 @@
 
 -->
 ## Upcoming Release
+* Added optional parameter `SecureVmGuestStateSas` to `Grant-AzDiskAccess` cmdlet to return `GrantAccessData.GetSecureVMGuestStateSAS Property`.
 
 ## Version 8.2.0
 * Renamed parameter `-VmId` to `-SourceId` and added `-VmId` as an alias to `New-AzRestorePointCollection` cmdlet.
