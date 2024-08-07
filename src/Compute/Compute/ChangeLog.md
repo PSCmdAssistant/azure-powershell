@@ -20,6 +20,8 @@
 
 -->
 ## Upcoming Release
+* Implemented Trusted Launch as the default deployment option in Azure PowerShell for `New-AzVM` and `New-AzVMSS` cmdlets.
+* Added  parameter `-ResourceIdsOnly` to `Get-AzCapacityReservationGroup` cmdlet.
 * Added  parameter `-ResourceIdsOnly` to `Get-AzCapacityReservationGroup` cmdlet.
 
 ## Version 8.2.0
