@@ -1,4 +1,4 @@
- //
+//
 // Copyright (c) Microsoft and contributors.  All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -905,7 +905,7 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                 {
                     vVirtualMachineProfile.ScheduledEventsProfile.OsImageNotificationProfile = new OSImageNotificationProfile();
                 }
-                vVirtualMachineProfile.ScheduledEventsProfile.OsImageNotificationProfile.Enable = this.OSImageScheduledEventEnabled;
+                vVirtualMachineProfile.ScheduledEventsProfile.OsImageNotificationProfile.Enable = this.OSImageScheduledEventEnabled.IsPresent;
             }
 
             if (this.IsParameterBound(c => c.OSImageScheduledEventNotBeforeTimeoutInMinutes))
@@ -956,4 +956,3 @@ namespace Microsoft.Azure.Commands.Compute.Automation
         }
     }
 }
-
