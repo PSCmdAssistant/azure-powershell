@@ -347,6 +347,16 @@ namespace Microsoft.Azure.Commands.Compute.Automation
            Mandatory = false)]
         public bool? EnableSecureBoot { get; set; } = null;
 
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true)]
+        public bool? EnableResilientVMCreate { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true)]
+        public bool? EnableResilientVMDelete { get; set; }
+
         protected override void ProcessRecord()
         {
             if (ShouldProcess("VirtualMachineScaleSet", "New"))
@@ -895,7 +905,7 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                 {
                     vVirtualMachineProfile.ScheduledEventsProfile.OsImageNotificationProfile = new OSImageNotificationProfile();
                 }
-                vVirtualMachineProfile.ScheduledEventsProfile.OsImageNotificationProfile.Enable = this.OSImageScheduledEventEnabled;
+                vVirtualMachineProfile.ScheduledEventsProfile.OsImageNotificationProfile.Enable = this.OSImageScheduledEventEnabled.IsPresent;
             }
 
             if (this.IsParameterBound(c => c.OSImageScheduledEventNotBeforeTimeoutInMinutes))
@@ -937,11 +947,12 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                 Identity = vIdentity,
                 OrchestrationMode = this.IsParameterBound(c => c.OrchestrationMode) ? this.OrchestrationMode : null,
                 SpotRestorePolicy = this.IsParameterBound(c => c.EnableSpotRestore) ? new SpotRestorePolicy(true, this.SpotRestoreTimeout) : null,
-                PriorityMixPolicy = vPriorityMixPolicy
+                PriorityMixPolicy = vPriorityMixPolicy,
+                EnableResilientVMCreate = this.IsParameterBound(c => c.EnableResilientVMCreate) ? this.EnableResilientVMCreate : (bool?)null,
+                EnableResilientVMDelete = this.IsParameterBound(c => c.EnableResilientVMDelete) ? this.EnableResilientVMDelete : (bool?)null
             };
 
             WriteObject(vVirtualMachineScaleSet);
         }
     }
 }
-
