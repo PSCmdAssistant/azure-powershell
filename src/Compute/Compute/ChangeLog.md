@@ -20,6 +20,8 @@
 
 -->
 ## Upcoming Release
+* Added new parameters `EnableResilientVMCreate` and `EnableResilientVMDelete` to `Update-AzVmss` and `New-AzVmssConfig` cmdlets to enable Resilient VM Create and/or Resilient VM Delete on their scale sets during a VMSS update or VMSS create operation.
+* Added  parameter `-ResourceIdsOnly` to `Get-AzCapacityReservationGroup` cmdlet.
 * Added  parameter `-ResourceIdsOnly` to `Get-AzCapacityReservationGroup` cmdlet.
 
 ## Version 8.2.0
