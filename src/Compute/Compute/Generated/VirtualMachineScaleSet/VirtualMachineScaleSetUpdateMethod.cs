@@ -1,4 +1,4 @@
-//
+ //
 // Copyright (c) Microsoft and contributors.  All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -421,7 +421,20 @@ namespace Microsoft.Azure.Commands.Compute.Automation
             HelpMessage = "Used to make a request conditional for the GET and HEAD methods. The server will only return the requested resources if none of the listed ETag values match the current entity. Used to make a request conditional for the GET and HEAD methods. The server will only return the requested resources if none of the listed ETag values match the current entity. Set to '*' to allow a new record set to be created, but to prevent updating an existing record set. Other values will result in error from server as they are not supported.")]
         public string IfNoneMatch { get; set; }
 
-        private void BuildPatchObject()
+        [Parameter(
+            Mandatory = false,
+            HelpMessage = "Enable Resilient VM Create on the scale set.")]
+        public bool EnableResilientVMCreate { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            HelpMessage = "Enable Resilient VM Delete on the scale set.")]
+        public bool EnableResilientVMDelete { get; set; }
+    }
+}
+ 
+
+private void BuildPatchObject()
         {
             if (this.IsParameterBound(c => c.AutomaticOSUpgrade))
             {
@@ -1404,9 +1417,29 @@ namespace Microsoft.Azure.Commands.Compute.Automation
             {
                 throw new ArgumentException(Microsoft.Azure.Commands.Compute.Properties.Resources.BothWindowsAndLinuxConfigurationsSpecified);
             }
-        }
 
-        private void BuildPutObject()
+            // New parameters for Resilient VM Create and Delete
+            if (this.IsParameterBound(c => c.EnableResilientVMCreate))
+            {
+                if (this.VirtualMachineScaleSetUpdate == null)
+                {
+                    this.VirtualMachineScaleSetUpdate = new VirtualMachineScaleSetUpdate();
+                }
+                this.VirtualMachineScaleSetUpdate.EnableResilientVMCreate = this.EnableResilientVMCreate;
+            }
+
+            if (this.IsParameterBound(c => c.EnableResilientVMDelete))
+            {
+                if (this.VirtualMachineScaleSetUpdate == null)
+                {
+                    this.VirtualMachineScaleSetUpdate = new VirtualMachineScaleSetUpdate();
+                }
+                this.VirtualMachineScaleSetUpdate.EnableResilientVMDelete = this.EnableResilientVMDelete;
+            }
+        }
+ 
+
+private void BuildPutObject()
         {
             if (this.IsParameterBound(c => c.AutomaticOSUpgrade))
             {
@@ -2164,6 +2197,25 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                 this.VirtualMachineScaleSet.VirtualMachineProfile.SecurityProfile.UefiSettings.SecureBootEnabled = this.EnableSecureBoot;
             }
 
+            // New parameters for Resilient VM Create and Delete
+            if (this.IsParameterBound(c => c.EnableResilientVMCreate))
+            {
+                if (this.VirtualMachineScaleSet.VirtualMachineProfile == null)
+                {
+                    this.VirtualMachineScaleSet.VirtualMachineProfile = new PSVirtualMachineScaleSetVMProfile();
+                }
+                this.VirtualMachineScaleSet.VirtualMachineProfile.EnableResilientVMCreate = this.EnableResilientVMCreate;
+            }
+
+            if (this.IsParameterBound(c => c.EnableResilientVMDelete))
+            {
+                if (this.VirtualMachineScaleSet.VirtualMachineProfile == null)
+                {
+                    this.VirtualMachineScaleSet.VirtualMachineProfile = new PSVirtualMachineScaleSetVMProfile();
+                }
+                this.VirtualMachineScaleSet.VirtualMachineProfile.EnableResilientVMDelete = this.EnableResilientVMDelete;
+            }
+
             if (this.VirtualMachineScaleSet != null
                 && this.VirtualMachineScaleSet.VirtualMachineProfile != null
                 && this.VirtualMachineScaleSet.VirtualMachineProfile.OsProfile != null
@@ -2176,3 +2228,4 @@ namespace Microsoft.Azure.Commands.Compute.Automation
         }
     }
 }
+.
