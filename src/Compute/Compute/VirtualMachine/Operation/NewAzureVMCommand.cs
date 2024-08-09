@@ -1,4 +1,4 @@
- // ----------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------
 //
 // Copyright Microsoft Corporation
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -517,56 +517,4 @@ namespace Microsoft.Azure.Commands.Compute
             });
         }
     }
-}
-
-public override void ExecuteCmdlet()
-{
-    base.ExecuteCmdlet();
-
-    if (ShouldProcess(target: VMName, action: string.Format("Create VM '{0}' in resource group '{1}'", VMName, ResourceGroupName)))
-    {
-        Run();
-        WriteObject(this.VM);
-    }
-
-    // Check for image capabilities
-    var imageCapabilities = GetImageCapabilities(ImageName);
-    if (imageCapabilities != null)
-    {
-        if (imageCapabilities.hyperVGeneration == "v2")
-        {
-            // Enable Trusted Launch as Default for New-AzVM parameters
-            this.VM.securityType = "TrustedLaunch";
-            this.VM.EnableSecureBoot = $true;
-            this.VM.EnablevTPM = $true;
-        }
-        else if (imageCapabilities.hyperVGeneration == "v1")
-        {
-            // Set SecurityType to Standard for Gen1 VMs
-            this.VM.securityType = "Standard";
-            // Print notification message for user
-            WriteWarning("Consider upgrading security for your workloads using Azure Trusted Launch VMs. To know more about Trusted Launch, please visit https://aka.ms/TrustedLaunch");
-        }
-    }
-    else
-    {
-        throw new Exception("Unable to retrieve image capabilities. Please ensure the image name is correct.");
-    }
-}
-
-private dynamic GetImageCapabilities(string imageName)
-{
-    // Call the Virtual Machines Images GET API to retrieve image capabilities
-    var response = InvokeRestMethod(
-        Method: "GET",
-        Uri: $"https://management.azure.com/subscriptions/{SubscriptionId}/providers/Microsoft.Compute/locations/{Location}/publishers/{PublisherName}/artifacttypes/vmimage/offers/{Offer}/skus/{Sku}/versions/{Version}?api-version=2021-11-01",
-        Body: null
-    );
-
-    if (response != null)
-    {
-        return response.properties;
-    }
-
-    return null;
 }

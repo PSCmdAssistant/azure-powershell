@@ -1,4 +1,4 @@
- // 
+// 
 // Copyright (c) Microsoft and contributors.  All rights reserved.
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,6 +19,11 @@
 // Changes to this file may cause incorrect behavior and will be lost if the
 // code is regenerated.
 
+using Microsoft.Azure.Commands.Compute.Automation.Models; 
+
+// Add the namespace where SecurityProfile is defined
+using Namespace.Where.SecurityProfile.Is.Defined;
+
 namespace Microsoft.Azure.Commands.Compute.Automation.Models
 {
     public partial class PSVirtualMachineScaleSet
@@ -27,7 +32,7 @@ namespace Microsoft.Azure.Commands.Compute.Automation.Models
         public string FullyQualifiedDomainName { get; set; }
 
         // Gets or sets the SecurityProfile.
-        public SecurityProfile SecurityProfile { get; set; }
+        public Namespace.Where.SecurityProfile.Is.Defined.SecurityProfile SecurityProfile { get; set; }
 
         // Gets or sets the StorageProfile.
         public VirtualMachineScaleSetStorageProfile StorageProfile { get; set; }
