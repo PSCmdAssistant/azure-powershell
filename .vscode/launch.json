@@ -9,7 +9,8 @@
         "args": [
           "-NoExit",
           "-Command",
-          "Import-Module /azure-powershell/artifacts/Debug/Az.Accounts/Az.Accounts.psd1;Import-Module /azure-powershell/artifacts/Debug/Az.Compute/Az.Compute.psd1;$DebugPreference='Continue'"        ],
+          "Import-Module /workspaces/azure-powershell/artifacts/Debug/Az.Accounts/Az.Accounts.psd1; Import-Module /workspaces/azure-powershell/artifacts/Debug/Az.Compute/Az.Compute.psd1"
+        ],
         "cwd": "${workspaceFolder}/artifacts/Debug/Az.Compute",
         "stopAtEntry": false,
         "console": "internalConsole",
