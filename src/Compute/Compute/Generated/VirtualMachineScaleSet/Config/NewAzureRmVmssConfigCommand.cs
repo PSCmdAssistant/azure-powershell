@@ -347,6 +347,16 @@ namespace Microsoft.Azure.Commands.Compute.Automation
            Mandatory = false)]
         public bool? EnableSecureBoot { get; set; } = null;
 
+        [Parameter(
+            Mandatory = false,
+            HelpMessage = "Specifies whether resilient VM creation is enabled.")]
+        public SwitchParameter EnableResilientVMCreate { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            HelpMessage = "Specifies whether resilient VM deletion is enabled.")]
+        public SwitchParameter EnableResilientVMDelete { get; set; }
+
         protected override void ProcessRecord()
         {
             if (ShouldProcess("VirtualMachineScaleSet", "New"))
@@ -937,11 +947,12 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                 Identity = vIdentity,
                 OrchestrationMode = this.IsParameterBound(c => c.OrchestrationMode) ? this.OrchestrationMode : null,
                 SpotRestorePolicy = this.IsParameterBound(c => c.EnableSpotRestore) ? new SpotRestorePolicy(true, this.SpotRestoreTimeout) : null,
-                PriorityMixPolicy = vPriorityMixPolicy
+                PriorityMixPolicy = vPriorityMixPolicy,
+                EnableResilientVMCreate = this.EnableResilientVMCreate.IsPresent ? true : (bool?)null,
+                EnableResilientVMDelete = this.EnableResilientVMDelete.IsPresent ? true : (bool?)null
             };
 
             WriteObject(vVirtualMachineScaleSet);
         }
     }
 }
-

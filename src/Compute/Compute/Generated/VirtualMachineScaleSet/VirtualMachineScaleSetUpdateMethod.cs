@@ -1,4 +1,4 @@
-//
+ //
 // Copyright (c) Microsoft and contributors.  All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -421,7 +421,19 @@ namespace Microsoft.Azure.Commands.Compute.Automation
             HelpMessage = "Used to make a request conditional for the GET and HEAD methods. The server will only return the requested resources if none of the listed ETag values match the current entity. Used to make a request conditional for the GET and HEAD methods. The server will only return the requested resources if none of the listed ETag values match the current entity. Set to '*' to allow a new record set to be created, but to prevent updating an existing record set. Other values will result in error from server as they are not supported.")]
         public string IfNoneMatch { get; set; }
 
-        private void BuildPatchObject()
+        [Parameter(
+            Mandatory = false,
+            HelpMessage = "Enable or disable resilient VM creation.")]
+        public bool EnableResilientVMCreate { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            HelpMessage = "Enable or disable resilient VM deletion.")]
+        public bool EnableResilientVMDelete { get; set; }
+        
+    }  
+
+private void BuildPatchObject()
         {
             if (this.IsParameterBound(c => c.AutomaticOSUpgrade))
             {
@@ -733,7 +745,7 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                 }
                 if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.StorageProfile.ImageReference == null)
                 {
-                    this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.StorageProfile.ImageReference = new ImageReference();
+                    this.VirtualMachineScaleSetUpdate.VirtualMachineScaleSetUpdate.VirtualMachineProfile.StorageProfile.ImageReference = new ImageReference();
                 }
                 this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.StorageProfile.ImageReference.Sku = this.ImageReferenceSku;
             }
@@ -809,7 +821,7 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                 }
                 if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.StorageProfile == null)
                 {
-                    this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.StorageProfile = new VirtualMachineScaleSetUpdateStorageProfile();
+                    this.VirtualMachineScaleSetUpdate.VirtualMachineScaleSetUpdate.VirtualMachineProfile.StorageProfile = new VirtualMachineScaleSetUpdateStorageProfile();
                 }
                 if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.StorageProfile.OsDisk == null)
                 {
@@ -817,7 +829,7 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                 }
                 if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.StorageProfile.OsDisk.ManagedDisk == null)
                 {
-                    this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.StorageProfile.OsDisk.ManagedDisk = new VirtualMachineScaleSetManagedDiskParameters();
+                    this.VirtualMachineScaleSetUpdate.VirtualMachineScaleSetUpdate.VirtualMachineProfile.StorageProfile.OsDisk.ManagedDisk = new VirtualMachineScaleSetManagedDiskParameters();
                 }
                 this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.StorageProfile.OsDisk.ManagedDisk.StorageAccountType = this.ManagedDiskStorageAccountType;
             }
@@ -1258,7 +1270,7 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                 }
                 if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile == null)
                 {
-                    this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile = new SecurityProfile();
+                    this.VirtualMachineScaleSetUpdate.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile = new SecurityProfile();
                 }
                 this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.SecurityProfile.EncryptionAtHost = this.EncryptionAtHost;
             }
@@ -1404,9 +1416,47 @@ namespace Microsoft.Azure.Commands.Compute.Automation
             {
                 throw new ArgumentException(Microsoft.Azure.Commands.Compute.Properties.Resources.BothWindowsAndLinuxConfigurationsSpecified);
             }
+
+            // New Feature Implementation
+            if (this.IsParameterBound(c => c.EnableResilientVMCreate))
+            {
+                if (this.VirtualMachineScaleSetUpdate == null)
+                {
+                    this.VirtualMachineScaleSetUpdate = new VirtualMachineScaleSetUpdate();
+                }
+                if (this.VirtualMachineScaleSetUpdate.ResilientVMCreatePolicy == null)
+                {
+                    this.VirtualMachineScaleSetUpdate.ResilientVMCreatePolicy = new ResilientVMCreatePolicy();
+                }
+                this.VirtualMachineScaleSetUpdate.ResilientVMCreatePolicy.Enabled = this.EnableResilientVMCreate;
+            }
+
+            if (this.IsParameterBound(c => c.EnableResilientVMDelete))
+            {
+                if (this.VirtualMachineScaleSetUpdate == null)
+                {
+                    this.VirtualMachineScaleSetUpdate = new VirtualMachineScaleSetUpdate();
+                }
+                if (this.VirtualMachineScaleSetUpdate.ResilientVMDeletePolicy == null)
+                {
+                    this.VirtualMachineScaleSetUpdate.ResilientVMDeletePolicy = new ResilientVMDeletePolicy();
+                }
+                this.VirtualMachineScaleSetUpdate.ResilientVMDeletePolicy.Enabled = this.EnableResilientVMDelete;
+            }
         }
 
-        private void BuildPutObject()
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipeline = true,
+            HelpMessage = "Enable or disable resilient VM creation.")]
+        public bool EnableResilientVMCreate { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipeline = true,
+            HelpMessage = "Enable or disable resilient VM deletion.")]
+        public bool EnableResilientVMDelete { get; set; }
+private void BuildPutObject()
         {
             if (this.IsParameterBound(c => c.AutomaticOSUpgrade))
             {
@@ -1455,7 +1505,7 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                 this.VirtualMachineScaleSet.VirtualMachineProfile.DiagnosticsProfile.BootDiagnostics.StorageUri = this.BootDiagnosticsStorageUri;
             }
 
-            if (this.IsParameterBound(c=> c.CapacityReservationGroupId))
+            if (this.IsParameterBound(c => c.CapacityReservationGroupId))
             {
                 if (this.VirtualMachineScaleSet.VirtualMachineProfile == null)
                 {
@@ -2173,6 +2223,31 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                 throw new ArgumentException(Microsoft.Azure.Commands.Compute.Properties.Resources.BothWindowsAndLinuxConfigurationsSpecified);
             }
 
+            if (this.IsParameterBound(c => c.EnableResilientVMCreate))
+            {
+                if (this.VirtualMachineScaleSet.VirtualMachineProfile == null)
+                {
+                    this.VirtualMachineScaleSet.VirtualMachineProfile = new PSVirtualMachineScaleSetVMProfile();
+                }
+                if (this.VirtualMachineScaleSet.VirtualMachineProfile.ResilientVMCreatePolicy == null)
+                {
+                    this.VirtualMachineScaleSet.VirtualMachineProfile.ResilientVMCreatePolicy = new ResilientVMCreatePolicy();
+                }
+                this.VirtualMachineScaleSet.VirtualMachineProfile.ResilientVMCreatePolicy.Enabled = this.EnableResilientVMCreate;
+            }
+
+            if (this.IsParameterBound(c => c.EnableResilientVMDelete))
+            {
+                if (this.VirtualMachineScaleSet.VirtualMachineProfile == null)
+                {
+                    this.VirtualMachineScaleSet.VirtualMachineProfile = new PSVirtualMachineScaleSetVMProfile();
+                }
+                if (this.VirtualMachineScaleSet.VirtualMachineProfile.ResilientVMDeletePolicy == null)
+                {
+                    this.VirtualMachineScaleSet.VirtualMachineProfile.ResilientVMDeletePolicy = new ResilientVMDeletePolicy();
+                }
+                this.VirtualMachineScaleSet.VirtualMachineProfile.ResilientVMDeletePolicy.Enabled = this.EnableResilientVMDelete;
+            }
         }
     }
 }
