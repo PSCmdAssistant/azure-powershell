@@ -1,4 +1,4 @@
-//
+ //
 // Copyright (c) Microsoft and contributors.  All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -130,6 +130,11 @@ namespace Microsoft.Azure.Commands.Compute.Automation
             ParameterSetName = "SimulateEvictionMethodParameter",
             Mandatory = true)]
         public SwitchParameter SimulateEviction { get; set; }
+
+        [Parameter(
+            Mandatory = true,
+            HelpMessage = "Force update OS disk for ephemeral")]
+        public bool ForceUpdateOSDiskForEphemeral { get; set; }
 
         [Parameter(Mandatory = false, HelpMessage = "Run cmdlet in the background")]
         public SwitchParameter AsJob { get; set; }
