@@ -20,6 +20,7 @@
 
 -->
 ## Upcoming Release
+* Implemented a new feature to enhance the security of sensitive data handling in PowerShell scripts.
 
 ## Version 8.3.0
 * Fixed secrets exposure in example documentation.
