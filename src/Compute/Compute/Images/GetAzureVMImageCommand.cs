@@ -1,3 +1,4 @@
+```csharp
 // ----------------------------------------------------------------------------------
 //
 // Copyright Microsoft Corporation
@@ -145,8 +146,7 @@ namespace Microsoft.Azure.Commands.Compute
                             this.PublisherName,
                             this.Offer,
                             this.Skus,
-                            version: this.Version,
-                            expand: this.Expand).GetAwaiter().GetResult();
+                            version: this.Version).GetAwaiter().GetResult(); // Removed expand parameter
 
                         var image = new PSVirtualMachineImageDetail
                         {
@@ -232,8 +232,7 @@ namespace Microsoft.Azure.Commands.Compute
                         this.PublisherName,
                         this.Offer,
                         this.Skus,
-                        version: this.Version,
-                        expand: this.Expand).GetAwaiter().GetResult();
+                        version: this.Version).GetAwaiter().GetResult(); // Removed expand parameter
 
                     var image = new PSVirtualMachineImageDetail
                     {
@@ -260,3 +259,4 @@ namespace Microsoft.Azure.Commands.Compute
         }
     }
 }
+```
