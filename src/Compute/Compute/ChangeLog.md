@@ -20,6 +20,9 @@
 
 -->
 ## Upcoming Release
+* Introduced the `Get-AzVMImage` cmdlet with an optional `$expand` parameter to enhance image retrieval capabilities.
+* Added a new optional parameter `-GenerateSshKey-type` to the `New-AzVM` cmdlet, allowing users to specify the type of SSH key to generate (Ed25519 or RSA).
+* Added `EnableResilientVMCreate` and `EnableResilientVMDelete` parameters to `Update-AzVmss` and `New-AzVmssConfig` cmdlets for enhanced VM resilience options.
 * Added a new optional parameter `-GenerateSshKey-type` to the `New-AzVM` cmdlet, allowing users to specify the type of SSH key to generate (Ed25519 or RSA).
 * Added `EnableResilientVMCreate` and `EnableResilientVMDelete` parameters to `Update-AzVmss` and `New-AzVmssConfig` cmdlets for enhanced VM resilience options.
 
