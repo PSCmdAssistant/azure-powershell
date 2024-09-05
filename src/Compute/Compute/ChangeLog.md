@@ -20,6 +20,9 @@
 
 -->
 ## Upcoming Release
+* Introduced the `Get-AzVMImage` cmdlet with an optional `$expand` parameter for enhanced image retrieval capabilities.
+
+* Added `EnableResilientVMCreate` and `EnableResilientVMDelete` parameters to `Update-AzVmss` and `New-AzVmssConfig` cmdlets for enhanced VM resilience options.
 * Added `EnableResilientVMCreate` and `EnableResilientVMDelete` parameters to `Update-AzVmss` and `New-AzVmssConfig` cmdlets for enhanced VM resilience options.
 
 ## Version 8.3.0
