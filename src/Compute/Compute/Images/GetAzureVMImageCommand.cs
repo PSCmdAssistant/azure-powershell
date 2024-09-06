@@ -1,4 +1,4 @@
-﻿// ----------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------
 //
 // Copyright Microsoft Corporation
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -97,6 +97,9 @@ namespace Microsoft.Azure.Commands.Compute
             ValueFromPipelineByPropertyName = true)]
         public string OrderBy { get; set; }
 
+        [Parameter(Mandatory = false, HelpMessage = "Expand the response to include additional details.")]
+        public string Expand { get; set; }
+
         public override void ExecuteCmdlet()
         {
             base.ExecuteCmdlet();
@@ -114,7 +117,8 @@ namespace Microsoft.Azure.Commands.Compute
                             this.Offer,
                             this.Skus,
                             top: this.Top,
-                            orderby: this.OrderBy
+                            orderby: this.OrderBy,
+                            expand: this.Expand
                             ).GetAwaiter().GetResult();
 
                         var images = from r in result.Body
@@ -141,7 +145,8 @@ namespace Microsoft.Azure.Commands.Compute
                             this.PublisherName,
                             this.Offer,
                             this.Skus,
-                            version: this.Version).GetAwaiter().GetResult();
+                            version: this.Version,
+                            expand: this.Expand).GetAwaiter().GetResult();
 
                         var image = new PSVirtualMachineImageDetail
                         {
@@ -174,7 +179,8 @@ namespace Microsoft.Azure.Commands.Compute
                         this.Offer,
                         this.Skus,
                         top: this.Top,
-                        orderby: this.OrderBy
+                        orderby: this.OrderBy,
+                        expand: this.Expand
                         ).GetAwaiter().GetResult();
 
                     var images = from r in result.Body
@@ -200,7 +206,8 @@ namespace Microsoft.Azure.Commands.Compute
                         this.Offer,
                         this.Skus,
                         top: 1,
-                        orderby: "name desc"
+                        orderby: "name desc",
+                        expand: this.Expand
                         ).GetAwaiter().GetResult();
 
                     var images = from r in result.Body
@@ -225,7 +232,8 @@ namespace Microsoft.Azure.Commands.Compute
                         this.PublisherName,
                         this.Offer,
                         this.Skus,
-                        version: this.Version).GetAwaiter().GetResult();
+                        version: this.Version,
+                        expand: this.Expand).GetAwaiter().GetResult();
 
                     var image = new PSVirtualMachineImageDetail
                     {
