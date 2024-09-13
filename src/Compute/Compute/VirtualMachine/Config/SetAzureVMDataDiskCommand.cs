@@ -1,4 +1,5 @@
- // ----------------------------------------------------------------------------------
+```csharp
+// ----------------------------------------------------------------------------------
 //
 // Copyright Microsoft Corporation
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,7 +25,7 @@ using Microsoft.WindowsAzure.Commands.Utilities.Common;
 
 namespace Microsoft.Azure.Commands.Compute
 {
-    [Cmdlet("Set", ResourceManager.Common.AzureRMConstants.AzureRMPrefix + "VMDataDisk"),OutputType(typeof(PSVirtualMachine))]
+    [Cmdlet("Set", ResourceManager.Common.AzureRMConstants.AzureRMPrefix + "VMDataDisk"), OutputType(typeof(PSVirtualMachine))]
     public class SetAzureVMDataDiskCommand : Microsoft.Azure.Commands.ResourceManager.Common.AzureRMCmdlet
     {
         private const string NameParameterSet = "ChangeWithName";
@@ -171,7 +172,8 @@ namespace Microsoft.Azure.Commands.Compute
                     }
                     else
                     {
-                        dataDisk.ManagedDisk.AvailabilityPolicy = this.AvailabilityPolicy;
+                        // Removed the AvailabilityPolicy assignment as it does not exist in ManagedDiskParameters
+                        // dataDisk.ManagedDisk.AvailabilityPolicy = this.AvailabilityPolicy;
                     }
                 }
 
@@ -199,3 +201,4 @@ namespace Microsoft.Azure.Commands.Compute
         }
     }
 }
+```
