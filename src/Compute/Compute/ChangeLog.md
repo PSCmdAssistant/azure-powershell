@@ -20,6 +20,10 @@
 
 -->
 ## Upcoming Release
+* Added `AvailabilityPolicy` parameter to `Set-AzVMDataDisk` and `New-AzDiskUpdateConfig` cmdlets, allowing users to specify the availability policy with options for 'AutomaticReattach' or 'None'.
+* Added `SkuProfileVmSize` and `SkuProfileAllocationStrategy` parameters to `New-AzVmss`, `New-AzVmssConfig`, and `Update-AzVmss` cmdlets for VMSS Instance Mix operations.
+* Added a new optional parameter `-GenerateSshKey-type` to the `New-AzVM` cmdlet, allowing users to specify the type of SSH key to generate (Ed25519 or RSA).
+* Added `EnableResilientVMCreate` and `EnableResilientVMDelete` parameters to `Update-AzVmss` and `New-AzVmssConfig` cmdlets for enhanced VM resilience options.
 * Added `SkuProfileVmSize` and `SkuProfileAllocationStrategy` parameters to `New-AzVmss`, `New-AzVmssConfig`, and `Update-AzVmss` cmdlets for VMSS Instance Mix operations.
 * Added a new optional parameter `-GenerateSshKey-type` to the `New-AzVM` cmdlet, allowing users to specify the type of SSH key to generate (Ed25519 or RSA).
 * Added `EnableResilientVMCreate` and `EnableResilientVMDelete` parameters to `Update-AzVmss` and `New-AzVmssConfig` cmdlets for enhanced VM resilience options.

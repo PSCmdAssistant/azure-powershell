@@ -1,4 +1,4 @@
-﻿// ----------------------------------------------------------------------------------
+ // ----------------------------------------------------------------------------------
 //
 // Copyright Microsoft Corporation
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -92,6 +92,12 @@ namespace Microsoft.Azure.Commands.Compute
             ValueFromPipelineByPropertyName = false)]
         public SwitchParameter WriteAccelerator { get; set; }
 
+        [Parameter(
+            Mandatory = false,
+            HelpMessage = "Specifies the availability policy for the disk.")]
+        [ValidateSet("AutomaticReattach", "None")]
+        public string AvailabilityPolicy { get; set; }
+
         public override void ExecuteCmdlet()
         {
             var storageProfile = this.VM.StorageProfile;
@@ -149,6 +155,23 @@ namespace Microsoft.Azure.Commands.Compute
                     else
                     {
                         dataDisk.ManagedDisk.DiskEncryptionSet = new DiskEncryptionSetParameters(this.DiskEncryptionSetId);
+                    }
+                }
+
+                if (this.AvailabilityPolicy != null)
+                {
+                    if (dataDisk.ManagedDisk == null)
+                    {
+                        ThrowTerminatingError
+                            (new ErrorRecord(
+                                new InvalidOperationException(Properties.Resources.NotManagedDisk),
+                                string.Empty,
+                                ErrorCategory.InvalidData,
+                                null));
+                    }
+                    else
+                    {
+                        dataDisk.ManagedDisk.AvailabilityPolicy = this.AvailabilityPolicy;
                     }
                 }
 
