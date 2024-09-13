@@ -26,10 +26,12 @@ namespace Microsoft.Azure.Commands.Compute.Automation.Models
         public DateTime? EndTime { get; set; }
         public string Status  { get; set; }
         public ApiError Error { get; set; }
-		
-		public PSOperationStatusResponse()
-		{
-			this.Status = "Succeeded";
-		}
+        
+        public bool? EnableUserRedeployScheduledEvents { get; set; }
+
+        public PSOperationStatusResponse()
+        {
+            this.Status = "Succeeded";
+        }
     }
 }
