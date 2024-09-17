@@ -20,13 +20,7 @@
 
 -->
 ## Upcoming Release
-* Added mandatory boolean parameter `-forceUpdateOSDiskForEphemeral` to the `Set-AzVmssVM` cmdlet to enhance OS disk management for ephemeral VMs.
-* Fixed secrets exposure in example documentation.
-* References are updated to use 2024-07-01 ComputeRP and 2024-03-02 DiskRP REST API calls.
-* Added information on how to find VM Images when using `New-AzVM` with `-Image` parameter.
-* Added `TimeCreated` read-only field to `PSVirtualMachineScaleSetVMProfile` object.
-* Added parameter `-ResourceIdsOnly` to `Get-AzCapacityReservationGroup` cmdlet.
-* Changed the `Set-AzVMOperatingSystem` cmdlet when the `-VM` parameter is used without an OSProfile. Now it will not throw a null reference exception when `-Credential` is not provided.
+* Added optional Switch parameter `-forceUpdateOSDiskForEphemeral` to the `Set-AzVmssVM` cmdlet to enhance OS disk management for ephemeral VMs.
 * Fixed secrets exposure in example documentation.
 * References are updated to use 2024-07-01 ComputeRP and 2024-03-02 DiskRP REST API calls.
 * Added information on how to find VM Images when using `New-AzVM` with `-Image` parameter.
