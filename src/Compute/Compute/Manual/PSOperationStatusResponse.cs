@@ -25,8 +25,7 @@ namespace Microsoft.Azure.Commands.Compute.Automation.Models
         public DateTime? StartTime { get; set; }
         public DateTime? EndTime { get; set; }
         public string Status  { get; set; }
-        public ApiError Error { get; set; }
-		
+        public ApiError Error { get; set; }		
 		public PSOperationStatusResponse()
 		{
 			this.Status = "Succeeded";

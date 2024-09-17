@@ -1,4 +1,4 @@
-//
+ //
 // Copyright (c) Microsoft and contributors.  All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -46,6 +46,10 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                     string resourceGroupName = this.ResourceGroupName;
                     string vmScaleSetName = this.VMScaleSetName;
                     string instanceId = this.InstanceId;
+                    VirtualMachineScaleSetVMReimageParameters virtualMachineScaleSetVMReimageParameters = new VirtualMachineScaleSetVMReimageParameters();
+                    
+                    if(this.IsParameterBound(c => c.ForceUpdateOSDiskForEphemeral))
+                        virtualMachineScaleSetVMReimageParameters.ForceUpdateOSDiskForEphemeral = this.ForceUpdateOSDiskForEphemeral.ToBool();
 
                     Rest.Azure.AzureOperationResponse result = null;
                     if (this.ParameterSetName.Equals("FriendMethod"))
@@ -66,7 +70,7 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                     }
                     else
                     {
-                        result = VirtualMachineScaleSetVMsClient.ReimageWithHttpMessagesAsync(resourceGroupName, vmScaleSetName, instanceId: instanceId, vmScaleSetVMReimageInput: null).GetAwaiter().GetResult();
+                        result = VirtualMachineScaleSetVMsClient.ReimageWithHttpMessagesAsync(resourceGroupName, vmScaleSetName, instanceId: instanceId, virtualMachineScaleSetVMReimageParameters).GetAwaiter().GetResult();
                     }
 
                     PSOperationStatusResponse output = new PSOperationStatusResponse
@@ -130,6 +134,11 @@ namespace Microsoft.Azure.Commands.Compute.Automation
             ParameterSetName = "SimulateEvictionMethodParameter",
             Mandatory = true)]
         public SwitchParameter SimulateEviction { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            HelpMessage = "Parameter to force update ephemeral OS disk for a virtual machine scale set VM")]
+        public SwitchParameter ForceUpdateOSDiskForEphemeral { get; set; }
 
         [Parameter(Mandatory = false, HelpMessage = "Run cmdlet in the background")]
         public SwitchParameter AsJob { get; set; }
