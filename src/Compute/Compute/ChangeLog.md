@@ -20,16 +20,14 @@
 
 -->
 ## Upcoming Release
-<<<<<<< HEAD
-* Added `-Redeploy` parameter as an optional boolean for `Update-AzHost` cmdlet to enhance host management capabilities.
-=======
 * Added `SkuProfileVmSize` and `SkuProfileAllocationStrategy` parameters to `New-AzVmss`, `New-AzVmssConfig`, and `Update-AzVmss` cmdlets for VMSS Instance Mix operations.
 * Added a new optional parameter `-GenerateSshKey-type` to the `New-AzVM` cmdlet, allowing users to specify the type of SSH key to generate (Ed25519 or RSA).
 * Added `EnableResilientVMCreate` and `EnableResilientVMDelete` parameters to `Update-AzVmss` and `New-AzVmssConfig` cmdlets for enhanced VM resilience options.
+* Added `NvmeDisk` argument completer to `DiffDiskPlacement` parameter for `Set-AzVMOSDisk` and `Set-AzVmssStorageProfile` cmdlets, allowing options for disk placement as `CacheDisk`, `ResourceDisk`, or `NvmeDisk`.
 * Added optional Switch parameter `-forceUpdateOSDiskForEphemeral` to the `Set-AzVmssVM` cmdlet to enhance OS disk management for ephemeral VMs.
+* Added `-Redeploy` parameter as an optional boolean for `Update-AzHost` cmdlet to enhance host management capabilities.
 
 ## Version 8.3.0
->>>>>>> main
 * Fixed secrets exposure in example documentation.
 * References are updated to use 2024-07-01 ComputeRP and 2024-03-02 DiskRP REST API calls.
 * Added information on how to find VM Images when using `New-AzVM` with `-Image` parameter.
