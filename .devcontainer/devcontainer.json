@@ -12,7 +12,11 @@
 			"NODE_VERSION": "lts/*"
 		}
 	},
-
+	"settings": {
+		"terminal.integrated.defaultProfile.linux": "pwsh",
+		"terminal.integrated.defaultProfile.windows": "PowerShell"
+  	},
+	"postCreateCommand": "dotnet build src/Compute/Compute.sln && /usr/bin/pwsh -Command 'Import-Module /workspaces/azure-powershell/artifacts/Debug/Az.Accounts/Az.Accounts.psd1; Import-Module /workspaces/azure-powershell/artifacts/Debug/Az.Compute/Az.Compute.psd1'",
 	"customizations": {
 		"vscode": {
 			"extensions": [
