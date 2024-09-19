@@ -1,4 +1,4 @@
-﻿// ----------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------
 //
 // Copyright Microsoft Corporation
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -97,12 +97,46 @@ namespace Microsoft.Azure.Commands.Compute
             ValueFromPipelineByPropertyName = true)]
         public string OrderBy { get; set; }
 
+        [Parameter(
+            Mandatory = false,
+            HelpMessage = "Get the VM images available in the specified location.")]
+        public string GetVMImage { get; set; }
+
         public override void ExecuteCmdlet()
         {
             base.ExecuteCmdlet();
 
             ExecuteClientAction(() =>
             {
+                if (!string.IsNullOrEmpty(GetVMImage))
+                {
+                    // Logic to retrieve VM images based on the GetVMImage parameter
+                    var result = this.VirtualMachineImageClient.ListWithHttpMessagesAsync(
+                        this.Location.Canonicalize(),
+                        this.PublisherName,
+                        this.Offer,
+                        this.Skus,
+                        top: this.Top,
+                        orderby: this.OrderBy
+                        ).GetAwaiter().GetResult();
+
+                    var images = from r in result.Body
+                                 select new PSVirtualMachineImage
+                                 {
+                                     RequestId = result.RequestId,
+                                     StatusCode = result.Response.StatusCode,
+                                     Id = r.Id,
+                                     Location = r.Location,
+                                     Version = r.Name,
+                                     PublisherName = this.PublisherName,
+                                     Offer = this.Offer,
+                                     Skus = this.Skus
+                                 };
+
+                    WriteObject(images, true);
+                    return;
+                }
+
                 if ((this.IsParameterBound(c => c.EdgeZone)) && this.EdgeZone != null)
                 {
                     if (this.ParameterSetName.Equals(ListVMImageParamSetName) || WildcardPattern.ContainsWildcardCharacters(Version))
