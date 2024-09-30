@@ -1,4 +1,4 @@
-﻿// ----------------------------------------------------------------------------------
+ // ----------------------------------------------------------------------------------
 //
 // Copyright Microsoft Corporation
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -59,6 +59,11 @@ namespace Microsoft.Azure.Commands.Compute
         [Parameter(Mandatory = false, HelpMessage = "Run cmdlet in the background")]
         public SwitchParameter AsJob { get; set; }
 
+        [Parameter(
+            Mandatory = false,
+            HelpMessage = "Enable user redeploy scheduled events")]
+        public bool EnableUserRedeployScheduledEvents { get; set; }
+
         public override void ExecuteCmdlet()
         {
             if (this.ShouldProcess(AvailabilitySet.Name, VerbsData.Update))
@@ -76,7 +81,8 @@ namespace Microsoft.Azure.Commands.Compute
                         Sku = new Sku(this.IsParameterBound(c => c.Sku) ? this.Sku : this.AvailabilitySet.Sku, null, null),
                         ProximityPlacementGroup = this.IsParameterBound(c => c.ProximityPlacementGroupId) 
                                                 ? new SubResource(this.ProximityPlacementGroupId)
-                                                : this.AvailabilitySet.ProximityPlacementGroup
+                                                : this.AvailabilitySet.ProximityPlacementGroup,
+                        EnableUserRedeployScheduledEvents = this.EnableUserRedeployScheduledEvents
                     };
 
                     if (avSetParams.ProximityPlacementGroup != null && string.IsNullOrEmpty(avSetParams.ProximityPlacementGroup.Id))
