@@ -20,6 +20,9 @@
 
 -->
 ## Upcoming Release
+* Introduced `New-AzVM` and `New-AzVMSS` cmdlets with new parameters for enhanced security features including `securityType`, `EnableSecureBoot`, and `EnablevTPM`.
+* Updated image aliases to be up-to-date in the azure-powershell\src\Compute\Strategies\ComputeRp\Images.json file.
+* Upgraded Azure.Core to 1.44.1.
 * Updated image aliases to be up-to-date in the azure-powershell\src\Compute\Strategies\ComputeRp\Images.json file.
 * Upgraded Azure.Core to 1.44.1.
 
