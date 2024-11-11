@@ -1,8 +1,9 @@
-//
+ //
 // Copyright (c) Microsoft and contributors.  All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
+// You may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //   http://www.apache.org/licenses/LICENSE-2.0
 //
@@ -78,6 +79,10 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                         parameters.Sku = new Sku(this.Sku, null, null);
                     }
 
+                    if (this.IsParameterBound(c => c.Redeploy))
+                    {
+                        parameters.Redeploy = this.Redeploy;
+                    }
 
                     var result = DedicatedHostsClient.Update(resourceGroupName, hostGroupName, Name, parameters);
                     var psObject = new PSHost();
@@ -122,6 +127,11 @@ namespace Microsoft.Azure.Commands.Compute.Automation
         [Parameter(
             Mandatory = false)]
         public DedicatedHostLicenseTypes LicenseType { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            HelpMessage = "Triggers redeployment of the dedicated host.")]
+        public bool Redeploy { get; set; }
 
         [Parameter(
             ParameterSetName = "ResourceIdParameter",
