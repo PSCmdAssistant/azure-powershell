@@ -1,15 +1,11 @@
-﻿# ----------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------
 #
 # Copyright Microsoft Corporation
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# you may obtain a copy of the License at
 # http://www.apache.org/licenses/LICENSE-2.0
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 # ----------------------------------------------------------------------------------
 
 <#
@@ -327,6 +323,45 @@ function Test-DedicatedHostUpdateAndSize
         $dHUpdate = Update-AzHost -ResourceGroupName $rgname -HostGroupName $hostGroupName -Name $hostName -AutoReplaceOnFailure $false;
         Assert-AreEqual $dHUpdate.AutoReplaceOnFailure $False ;
 
+    }
+    finally
+    {
+        # Cleanup
+        Clean-ResourceGroup $rgname
+    }
+}
+
+<#
+.SYNOPSIS
+Test Update-AzHost with Redeploy parameter.
+#>
+function TestGen-updateazhost
+{
+    # Setup
+    $rgname = Get-ComputeTestResourceName
+
+    try
+    {
+        # Common
+        [string]$loc = Get-Location "Microsoft.Resources" "resourceGroups" "East US 2 EUAP";
+        $loc = $loc.Replace(' ', '');
+
+        New-AzResourceGroup -Name $rgname -Location $loc -Force;
+
+        $hostGroupName = $rgname + 'hostgroup';
+        New-AzHostGroup -ResourceGroupName $rgname -Name $hostGroupName -Location $loc -PlatformFaultDomain 1 -Zone "2" -Tag @{key1 = "val1"};
+
+        $hostName = $rgname + 'host';
+        New-AzHost -ResourceGroupName $rgname -HostGroupName $hostGroupName -Name $hostName -Location $loc -Sku "ESv3-Type1" -Tag @{key1 = "val2"};
+
+        # Test Update-AzHost without Redeploy
+        $updateHost = Update-AzHost -ResourceGroupName $rgname -HostGroupName $hostGroupName -Name $hostName -AutoReplaceOnFailure $false;
+        Assert-AreEqual $updateHost.AutoReplaceOnFailure $false;
+
+        # Test Update-AzHost with Redeploy
+        $updateHostRedeploy = Update-AzHost -ResourceGroupName $rgname -HostGroupName $hostGroupName -Name $hostName -AutoReplaceOnFailure $false -Redeploy $true;
+        Assert-AreEqual $updateHostRedeploy.AutoReplaceOnFailure $false;
+        Assert-AreEqual $true $updateHostRedeploy.Redeploy;
     }
     finally
     {
