@@ -1,3 +1,4 @@
+```csharp
 //
 // Copyright (c) Microsoft and contributors.  All rights reserved.
 //
@@ -6,7 +7,7 @@
 // You may obtain a copy of the License at
 //   http://www.apache.org/licenses/LICENSE-2.0
 //
-// Unless required by applicable law or agreed to in writing, software
+// Unless required by applicable law or agreed in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //
@@ -78,6 +79,10 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                         parameters.Sku = new Sku(this.Sku, null, null);
                     }
 
+                    if (this.IsParameterBound(c => c.Redeploy))
+                    {
+                        parameters.Redeploy = this.Redeploy; // This line is causing the error
+                    }
 
                     var result = DedicatedHostsClient.Update(resourceGroupName, hostGroupName, Name, parameters);
                     var psObject = new PSHost();
@@ -124,6 +129,11 @@ namespace Microsoft.Azure.Commands.Compute.Automation
         public DedicatedHostLicenseTypes LicenseType { get; set; }
 
         [Parameter(
+            Mandatory = false,
+            HelpMessage = "Triggers redeployment of the dedicated host.")]
+        public bool Redeploy { get; set; }
+
+        [Parameter(
             ParameterSetName = "ResourceIdParameter",
             Position = 0,
             Mandatory = true,
@@ -132,3 +142,4 @@ namespace Microsoft.Azure.Commands.Compute.Automation
 
     }
 }
+```
