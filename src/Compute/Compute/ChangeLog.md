@@ -20,6 +20,7 @@
 
 -->
 ## Upcoming Release
+* Added new optional boolean parameters `ScheduledEventsAdditionalEndpoints`, `EnableUserRebootScheduledEvents`, and `EnableUserRedeployScheduledEvents` to `Update-AzVmss`, `Set-AzVmss`, `Update-AzAvailabilitySet`, `Set-AzAvailabilitySet`, `Update-AzVM`, and `Set-AzVM` cmdlets.
 * Made `-PublicIpSku` parameter Standard by default in `New-AzVM`
 
 ## Version 8.5.0

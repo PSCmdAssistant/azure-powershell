@@ -5563,3 +5563,125 @@ function Test-SecurityPostureFeature
         Clean-ResourceGroup $rgname;
     }
 }
+# Test Name: TestGen-setazvmss
+Describe "TestGen-setazvmss" {
+    $resourceGroupName = "TestResourceGroup"
+    $location = Get-Location
+
+    BeforeAll {
+        # Setup code to create a resource group if needed
+        New-AzResourceGroup -Name $resourceGroupName -Location $location
+    }
+
+    AfterAll {
+        # Cleanup code to remove the resource group after tests
+        Remove-AzResourceGroup -Name $resourceGroupName -Force
+    }
+
+    It "Should set ScheduledEventsAdditionalEndpoints to true" {
+        $result = Set-AzVmss -ResourceGroupName $resourceGroupName -VMScaleSetName "TestVMSS" -ScheduledEventsAdditionalEndpoints $true
+        $result.ScheduledEventsAdditionalEndpoints | Should -Be $true
+    }
+
+    It "Should set EnableUserRebootScheduledEvents to true" {
+        $result = Set-AzVmss -ResourceGroupName $resourceGroupName -VMScaleSetName "TestVMSS" -EnableUserRebootScheduledEvents $true
+        $result.EnableUserRebootScheduledEvents | Should -Be $true
+    }
+
+    It "Should set EnableUserRedeployScheduledEvents to true" {
+        $result = Set-AzVmss -ResourceGroupName $resourceGroupName -VMScaleSetName "TestVMSS" -EnableUserRedeployScheduledEvents $true
+        $result.EnableUserRedeployScheduledEvents | Should -Be $true
+    }
+
+    It "Should set ScheduledEventsAdditionalEndpoints to false" {
+        $result = Set-AzVmss -ResourceGroupName $resourceGroupName -VMScaleSetName "TestVMSS" -ScheduledEventsAdditionalEndpoints $false
+        $result.ScheduledEventsAdditionalEndpoints | Should -Be $false
+    }
+
+    It "Should set EnableUserRebootScheduledEvents to false" {
+        $result = Set-AzVmss -ResourceGroupName $resourceGroupName -VMScaleSetName "TestVMSS" -EnableUserRebootScheduledEvents $false
+        $result.EnableUserRebootScheduledEvents | Should -Be $false
+    }
+
+    It "Should set EnableUserRedeployScheduledEvents to false" {
+        $result = Set-AzVmss -ResourceGroupName $resourceGroupName -VMScaleSetName "TestVMSS" -EnableUserRedeployScheduledEvents $false
+        $result.EnableUserRedeployScheduledEvents | Should -Be $false
+    }
+}
+
+# Test Name: TestGen-updateazvmss
+
+Describe "TestGen-updateazvmss" {
+    $resourceGroupName = "TestResourceGroup"
+    $location = Get-Location
+
+    BeforeAll {
+        # Create a resource group for testing
+        New-AzResourceGroup -Name $using:resourceGroupName -Location $using:location
+    }
+
+    AfterAll {
+        # Remove the resource group after tests
+        Remove-AzResourceGroup -Name $using:resourceGroupName -Force
+    }
+
+    It "Should update VMSS with ScheduledEventsAdditionalEndpoints set to true" {
+        $vmssParams = @{
+            ResourceGroupName = $using:resourceGroupName
+            VMScaleSetName = "TestVMSS"
+            ScheduledEventsAdditionalEndpoints = $true
+        }
+
+        # Call the Update-AzVmss cmdlet
+        $result = Update-AzVmss @vmssParams
+
+        # Validate the result
+        $result.ScheduledEventsAdditionalEndpoints | Should -Be $true
+    }
+
+    It "Should update VMSS with EnableUserRebootScheduledEvents set to true" {
+        $vmssParams = @{
+            ResourceGroupName = $using:resourceGroupName
+            VMScaleSetName = "TestVMSS"
+            EnableUserRebootScheduledEvents = $true
+        }
+
+        # Call the Update-AzVmss cmdlet
+        $result = Update-AzVmss @vmssParams
+
+        # Validate the result
+        $result.EnableUserRebootScheduledEvents | Should -Be $true
+    }
+
+    It "Should update VMSS with EnableUserRedeployScheduledEvents set to true" {
+        $vmssParams = @{
+            ResourceGroupName = $using:resourceGroupName
+            VMScaleSetName = "TestVMSS"
+            EnableUserRedeployScheduledEvents = $true
+        }
+
+        # Call the Update-AzVmss cmdlet
+        $result = Update-AzVmss @vmssParams
+
+        # Validate the result
+        $result.EnableUserRedeployScheduledEvents | Should -Be $true
+    }
+
+    It "Should update VMSS with all parameters set to true" {
+        $vmssParams = @{
+            ResourceGroupName = $using:resourceGroupName
+            VMScaleSetName = "TestVMSS"
+            ScheduledEventsAdditionalEndpoints = $true
+            EnableUserRebootScheduledEvents = $true
+            EnableUserRedeployScheduledEvents = $true
+        }
+
+        # Call the Update-AzVmss cmdlet
+        $result = Update-AzVmss @vmssParams
+
+        # Validate the result
+        $result.ScheduledEventsAdditionalEndpoints | Should -Be $true
+        $result.EnableUserRebootScheduledEvents | Should -Be $true
+        $result.EnableUserRedeployScheduledEvents | Should -Be $true
+    }
+}
