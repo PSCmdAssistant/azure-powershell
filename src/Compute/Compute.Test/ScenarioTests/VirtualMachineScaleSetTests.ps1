@@ -5563,3 +5563,98 @@ function Test-SecurityPostureFeature
         Clean-ResourceGroup $rgname;
     }
 }
+# Test Name: TestGen-setazvmss
+
+Describe "TestGen-setazvmss" {
+    $resourceGroupName = "TestResourceGroup"
+    $location = Get-Location
+
+    BeforeAll {
+        # Setup code to create a resource group if needed
+        New-AzResourceGroup -Name $resourceGroupName -Location $location
+    }
+
+    AfterAll {
+        # Cleanup code to remove the resource group after tests
+        Remove-AzResourceGroup -Name $resourceGroupName -Force
+    }
+
+    It "Should set ScheduledEventsAdditionalEndpoints to true" {
+        $vmss = New-AzVmss -ResourceGroupName $resourceGroupName -Name "TestVMSS" -Location $location -SkuCapacity 2 -SkuName "Standard_DS1_v2" -UpgradePolicyMode "Manual"
+        $result = Set-AzVmss -ResourceGroupName $resourceGroupName -Name $vmss.Name -ScheduledEventsAdditionalEndpoints $true
+        $result.ScheduledEventsAdditionalEndpoints | Should -Be $true
+    }
+
+    It "Should set EnableUserRebootScheduledEvents to true" {
+        $vmss = New-AzVmss -ResourceGroupName $resourceGroupName -Name "TestVMSS" -Location $location -SkuCapacity 2 -SkuName "Standard_DS1_v2" -UpgradePolicyMode "Manual"
+        $result = Set-AzVmss -ResourceGroupName $resourceGroupName -Name $vmss.Name -EnableUserRebootScheduledEvents $true
+        $result.EnableUserRebootScheduledEvents | Should -Be $true
+    }
+
+    It "Should set EnableUserRedeployScheduledEvents to true" {
+        $vmss = New-AzVmss -ResourceGroupName $resourceGroupName -Name "TestVMSS" -Location $location -SkuCapacity 2 -SkuName "Standard_DS1_v2" -UpgradePolicyMode "Manual"
+        $result = Set-AzVmss -ResourceGroupName $resourceGroupName -Name $vmss.Name -EnableUserRedeployScheduledEvents $true
+        $result.EnableUserRedeployScheduledEvents | Should -Be $true
+    }
+
+    It "Should not set ScheduledEventsAdditionalEndpoints when not specified" {
+        $vmss = New-AzVmss -ResourceGroupName $resourceGroupName -Name "TestVMSS" -Location $location -SkuCapacity 2 -SkuName "Standard_DS1_v2" -UpgradePolicyMode "Manual"
+        $result = Set-AzVmss -ResourceGroupName $resourceGroupName -Name $vmss.Name
+        $result.ScheduledEventsAdditionalEndpoints | Should -Be $null
+    }
+
+    It "Should not set EnableUserRebootScheduledEvents when not specified" {
+        $vmss = New-AzVmss -ResourceGroupName $resourceGroupName -Name "TestVMSS" -Location $location -SkuCapacity 2 -SkuName "Standard_DS1_v2" -UpgradePolicyMode "Manual"
+        $result = Set-AzVmss -ResourceGroupName $resourceGroupName -Name $vmss.Name
+        $result.EnableUserRebootScheduledEvents | Should -Be $null
+    }
+
+    It "Should not set EnableUserRedeployScheduledEvents when not specified" {
+        $vmss = New-AzVmss -ResourceGroupName $resourceGroupName -Name "TestVMSS" -Location $location -SkuCapacity 2 -SkuName "Standard_DS1_v2" -UpgradePolicyMode "Manual"
+        $result = Set-AzVmss -ResourceGroupName $resourceGroupName -Name $vmss.Name
+        $result.EnableUserRedeployScheduledEvents | Should -Be $null
+    }
+}
+
+# Test Name: TestGen-updateazvmss
+
+Describe "TestGen-updateazvmss" {
+    $resourceGroupName = "TestResourceGroup"
+    $location = Get-Location
+
+    BeforeAll {
+        # Setup code to create a resource group if needed
+        New-AzResourceGroup -Name $resourceGroupName -Location $location
+    }
+
+    AfterAll {
+        # Cleanup code to remove the resource group after tests
+        Remove-AzResourceGroup -Name $resourceGroupName -Force
+    }
+
+    It "Should update VMSS with ScheduledEventsAdditionalEndpoints set to true" {
+        $vmss = New-AzVmss -ResourceGroupName $resourceGroupName -Name "TestVMSS" -Location $location -SkuCapacity 2 -SkuName "Standard_DS1_v2"
+        $result = Update-AzVmss -ResourceGroupName $resourceGroupName -Name $vmss.Name -ScheduledEventsAdditionalEndpoints $true
+        $result.ScheduledEventsAdditionalEndpoints | Should -Be $true
+    }
+
+    It "Should update VMSS with EnableUserRebootScheduledEvents set to true" {
+        $vmss = New-AzVmss -ResourceGroupName $resourceGroupName -Name "TestVMSS" -Location $location -SkuCapacity 2 -SkuName "Standard_DS1_v2"
+        $result = Update-AzVmss -ResourceGroupName $resourceGroupName -Name $vmss.Name -EnableUserRebootScheduledEvents $true
+        $result.EnableUserRebootScheduledEvents | Should -Be $true
+    }
+
+    It "Should update VMSS with EnableUserRedeployScheduledEvents set to true" {
+        $vmss = New-AzVmss -ResourceGroupName $resourceGroupName -Name "TestVMSS" -Location $location -SkuCapacity 2 -SkuName "Standard_DS1_v2"
+        $result = Update-AzVmss -ResourceGroupName $resourceGroupName -Name $vmss.Name -EnableUserRedeployScheduledEvents $true
+        $result.EnableUserRedeployScheduledEvents | Should -Be $true
+    }
+
+    It "Should update VMSS with all parameters set to false" {
+        $vmss = New-AzVmss -ResourceGroupName $resourceGroupName -Name "TestVMSS" -Location $location -SkuCapacity 2 -SkuName "Standard_DS1_v2"
+        $result = Update-AzVmss -ResourceGroupName $resourceGroupName -Name $vmss.Name -ScheduledEventsAdditionalEndpoints $false -EnableUserRebootScheduledEvents $false -EnableUserRedeployScheduledEvents $false
+        $result.ScheduledEventsAdditionalEndpoints | Should -Be $false
+        $result.EnableUserRebootScheduledEvents | Should -Be $false
+        $result.EnableUserRedeployScheduledEvents | Should -Be $false
+    }
+}

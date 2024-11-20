@@ -20,6 +20,8 @@
 
 -->
 ## Upcoming Release
+* Added new optional boolean parameters to several cmdlets for managing scheduled events related to VM reboots and redeploys.
+    - The parameters include `ScheduledEventsAdditionalEndpoints`, `EnableUserRebootScheduledEvents`, and `EnableUserRedeployScheduledEvents` for `Update-AzVmss`, `Set-AzVmss`, `Update-AzAvailabilitySet`, `Set-AzAvailabilitySet`, `Update-AzVM`, and `Set-AzVM`.
 * Upgraded Azure.Core to 1.44.1.
 
 ## Version 9.0.0

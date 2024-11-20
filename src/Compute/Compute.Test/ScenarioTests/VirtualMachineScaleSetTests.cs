@@ -444,5 +444,19 @@ namespace Microsoft.Azure.Commands.Compute.Test.ScenarioTests
         {
             TestRunner.RunTestScript("Test-SecurityPostureFeature");
         }
-    }
+
+        [Fact]
+        [Trait(Category.AcceptanceType, Category.CheckIn)]
+        public void testgensetazvmss()
+        {
+            TestRunner.RunTestScript("TestGen-setazvmss");
+        }
+
+        [Fact]
+        [Trait(Category.AcceptanceType, Category.CheckIn)]
+        public void testgenupdateazvmss()
+        {
+            TestRunner.RunTestScript("TestGen-updateazvmss");
+        }
+            }
 }
