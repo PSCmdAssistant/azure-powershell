@@ -1,4 +1,4 @@
-//
+ //
 // Copyright (c) Microsoft and contributors.  All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -130,5 +130,20 @@ namespace Microsoft.Azure.Commands.Compute.Automation
 
         [Parameter(Mandatory = false, HelpMessage = "Run cmdlet in the background")]
         public SwitchParameter AsJob { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            HelpMessage = "If true, events are delivered to the additional endpoints (event grid and Azure resource graph). If false, they will not be delivered there.")]
+        public bool? ScheduledEventsAdditionalEndpoints { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            HelpMessage = "If true, events for user-initiated reboots of the VM will be delivered. If false, they won't.")]
+        public bool? EnableUserRebootScheduledEvents { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            HelpMessage = "If true, events for user-initiated redeploys of the VM will be delivered. If false, they won't.")]
+        public bool? EnableUserRedeployScheduledEvents { get; set; }
     }
 }

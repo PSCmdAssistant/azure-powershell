@@ -31,5 +31,9 @@ namespace Microsoft.Azure.Commands.Compute.Automation.Models
 		{
 			this.Status = "Succeeded";
 		}
+
+        public bool? ScheduledEventsAdditionalEndpoints { get; set; }
+        public bool? EnableUserRebootScheduledEvents { get; set; }
+        public bool? EnableUserRedeployScheduledEvents { get; set; }
     }
 }
