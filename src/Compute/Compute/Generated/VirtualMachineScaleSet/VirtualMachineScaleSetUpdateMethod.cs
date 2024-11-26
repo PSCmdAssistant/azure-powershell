@@ -1,4 +1,4 @@
-//
+ //
 // Copyright (c) Microsoft and contributors.  All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -444,7 +444,26 @@ namespace Microsoft.Azure.Commands.Compute.Automation
             HelpMessage = "Specifies whether resilient VM deletion should be enabled on the virtual machine scale set. The default value is false.")]
         public bool EnableResilientVMDelete { get; set; }
 
-        private void BuildPatchObject()
+        [Parameter(
+            Mandatory = false,
+            HelpMessage = "Specifies whether additional endpoints for scheduled events are enabled.",
+            ValueFromPipelineByPropertyName = true)]
+        public bool ScheduledEventsAdditionalEndpoints { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            HelpMessage = "Specifies whether user reboot scheduled events are enabled.",
+            ValueFromPipelineByPropertyName = true)]
+        public bool EnableUserRebootScheduledEvents { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            HelpMessage = "Specifies whether user redeploy scheduled events are enabled.",
+            ValueFromPipelineByPropertyName = true)]
+        public bool EnableUserRedeployScheduledEvents { get; set; }
+    }
+}
+ private void BuildPatchObject()
         {
             if (this.IsParameterBound(c => c.AutomaticOSUpgrade))
             {
@@ -1454,9 +1473,59 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                 }
                 this.VirtualMachineScaleSetUpdate.ResiliencyPolicy.ResilientVMDeletionPolicy = new ResilientVMDeletionPolicy(this.EnableResilientVMDelete);
             }
-        }
 
-        private void BuildPutObject()
+            if (this.IsParameterBound(c => c.ScheduledEventsAdditionalEndpoints))
+            {
+                if (this.VirtualMachineScaleSetUpdate == null)
+                {
+                    this.VirtualMachineScaleSetUpdate = new VirtualMachineScaleSetUpdate();
+                }
+                if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile == null)
+                {
+                    this.VirtualMachineScaleSetUpdate.VirtualMachineProfile = new VirtualMachineScaleSetUpdateVMProfile();
+                }
+                if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.ScheduledEventsProfile == null)
+                {
+                    this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.ScheduledEventsProfile = new ScheduledEventsProfile();
+                }
+                this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.ScheduledEventsProfile.ScheduledEventsAdditionalEndpoints = this.ScheduledEventsAdditionalEndpoints;
+            }
+
+            if (this.IsParameterBound(c => c.EnableUserRebootScheduledEvents))
+            {
+                if (this.VirtualMachineScaleSetUpdate == null)
+                {
+                    this.VirtualMachineScaleSetUpdate = new VirtualMachineScaleSetUpdate();
+                }
+                if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile == null)
+                {
+                    this.VirtualMachineScaleSetUpdate.VirtualMachineProfile = new VirtualMachineScaleSetUpdateVMProfile();
+                }
+                if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.ScheduledEventsProfile == null)
+                {
+                    this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.ScheduledEventsProfile = new ScheduledEventsProfile();
+                }
+                this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.ScheduledEventsProfile.EnableUserRebootScheduledEvents = this.EnableUserRebootScheduledEvents;
+            }
+
+            if (this.IsParameterBound(c => c.EnableUserRedeployScheduledEvents))
+            {
+                if (this.VirtualMachineScaleSetUpdate == null)
+                {
+                    this.VirtualMachineScaleSetUpdate = new VirtualMachineScaleSetUpdate();
+                }
+                if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile == null)
+                {
+                    this.VirtualMachineScaleSetUpdate.VirtualMachineProfile = new VirtualMachineScaleSetUpdateVMProfile();
+                }
+                if (this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.ScheduledEventsProfile == null)
+                {
+                    this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.ScheduledEventsProfile = new ScheduledEventsProfile();
+                }
+                this.VirtualMachineScaleSetUpdate.VirtualMachineProfile.ScheduledEventsProfile.EnableUserRedeployScheduledEvents = this.EnableUserRedeployScheduledEvents;
+            }
+        }
+ private void BuildPutObject()
         {
             if (this.IsParameterBound(c => c.AutomaticOSUpgrade))
             {
@@ -2272,6 +2341,45 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                     this.VirtualMachineScaleSet.ResiliencyPolicy = new ResiliencyPolicy();
                 }
                 this.VirtualMachineScaleSet.ResiliencyPolicy.ResilientVMDeletionPolicy = new ResilientVMDeletionPolicy(this.EnableResilientVMDelete);
+            }
+
+            if (this.IsParameterBound(c => c.ScheduledEventsAdditionalEndpoints))
+            {
+                if (this.VirtualMachineScaleSet.VirtualMachineProfile == null)
+                {
+                    this.VirtualMachineScaleSet.VirtualMachineProfile = new PSVirtualMachineScaleSetVMProfile();
+                }
+                if (this.VirtualMachineScaleSet.VirtualMachineProfile.ScheduledEventsProfile == null)
+                {
+                    this.VirtualMachineScaleSet.VirtualMachineProfile.ScheduledEventsProfile = new ScheduledEventsProfile();
+                }
+                this.VirtualMachineScaleSet.VirtualMachineProfile.ScheduledEventsProfile.ScheduledEventsAdditionalEndpoints = this.ScheduledEventsAdditionalEndpoints;
+            }
+
+            if (this.IsParameterBound(c => c.EnableUserRebootScheduledEvents))
+            {
+                if (this.VirtualMachineScaleSet.VirtualMachineProfile == null)
+                {
+                    this.VirtualMachineScaleSet.VirtualMachineProfile = new PSVirtualMachineScaleSetVMProfile();
+                }
+                if (this.VirtualMachineScaleSet.VirtualMachineProfile.ScheduledEventsProfile == null)
+                {
+                    this.VirtualMachineScaleSet.VirtualMachineProfile.ScheduledEventsProfile = new ScheduledEventsProfile();
+                }
+                this.VirtualMachineScaleSet.VirtualMachineProfile.ScheduledEventsProfile.EnableUserRebootScheduledEvents = this.EnableUserRebootScheduledEvents;
+            }
+
+            if (this.IsParameterBound(c => c.EnableUserRedeployScheduledEvents))
+            {
+                if (this.VirtualMachineScaleSet.VirtualMachineProfile == null)
+                {
+                    this.VirtualMachineScaleSet.VirtualMachineProfile = new PSVirtualMachineScaleSetVMProfile();
+                }
+                if (this.VirtualMachineScaleSet.VirtualMachineProfile.ScheduledEventsProfile == null)
+                {
+                    this.VirtualMachineScaleSet.VirtualMachineProfile.ScheduledEventsProfile = new ScheduledEventsProfile();
+                }
+                this.VirtualMachineScaleSet.VirtualMachineProfile.ScheduledEventsProfile.EnableUserRedeployScheduledEvents = this.EnableUserRedeployScheduledEvents;
             }
         }
     }
