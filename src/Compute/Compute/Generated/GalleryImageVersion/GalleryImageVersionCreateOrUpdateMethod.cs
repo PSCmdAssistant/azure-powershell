@@ -1,4 +1,4 @@
-//
+ //
 // Copyright (c) Microsoft and contributors.  All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -233,6 +233,15 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                             }
                         }
 
+                    if (this.IsParameterBound(c => c.ReplicationMode))
+                    {
+                        if (galleryImageVersion.PublishingProfile == null)
+                        {
+                            galleryImageVersion.PublishingProfile = new GalleryImageVersionPublishingProfile();
+                        }
+                        galleryImageVersion.PublishingProfile.ReplicationMode = this.ReplicationMode;
+                    }
+
                     Dictionary<string, List<string>> auxAuthHeader = null;
                     if (this.IsParameterBound(c => c.SourceImageId))
                     {
@@ -410,6 +419,13 @@ namespace Microsoft.Azure.Commands.Compute.Automation
             ValueFromPipelineByPropertyName = true,
             HelpMessage = "The target extended locations where the Image Version is going to be replicated to. This property is updatable.")]
         public Hashtable[] TargetExtendedLocation { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "Allows customers to designate an image version as being used for 'testing' by choosing ReplicationMode = Shallow. When choosing Shallow replication, the gallery image version is provisioned much quicker as a full copy of the source image is not made.")]
+        [PSArgumentCompleter("Full", "Shallow")]
+        public string ReplicationMode { get; set; }
     }
 
     [Cmdlet(VerbsData.Update, ResourceManager.Common.AzureRMConstants.AzureRMPrefix + "GalleryImageVersion", DefaultParameterSetName = "DefaultParameter", SupportsShouldProcess = true)]
