@@ -990,3 +990,267 @@ function Test-GalleryImageDefinitionDefaults
     }
 }
 
+
+function TestGen-newazgallery
+{
+    # Setup
+    $rgname = Get-ComputeTestResourceName;
+    $galleryName = 'gallery' + $rgname;
+    $imageDefinitionName = 'imageDef' + $rgname;
+    $imageVersionName = '1.0.0';
+
+    try
+    {
+        $loc = Get-Location
+        New-AzResourceGroup -Name $rgname -Location $loc -Force;
+
+        # Create a gallery
+        New-AzGallery -ResourceGroupName $rgname -Location $loc -Name $galleryName
+
+        # Create an image definition
+        New-AzGalleryImageDefinition -ResourceGroupName $rgname -GalleryName $galleryName -Name $imageDefinitionName -Location $loc -OsType 'Windows' -OsState 'Generalized' -Publisher 'Contoso' -Offer 'OfferName' -Sku 'SkuName'
+
+        # Create a new image version with BlockDeletionBeforeEndOfLife set to true
+        $imageVersion = New-AzGalleryImageVersion -ResourceGroupName $rgname -GalleryName $galleryName -GalleryImageDefinitionName $imageDefinitionName -Name $imageVersionName -Location $loc -BlockDeletionBeforeEndOfLife $true
+
+        # Assert that the image version is created with the correct BlockDeletionBeforeEndOfLife setting
+        Assert-AreEqual $imageVersion.BlockDeletionBeforeEndOfLife $true
+
+        # Update the image version to set BlockDeletionBeforeEndOfLife to false
+        $updatedImageVersion = Update-AzGalleryImageVersion -ResourceGroupName $rgname -GalleryName $galleryName -GalleryImageDefinitionName $imageDefinitionName -Name $imageVersionName -BlockDeletionBeforeEndOfLife $false
+
+        # Assert that the image version is updated with the correct BlockDeletionBeforeEndOfLife setting
+        Assert-AreEqual $updatedImageVersion.BlockDeletionBeforeEndOfLife $false
+    }
+    finally
+    {
+        # Cleanup
+        Remove-AzResourceGroup -Name $rgname -Force -ErrorAction SilentlyContinue
+    }
+}
+
+function TestGen-updateazgallery
+{
+    # Setup
+    $rgname = Get-ComputeTestResourceName;
+    $galleryName = 'gallery' + $rgname;
+    $galleryImageName = 'galleryimage' + $rgname;
+    $galleryImageVersionName = 'imageversion' + $rgname;
+
+    try
+    {
+        # Common
+        [string]$loc = Get-ComputeVMLocation;
+        $loc = $loc.Replace(' ', '');
+        New-AzResourceGroup -Name $rgname -Location $loc -Force;
+        $description1 = "Original Description";
+
+        # Gallery
+        New-AzGallery -ResourceGroupName $rgname -Name $galleryName -Description $description1 -Location $loc;
+
+        $gallery = Get-AzGallery -ResourceGroupName $rgname -Name $galleryName;
+        Verify-Gallery $gallery $rgname $galleryName $loc $description1;
+        $output = $gallery | Out-String;
+
+        # Gallery Image Definition
+        $publisherName = "galleryPublisher20180927";
+        $offerName = "galleryOffer20180927";
+        $skuName = "gallerySku20180927";
+        $eula = "eula";
+        $privacyStatementUri = "https://www.microsoft.com";
+        $releaseNoteUri = "https://www.microsoft.com";
+        $disallowedDiskTypes = "Premium_LRS";
+        $endOfLifeDate = [DateTime]::ParseExact('12 07 2025 18 02', 'HH mm yyyy dd MM', $null);
+        $minMemory = 1;
+        $maxMemory = 100;
+        $minVCPU = 2;
+        $maxVCPU = 32;
+        $purchasePlanName = "purchasePlanName";
+        $purchasePlanProduct = "purchasePlanProduct";
+        $purchasePlanPublisher = "20";
+        $osState = "Generalized";
+        $osType = "Windows";
+
+        New-AzGalleryImageDefinition -ResourceGroupName $rgname -GalleryName $galleryName -Name $galleryImageName `
+                                          -Location $loc -Publisher $publisherName -Offer $offerName -Sku $skuName `
+                                          -OsState $osState -OsType $osType `
+                                          -Description $description1 -Eula $eula `
+                                          -PrivacyStatementUri $privacyStatementUri -ReleaseNoteUri $releaseNoteUri `
+                                          -DisallowedDiskType $disallowedDiskTypes -EndOfLifeDate $endOfLifeDate `
+                                          -MinimumMemory $minMemory -MaximumMemory $maxMemory `
+                                          -MinimumVCPU $minVCPU -MaximumVCPU $maxVCPU `
+                                          -PurchasePlanName $purchasePlanName `
+                                          -PurchasePlanProduct $purchasePlanProduct `
+                                          -PurchasePlanPublisher $purchasePlanPublisher;
+
+        $definition = Get-AzGalleryImageDefinition -ResourceGroupName $rgname -GalleryName $galleryName -Name $galleryImageName;
+        $output = $definition | Out-String;
+        Verify-GalleryImageDefinition $definition $rgname $galleryImageName $loc $description1 `
+                                      $eula $privacyStatementUri $releaseNoteUri `
+                                      $osType $osState $endOfLifeDate `
+                                      $publisherName $offerName $skuName `
+                                      $minVCPU $maxVCPU $minMemory $maxMemory `
+                                      $disallowedDiskTypes `
+                                      $purchasePlanName $purchasePlanPublisher $purchasePlanProduct;
+
+        # Gallery Image Version
+        $galleryImageVersionName = "1.0.0";
+
+        # Create Gallery Image Version with BlockDeletionBeforeEndOfLife set to true
+        New-AzGalleryImageVersion -ResourceGroupName $rgname -GalleryName $galleryName -GalleryImageDefinitionName $galleryImageName `
+                                  -Name $galleryImageVersionName -Location $loc -TargetRegion $targetRegions `
+                                  -BlockDeletionBeforeEndOfLife $true;
+
+        $imageVersion = Get-AzGalleryImageVersion -ResourceGroupName $rgname -GalleryName $galleryName -GalleryImageDefinitionName $galleryImageName -Name $galleryImageVersionName;
+        Assert-AreEqual $imageVersion.BlockDeletionBeforeEndOfLife $true;
+
+        # Update Gallery Image Version to set BlockDeletionBeforeEndOfLife to false
+        Update-AzGalleryImageVersion -ResourceGroupName $rgname -GalleryName $galleryName -GalleryImageDefinitionName $galleryImageName `
+                                     -Name $galleryImageVersionName -BlockDeletionBeforeEndOfLife $false;
+
+        $updatedImageVersion = Get-AzGalleryImageVersion -ResourceGroupName $rgname -GalleryName $galleryName -GalleryImageDefinitionName $galleryImageName -Name $galleryImageVersionName;
+        Assert-AreEqual $updatedImageVersion.BlockDeletionBeforeEndOfLife $false;
+    }
+    finally
+    {
+        # Cleanup
+        Remove-AzResourceGroup -Name $rgname -Force -ErrorAction SilentlyContinue;
+    }
+}
+
+function TestGen-newazgalleryimageversion
+{
+    # Setup
+    $rgname = Get-ComputeTestResourceName;
+    $galleryName = 'gallery' + $rgname;
+    $galleryImageName = 'galleryimage' + $rgname;
+    $galleryImageVersionName = 'imageversion' + $rgname;
+
+    try
+    {
+        # Common
+        [string]$loc = Get-ComputeVMLocation;
+        $loc = $loc.Replace(' ', '');
+        New-AzResourceGroup -Name $rgname -Location $loc -Force;
+        $description1 = "Original Description";
+
+        # Gallery
+        New-AzGallery -ResourceGroupName $rgname -Name $galleryName -Description $description1 -Location $loc;
+
+        $gallery = Get-AzGallery -ResourceGroupName $rgname -Name $galleryName;
+        Verify-Gallery $gallery $rgname $galleryName $loc $description1;
+        $output = $gallery | Out-String;
+
+        # Gallery Image Definition
+        $publisherName = "galleryPublisher20180927";
+        $offerName = "galleryOffer20180927";
+        $skuName = "gallerySku20180927";
+        $eula = "eula";
+        $privacyStatementUri = "https://www.microsoft.com";
+        $releaseNoteUri = "https://www.microsoft.com";
+        $disallowedDiskTypes = "Premium_LRS";
+        $endOfLifeDate = [DateTime]::ParseExact('12 07 2025 18 02', 'HH mm yyyy dd MM', $null);
+        $minMemory = 1;
+        $maxMemory = 100;
+        $minVCPU = 2;
+        $maxVCPU = 32;
+        $purchasePlanName = "purchasePlanName";
+        $purchasePlanProduct = "purchasePlanProduct";
+        $purchasePlanPublisher = "20";
+        $osState = "Generalized";
+        $osType = "Windows";
+
+        New-AzGalleryImageDefinition -ResourceGroupName $rgname -GalleryName $galleryName -Name $galleryImageName `
+                                          -Location $loc -Publisher $publisherName -Offer $offerName -Sku $skuName `
+                                          -OsState $osState -OsType $osType `
+                                          -Description $description1 -Eula $eula `
+                                          -PrivacyStatementUri $privacyStatementUri -ReleaseNoteUri $releaseNoteUri `
+                                          -DisallowedDiskType $disallowedDiskTypes -EndOfLifeDate $endOfLifeDate `
+                                          -MinimumMemory $minMemory -MaximumMemory $maxMemory `
+                                          -MinimumVCPU $minVCPU -MaximumVCPU $maxVCPU `
+                                          -PurchasePlanName $purchasePlanName `
+                                          -PurchasePlanProduct $purchasePlanProduct `
+                                          -PurchasePlanPublisher $purchasePlanPublisher;
+
+        $definition = Get-AzGalleryImageDefinition -ResourceGroupName $rgname -GalleryName $galleryName -Name $galleryImageName;
+        $output = $definition | Out-String;
+        Verify-GalleryImageDefinition $definition $rgname $galleryImageName $loc $description1 `
+                                      $eula $privacyStatementUri $releaseNoteUri `
+                                      $osType $osState $endOfLifeDate `
+                                      $publisherName $offerName $skuName `
+                                      $minVCPU $maxVCPU $minMemory $maxMemory `
+                                      $disallowedDiskTypes `
+                                      $purchasePlanName $purchasePlanPublisher $purchasePlanProduct;
+
+        # Gallery Image Version
+        $galleryImageVersionName = "1.0.0";
+        $blockDeletion = $true;
+
+        New-AzGalleryImageVersion -ResourceGroupName $rgname -GalleryName $galleryName -GalleryImageDefinitionName $galleryImageName `
+                                  -Name $galleryImageVersionName -Location $loc -TargetRegion $targetRegions `
+                                  -BlockDeletionBeforeEndOfLife $blockDeletion;
+
+        $version = Get-AzGalleryImageVersion -ResourceGroupName $rgname -GalleryName $galleryName -GalleryImageDefinitionName $galleryImageName -Name $galleryImageVersionName;
+        Assert-AreEqual $version.BlockDeletionBeforeEndOfLife $blockDeletion;
+
+        # Update Gallery Image Version
+        $blockDeletion = $false;
+        Update-AzGalleryImageVersion -ResourceGroupName $rgname -GalleryName $galleryName -GalleryImageDefinitionName $galleryImageName `
+                                     -Name $galleryImageVersionName -BlockDeletionBeforeEndOfLife $blockDeletion;
+
+        $updatedVersion = Get-AzGalleryImageVersion -ResourceGroupName $rgname -GalleryName $galleryName -GalleryImageDefinitionName $galleryImageName -Name $galleryImageVersionName;
+        Assert-AreEqual $updatedVersion.BlockDeletionBeforeEndOfLife $blockDeletion;
+    }
+    finally
+    {
+        # Cleanup
+        Remove-AzResourceGroup -Name $rgname -Force -ErrorAction SilentlyContinue;
+    }
+}
+
+function TestGen-updateazgalleryimageversion
+{
+    # Setup
+    $rgname = Get-ComputeTestResourceName;
+    $loc = Get-Location;
+
+    try
+    {
+        $location = $loc;
+        New-AzResourceGroup -Name $rgname -Location $loc -Force;
+
+        # Gallery variables
+        $resourceGroup = $rgname
+        $galleryName = 'gl' + $rgname
+        $definitionName = 'def' + $rgname
+        $versionName = '1.0.0'
+        $skuDetails = @{
+            Publisher = 'test'
+            Offer = 'test'
+            Sku = 'test'
+        }
+
+        # Create a gallery
+        New-AzGallery -ResourceGroupName $resourceGroup -GalleryName $galleryName -Location $location
+
+        # Create a gallery image definition
+        New-AzGalleryImageDefinition -ResourceGroupName $resourceGroup -GalleryName $galleryName -Name $definitionName -Location $location -OsType 'Windows' -OsState 'Generalized' -HyperVGeneration 'V1' -Publisher $skuDetails.Publisher -Offer $skuDetails.Offer -Sku $skuDetails.Sku
+
+        # Create a gallery image version
+        New-AzGalleryImageVersion -ResourceGroupName $resourceGroup -GalleryName $galleryName -GalleryImageDefinitionName $definitionName -GalleryImageVersionName $versionName -Location $location -TargetRegion @{"Name"=$location; "ReplicaCount"=1} -BlockDeletionBeforeEndOfLife $true
+
+        # Update the gallery image version
+        Update-AzGalleryImageVersion -ResourceGroupName $resourceGroup -GalleryName $galleryName -GalleryImageDefinitionName $definitionName -GalleryImageVersionName $versionName -BlockDeletionBeforeEndOfLife $false
+
+        # Validate the update
+        $updatedVersion = Get-AzGalleryImageVersion -ResourceGroupName $resourceGroup -GalleryName $galleryName -GalleryImageDefinitionName $definitionName -GalleryImageVersionName $versionName
+        if ($updatedVersion.BlockDeletionBeforeEndOfLife -ne $false) {
+            throw "BlockDeletionBeforeEndOfLife was not updated correctly."
+        }
+    }
+    finally
+    {
+        # Cleanup
+        Remove-AzResourceGroup -Name $rgname -Force -ErrorAction SilentlyContinue
+    }
+}
