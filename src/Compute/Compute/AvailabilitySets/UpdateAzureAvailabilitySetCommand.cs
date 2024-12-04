@@ -102,17 +102,17 @@ namespace Microsoft.Azure.Commands.Compute
                     // Handle new parameters
                     if (this.IsParameterBound(c => c.ScheduledEventsAdditionalEndpoints))
                     {
-                        // Logic to handle ScheduledEventsAdditionalEndpoints
+                        avSetParams.ScheduledEventsAdditionalEndpoints = this.ScheduledEventsAdditionalEndpoints;
                     }
 
                     if (this.IsParameterBound(c => c.EnableUserRebootScheduledEvents))
                     {
-                        // Logic to handle EnableUserRebootScheduledEvents
+                        avSetParams.EnableUserRebootScheduledEvents = this.EnableUserRebootScheduledEvents;
                     }
 
                     if (this.IsParameterBound(c => c.EnableUserRedeployScheduledEvents))
                     {
-                        // Logic to handle EnableUserRedeployScheduledEvents
+                        avSetParams.EnableUserRedeployScheduledEvents = this.EnableUserRedeployScheduledEvents;
                     }
 
                     var result = this.AvailabilitySetClient.CreateOrUpdateWithHttpMessagesAsync(
