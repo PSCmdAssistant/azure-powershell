@@ -20,6 +20,9 @@
 
 -->
 ## Upcoming Release
+* Added `-Redeploy` parameter to `Update-AzHost` cmdlet.
+    - Allows redeployment of a dedicated host to a new node using ResourceGroupName, HostGroupName, Name, ResourceId, or a PSHost object. 
+* Upgraded Azure.Core to 1.44.1.
 * Upgraded Azure.Core to 1.44.1.
 
 ## Version 9.0.0
