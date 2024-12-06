@@ -20,6 +20,11 @@
 
 -->
 ## Upcoming Release
+* Added new optional parameters to `Update-AzVmss`, `Set-AzVmss`, `Update-AzAvailabilitySet`, `Set-AzAvailabilitySet`, `Update-AzVM`, and `Set-AzVM` cmdlets.
+    - `ScheduledEventsAdditionalEndpoints`: Allows events to be delivered to additional endpoints like event grid and Azure resource graph.
+    - `EnableUserRebootScheduledEvents`: Enables delivery of events for user-initiated reboots of the VM.
+    - `EnableUserRedeployScheduledEvents`: Enables delivery of events for user-initiated redeploys of the VM.
+* Upgraded Azure.Core to 1.44.1.
 * Upgraded Azure.Core to 1.44.1.
 
 ## Version 9.0.0

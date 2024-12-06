@@ -429,3 +429,48 @@ function Test-PPGVMIntentAndZoneFeatures
         Clean-ResourceGroup $rgname;
     }
 }
+
+function TestGen-updateazavailabilityset
+{
+    param ($loc)
+    # Setup
+    $rgname = Get-ComputeTestResourceName
+
+    try
+    {
+        # Common
+        [string]$loc = Get-Location;
+        $loc = $loc.Replace(' ', '');
+
+        New-AzResourceGroup -Name $rgname -Location $loc -Force;
+
+        # Create an Availability Set
+        $avSetName = $rgname + 'avset'
+        $availabilitySet = New-AzAvailabilitySet -ResourceGroupName $rgname -Name $avSetName -Location $loc -Sku Aligned
+
+        # Update the Availability Set with new parameters
+        Update-AzAvailabilitySet -ResourceGroupName $rgname -Name $avSetName `
+            -ScheduledEventsAdditionalEndpoints $true `
+            -EnableUserRebootScheduledEvents $true `
+            -EnableUserRedeployScheduledEvents $true
+
+        # Retrieve the updated Availability Set
+        $updatedAvailabilitySet = Get-AzAvailabilitySet -ResourceGroupName $rgname -Name $avSetName
+
+        # Validate the changes
+        if ($updatedAvailabilitySet.ScheduledEventsAdditionalEndpoints -ne $true) {
+            throw "ScheduledEventsAdditionalEndpoints was not set correctly."
+        }
+        if ($updatedAvailabilitySet.EnableUserRebootScheduledEvents -ne $true) {
+            throw "EnableUserRebootScheduledEvents was not set correctly."
+        }
+        if ($updatedAvailabilitySet.EnableUserRedeployScheduledEvents -ne $true) {
+            throw "EnableUserRedeployScheduledEvents was not set correctly."
+        }
+    }
+    finally
+    {
+        # Cleanup
+        Remove-AzResourceGroup -Name $rgname -Force -ErrorAction SilentlyContinue
+    }
+}

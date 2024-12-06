@@ -7727,3 +7727,69 @@ function Test-VMwithSSHKeyEd25519
         Clean-ResourceGroup $rgname;
     }
 }
+
+function TestGen-setazvm
+{
+    # Setup
+    $rgname = Get-ComputeTestResourceName;
+    $loc = Get-ComputeVMLocation;
+
+    try
+    {
+        New-AzResourceGroup -Name $rgname -Location $loc -Force;
+        # VM Profile & Hardware
+        $vmname = 'vm' + $rgname;
+        $domainNameLabel = "d1" + $rgname;
+
+        $vnetname = "vn" + $rgname;
+        $vnetAddress = "10.0.0.0/16";
+        $subnetname = "slb" + $rgname;
+        $subnetAddress = "10.0.2.0/24";
+        $OSDiskName = $vmname + "-osdisk";
+        $NICName = $vmname+ "-nic";
+        $NSGName = $vmname + "-NSG";
+        $OSDiskSizeinGB = 128;
+        $VMSize = "Standard_DS2_v2";
+        $PublisherName = "MicrosoftWindowsServer";
+        $Offer = "WindowsServer";
+        $SKU = "2022-datacenter-azure-edition";
+        $version = "latest";
+
+        # Creating a VM using Simple parameterset
+        $password = Get-PasswordForVM;
+        $securePassword = $password | ConvertTo-SecureString -AsPlainText -Force;
+        $user = Get-ComputeTestResourceName;
+        $cred = New-Object System.Management.Automation.PSCredential ($user, $securePassword);
+
+        $frontendSubnet = New-AzVirtualNetworkSubnetConfig -Name $subnetname -AddressPrefix $subnetAddress;
+
+        $vnet = New-AzVirtualNetwork -Name $vnetname -ResourceGroupName $rgname -Location $loc -AddressPrefix $vnetAddress -Subnet $frontendSubnet;
+
+        $nsgRuleRDP = New-AzNetworkSecurityRuleConfig -Name RDP  -Protocol Tcp  -Direction Inbound -Priority 1001 -SourceAddressPrefix * -SourcePortRange * -DestinationAddressPrefix * -DestinationPortRange 3389 -Access Allow;
+        $nsg = New-AzNetworkSecurityGroup -ResourceGroupName $RGName -Location $loc -Name $NSGName  -SecurityRules $nsgRuleRDP;
+        $nic = New-AzNetworkInterface -Name $NICName -ResourceGroupName $RGName -Location $loc -SubnetId $vnet.Subnets[0].Id -NetworkSecurityGroupId $nsg.Id -EnableAcceleratedNetworking;
+
+        # VM
+        $vmConfig = New-AzVMConfig -VMName $vmName -VMSize $VMSize;
+        Set-AzVMOperatingSystem -VM $vmConfig -Windows -ComputerName $vmName -Credential $cred;
+        Set-AzVMSourceImage -VM $vmConfig -PublisherName $PublisherName -Offer $Offer -Skus $SKU -Version $version ;
+        Add-AzVMNetworkInterface -VM $vmConfig -Id $nic.Id;
+
+        New-AzVM -ResourceGroupName $rgname -Location $loc -VM $vmConfig;
+
+        # Update VM with new parameters
+        Set-AzVM -ResourceGroupName $rgname -Name $vmname -ScheduledEventsAdditionalEndpoints $true -EnableUserRebootScheduledEvents $true -EnableUserRedeployScheduledEvents $true;
+
+        $vm = Get-AzVM -ResourceGroupName $rgname -Name $vmname;
+
+        # Validate new parameters
+        Assert-AreEqual $vm.ScheduledEventsAdditionalEndpoints $true;
+        Assert-AreEqual $vm.EnableUserRebootScheduledEvents $true;
+        Assert-AreEqual $vm.EnableUserRedeployScheduledEvents $true;
+    }
+    finally
+    {
+        # Cleanup
+        Remove-AzResourceGroup -Name $rgname -Force -ErrorAction SilentlyContinue;
+    }
+}
