@@ -82,5 +82,10 @@ namespace Microsoft.Azure.Commands.Compute.Models
         public string Sku { get; set; }
 
         public SubResource ProximityPlacementGroup { get; set; }
+
+        // New properties for scheduled events
+        public bool? ScheduledEventsAdditionalEndpoints { get; set; }
+        public bool? EnableUserRebootScheduledEvents { get; set; }
+        public bool? EnableUserRedeployScheduledEvents { get; set; }
     }
 }
