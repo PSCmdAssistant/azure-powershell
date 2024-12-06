@@ -334,3 +334,43 @@ function Test-DedicatedHostUpdateAndSize
         Clean-ResourceGroup $rgname
     }
 }
+function TestGen-updateazhost
+{
+    # Setup
+    $rgname = Get-ComputeTestResourceName
+
+    try
+    {
+        # Common
+        $loc = Get-Location
+
+        New-AzResourceGroup -Name $rgname -Location $loc -Force;
+
+        $hostGroupName = $rgname + 'hostgroup';
+        New-AzHostGroup -ResourceGroupName $rgname -Name $hostGroupName -Location $loc -PlatformFaultDomain 1 -Zone "2" -Tag @{key1 = "val1"};
+
+        $hostName = $rgname + 'host';
+        $host = New-AzHost -ResourceGroupName $rgname -HostGroupName $hostGroupName -Name $hostName -Location $loc -Sku "DSv3-Type1" -AutoReplaceOnFailure $true;
+
+        # Test Update-AzHost with Redeploy parameter using ResourceGroupName, HostGroupName, and Name
+        Update-AzHost -ResourceGroupName $rgname -HostGroupName $hostGroupName -Name $hostName -Redeploy $true
+        $updatedHost = Get-AzHost -ResourceGroupName $rgname -HostGroupName $hostGroupName -Name $hostName
+        Assert-AreEqual $updatedHost.Name $hostName "Host name should match after redeploy using ResourceGroupName, HostGroupName, and Name"
+
+        # Test Update-AzHost with Redeploy parameter using ResourceId
+        $resourceId = $host.Id
+        Update-AzHost -ResourceId $resourceId -Redeploy $true
+        $updatedHost = Get-AzHost -ResourceId $resourceId
+        Assert-AreEqual $updatedHost.Id $resourceId "Host ID should match after redeploy using ResourceId"
+
+        # Test Update-AzHost with Redeploy parameter using PSHost object
+        Update-AzHost -InputObject $host -Redeploy $true
+        $updatedHost = Get-AzHost -ResourceGroupName $rgname -HostGroupName $hostGroupName -Name $hostName
+        Assert-AreEqual $updatedHost.Name $hostName "Host name should match after redeploy using PSHost object"
+    }
+    finally
+    {
+        # Cleanup
+        Remove-AzResourceGroup -Name $rgname -Force -ErrorAction SilentlyContinue
+    }
+}

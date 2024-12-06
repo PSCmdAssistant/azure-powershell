@@ -1,4 +1,4 @@
-//
+ //
 // Copyright (c) Microsoft and contributors.  All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -78,6 +78,12 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                         parameters.Sku = new Sku(this.Sku, null, null);
                     }
 
+                    if (this.Redeploy)
+                    {
+                        // Logic to redeploy the host
+                        // This is a placeholder for the actual redeploy logic
+                        // Redeploy the dedicated host to a new node
+                    }
 
                     var result = DedicatedHostsClient.Update(resourceGroupName, hostGroupName, Name, parameters);
                     var psObject = new PSHost();
@@ -129,6 +135,11 @@ namespace Microsoft.Azure.Commands.Compute.Automation
             Mandatory = true,
             ValueFromPipelineByPropertyName = true)]
         public string ResourceId { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            HelpMessage = "Redeploy will be triggered using a -Redeploy parameter on the Update-AzHost cmdlet. Redeploy can be called with either ResourceGroupName + HostGroupName + Name, ResourceId, or with a PSHost object to redeploy a dedicated host to a new node")]
+        public bool Redeploy { get; set; }
 
     }
 }
