@@ -20,6 +20,10 @@
 
 -->
 ## Upcoming Release
+* Added new parameter `-Shield` to `Set-AzDiskSecurityProfile`.
+    - The `-Shield` parameter is a string with allowed values: `ShieldOn`, `ShieldGone`, `ShieldDown`.
+    - This parameter is optional and provides enhanced security profile settings for Azure disks.
+* Upgraded Azure.Core to 1.44.1.
 * Upgraded Azure.Core to 1.44.1.
 
 ## Version 9.0.0
