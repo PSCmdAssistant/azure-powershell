@@ -20,6 +20,10 @@
 
 -->
 ## Upcoming Release
+* Added new cmdlet `Set-AzDiskSecurityProfile` with an optional `-Shield` parameter.
+    - The `-Shield` parameter accepts values: `ShieldOn`, `ShieldGone`, `ShieldDown`.
+
+* Upgraded Azure.Core to 1.44.1.
 * Upgraded Azure.Core to 1.44.1.
 
 ## Version 9.0.0
