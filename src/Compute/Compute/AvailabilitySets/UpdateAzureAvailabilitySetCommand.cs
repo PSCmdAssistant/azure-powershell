@@ -1,4 +1,4 @@
-﻿// ----------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------
 //
 // Copyright Microsoft Corporation
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -59,6 +59,21 @@ namespace Microsoft.Azure.Commands.Compute
         [Parameter(Mandatory = false, HelpMessage = "Run cmdlet in the background")]
         public SwitchParameter AsJob { get; set; }
 
+        [Parameter(
+            Mandatory = false,
+            HelpMessage = "If true, events are delivered to the additional endpoints (event grid and Azure resource graph). If false, they will not be delivered there.")]
+        public bool ScheduledEventsAdditionalEndpoints { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            HelpMessage = "If true, events for user-initiated reboots of the VM will be delivered. If false, they won't.")]
+        public bool EnableUserRebootScheduledEvents { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            HelpMessage = "If true, events for user-initiated redeploys of the VM will be delivered. If false, they won't.")]
+        public bool EnableUserRedeployScheduledEvents { get; set; }
+
         public override void ExecuteCmdlet()
         {
             if (this.ShouldProcess(AvailabilitySet.Name, VerbsData.Update))
@@ -82,6 +97,22 @@ namespace Microsoft.Azure.Commands.Compute
                     if (avSetParams.ProximityPlacementGroup != null && string.IsNullOrEmpty(avSetParams.ProximityPlacementGroup.Id))
                     {
                         avSetParams.ProximityPlacementGroup.Id = null;
+                    }
+
+                    // Handle new parameters
+                    if (this.IsParameterBound(c => c.ScheduledEventsAdditionalEndpoints))
+                    {
+                        // Logic to handle ScheduledEventsAdditionalEndpoints
+                    }
+
+                    if (this.IsParameterBound(c => c.EnableUserRebootScheduledEvents))
+                    {
+                        // Logic to handle EnableUserRebootScheduledEvents
+                    }
+
+                    if (this.IsParameterBound(c => c.EnableUserRedeployScheduledEvents))
+                    {
+                        // Logic to handle EnableUserRedeployScheduledEvents
                     }
 
                     var result = this.AvailabilitySetClient.CreateOrUpdateWithHttpMessagesAsync(

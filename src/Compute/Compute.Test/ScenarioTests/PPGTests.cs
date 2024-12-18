@@ -52,5 +52,12 @@ namespace Microsoft.Azure.Commands.Compute.Test.ScenarioTests
         {
             TestRunner.RunTestScript("Test-PPGVMIntentAndZoneFeatures");
         }
-    }
+
+        [Fact]
+        [Trait(Category.AcceptanceType, Category.CheckIn)]
+        public void testgenupdateazavailabilityset()
+        {
+            TestRunner.RunTestScript("TestGen-updateazavailabilityset");
+        }
+        }
 }
