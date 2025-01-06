@@ -20,6 +20,9 @@
 
 -->
 ## Upcoming Release
+* Added new parameter `-ReplicationMode` to `New-AzGalleryImageVersion` cmdlet.
+    - Allows users to specify replication mode as 'Full' or 'Shallow', with 'Shallow' enabling quicker provisioning by not making a full copy of the source image.
+* Upgraded Azure.Core to 1.44.1.
 * Upgraded Azure.Core to 1.44.1.
 
 ## Version 9.0.0

@@ -990,3 +990,102 @@ function Test-GalleryImageDefinitionDefaults
     }
 }
 
+
+function TestGen-newazgallery
+{
+    # Setup
+    $rgname = Get-ComputeTestResourceName;
+    $galleryName = 'gallery' + $rgname;
+    $imageDefinitionName = 'imageDef' + $rgname;
+    $imageVersionName = '1.0.0';
+
+    try
+    {
+        $loc = Get-Location;
+        New-AzResourceGroup -Name $rgname -Location $loc -Force;
+
+        # Create a gallery
+        New-AzGallery -ResourceGroupName $rgname -Location $loc -Name $galleryName -Permission 'Private'
+
+        # Create a gallery image definition
+        New-AzGalleryImageDefinition -ResourceGroupName $rgname -GalleryName $galleryName -Name $imageDefinitionName -Location $loc -OsType 'Windows' -OsState 'Generalized' -Publisher 'Contoso' -Offer 'OfferName' -Sku 'SkuName'
+
+        # Test creating a gallery image version with Full replication mode
+        $imageVersionFull = New-AzGalleryImageVersion -ResourceGroupName $rgname -GalleryName $galleryName -GalleryImageDefinitionName $imageDefinitionName -Name $imageVersionName -Location $loc -ReplicationMode 'Full'
+        Assert-AreEqual $imageVersionFull.ReplicationMode 'Full'
+
+        # Test creating a gallery image version with Shallow replication mode
+        $imageVersionShallow = New-AzGalleryImageVersion -ResourceGroupName $rgname -GalleryName $galleryName -GalleryImageDefinitionName $imageDefinitionName -Name $imageVersionName -Location $loc -ReplicationMode 'Shallow'
+        Assert-AreEqual $imageVersionShallow.ReplicationMode 'Shallow'
+
+        # Clean up
+        Remove-AzGalleryImageVersion -ResourceGroupName $rgname -GalleryName $galleryName -GalleryImageDefinitionName $imageDefinitionName -Name $imageVersionName -Force
+        Remove-AzGalleryImageDefinition -ResourceGroupName $rgname -GalleryName $galleryName -Name $imageDefinitionName -Force
+        Remove-AzGallery -ResourceGroupName $rgname -Name $galleryName -Force
+    }
+    finally
+    {
+        # Remove the resource group
+        Remove-AzResourceGroup -Name $rgname -Force -ErrorAction SilentlyContinue
+    }
+}
+
+function TestGen-newazgalleryimageversion
+{
+    # Setup
+    $rgname = Get-ComputeTestResourceName;
+    $galleryName = 'gallery' + $rgname;
+    $galleryImageName = 'galleryimage' + $rgname;
+    $galleryImageVersionName = '1.0.0';
+
+    try
+    {
+        # Common
+        [string]$loc = Get-Location;
+        $loc = $loc.Replace(' ', '');
+        New-AzResourceGroup -Name $rgname -Location $loc -Force;
+        $description1 = "Original Description";
+
+        # Gallery
+        New-AzGallery -ResourceGroupName $rgname -Name $galleryName -Description $description1 -Location $loc;
+
+        $gallery = Get-AzGallery -ResourceGroupName $rgname -Name $galleryName;
+        Verify-Gallery $gallery $rgname $galleryName $loc $description1;
+
+        # Gallery Image Definition
+        $publisherName = "galleryPublisher";
+        $offerName = "galleryOffer";
+        $skuName = "gallerySku";
+        $osState = "Generalized";
+        $osType = "Windows";
+
+        New-AzGalleryImageDefinition -ResourceGroupName $rgname -GalleryName $galleryName -Name $galleryImageName `
+                                      -Location $loc -Publisher $publisherName -Offer $offerName -Sku $skuName `
+                                      -OsState $osState -OsType $osType;
+
+        $definition = Get-AzGalleryImageDefinition -ResourceGroupName $rgname -GalleryName $galleryName -Name $galleryImageName;
+        Verify-GalleryImageDefinition $definition $rgname $galleryImageName $loc $description1 `
+                                      $osType $osState $publisherName $offerName $skuName;
+
+        # Gallery Image Version with Full ReplicationMode
+        New-AzGalleryImageVersion -ResourceGroupName $rgname -GalleryName $galleryName -GalleryImageDefinitionName $galleryImageName `
+                                  -Name $galleryImageVersionName -Location $loc -TargetRegion @(@{Name='South Central US';ReplicaCount=1;StorageAccountType='Standard_LRS'}) `
+                                  -ReplicationMode Full;
+
+        $imageVersionFull = Get-AzGalleryImageVersion -ResourceGroupName $rgname -GalleryName $galleryName -GalleryImageDefinitionName $galleryImageName -Name $galleryImageVersionName;
+        Assert-AreEqual $imageVersionFull.ReplicationMode 'Full';
+
+        # Gallery Image Version with Shallow ReplicationMode
+        New-AzGalleryImageVersion -ResourceGroupName $rgname -GalleryName $galleryName -GalleryImageDefinitionName $galleryImageName `
+                                  -Name $galleryImageVersionName -Location $loc -TargetRegion @(@{Name='South Central US';ReplicaCount=1;StorageAccountType='Standard_LRS'}) `
+                                  -ReplicationMode Shallow;
+
+        $imageVersionShallow = Get-AzGalleryImageVersion -ResourceGroupName $rgname -GalleryName $galleryName -GalleryImageDefinitionName $galleryImageName -Name $galleryImageVersionName;
+        Assert-AreEqual $imageVersionShallow.ReplicationMode 'Shallow';
+    }
+    finally
+    {
+        # Cleanup
+        Remove-AzResourceGroup -Name $rgname -Force -ErrorAction SilentlyContinue;
+    }
+}
