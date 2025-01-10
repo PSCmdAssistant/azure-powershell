@@ -199,5 +199,19 @@ namespace Microsoft.Azure.Commands.Compute.Test.ScenarioTests
             TestRunner.RunTestScript("Test-DiskGrantAccessGetSASWithTL");
         }
 
-    }
+
+        [Fact]
+        [Trait(Category.AcceptanceType, Category.CheckIn)]
+        public void testgennewazdiskupdateconfig()
+        {
+            TestRunner.RunTestScript("TestGen-newazdiskupdateconfig");
+        }
+
+        [Fact]
+        [Trait(Category.AcceptanceType, Category.CheckIn)]
+        public void testgennewazdisk()
+        {
+            TestRunner.RunTestScript("TestGen-newazdisk");
+        }
+            }
 }

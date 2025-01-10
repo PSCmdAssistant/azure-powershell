@@ -1864,3 +1864,81 @@ function Test-DiskGrantAccessGetSASWithTL
 		Clean-ResourceGroup $rgname;
 	}
 }
+function TestGen-newazdiskupdateconfig
+{
+    $rgname = Get-ComputeTestResourceName;
+    $loc = Get-Location;
+
+    try
+    {
+        New-AzResourceGroup -Name $rgname -Location $loc -Force;
+        
+        # Create a new disk with initial configuration
+        $diskConfig = New-AzDiskConfig -Location $loc -SkuName 'Premium_LRS' -CreateOption 'Empty' -DiskSizeGB 2;
+        $diskname = "disk" + $rgname;
+        $diskPr = New-AzDisk -ResourceGroupName $rgname -DiskName $diskname -Disk $diskConfig;
+        
+        # Verify initial disk creation
+        $disk = Get-AzDisk -ResourceGroupName $rgname -DiskName $diskname;
+        Assert-AreEqual $disk.Sku.Name "Premium_LRS";
+        
+        # Update the disk with new AvailabilityPolicy parameter
+        $diskupdateconfig = New-AzDiskUpdateConfig -AvailabilityPolicy 'AutomaticReattach';
+        Update-AzDisk -ResourceGroupName $rgname -DiskName $diskname -DiskUpdate $diskupdateconfig;
+        
+        # Verify the disk update
+        $updatedDisk = Get-AzDisk -ResourceGroupName $rgname -DiskName $diskname;
+        Assert-AreEqual $updatedDisk.AvailabilityPolicy "AutomaticReattach";
+        
+        # Update the disk to clear the AvailabilityPolicy
+        $diskupdateconfig = New-AzDiskUpdateConfig -AvailabilityPolicy 'None';
+        Update-AzDisk -ResourceGroupName $rgname -DiskName $diskname -DiskUpdate $diskupdateconfig;
+        
+        # Verify the disk update
+        $updatedDisk = Get-AzDisk -ResourceGroupName $rgname -DiskName $diskname;
+        Assert-AreEqual $updatedDisk.AvailabilityPolicy $null;
+    }
+    finally
+    {
+        # Clean up resources
+        Remove-AzResourceGroup -Name $rgname -Force -ErrorAction SilentlyContinue;
+    }
+}
+
+function TestGen-newazdisk
+{
+    $rgname = Get-ComputeTestResourceName;
+    $loc = Get-Location;
+
+    try
+    {
+        New-AzResourceGroup -Name $rgname -Location $loc -Force;
+
+        # Setup
+        $diskName = 'disk' + $rgname;
+        $diskAccountType = 'Premium_LRS';
+        $createOption = 'Empty';
+        $diskSize = 32;
+        $availabilityPolicy1 = 'AutomaticReattach';
+        $availabilityPolicy2 = 'None';
+
+        # Create Disk with AvailabilityPolicy
+        $diskConfig = New-AzDiskConfig -Location $loc -AccountType $diskAccountType -CreateOption $createOption -DiskSizeGB $diskSize -AvailabilityPolicy $availabilityPolicy1;
+        New-AzDisk -ResourceGroupName $rgname -DiskName $diskName -Disk $diskConfig;
+        $disk = Get-AzDisk -ResourceGroupName $rgname -DiskName $diskName;
+        Assert-AreEqual $disk.AvailabilityPolicy $availabilityPolicy1;
+
+        # Update Disk with new AvailabilityPolicy
+        $diskUpdateConfig = New-AzDiskUpdateConfig -AvailabilityPolicy $availabilityPolicy2;
+        Update-AzDisk -ResourceGroupName $rgname -DiskName $diskName -DiskUpdate $diskUpdateConfig;
+        $diskUpdated = Get-AzDisk -ResourceGroupName $rgname -DiskName $diskName;
+        Assert-AreEqual $diskUpdated.AvailabilityPolicy $availabilityPolicy2;
+
+        # Clean up
+        Remove-AzDisk -ResourceGroupName $rgname -DiskName $diskName -Force;
+    }
+    finally
+    {
+        Remove-AzResourceGroup -Name $rgname -Force -ErrorAction SilentlyContinue;
+    }
+}

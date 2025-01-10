@@ -675,5 +675,19 @@ namespace Microsoft.Azure.Commands.Compute.Test.ScenarioTests
         {
             TestRunner.RunTestScript("Test-VMSetAzOSCredentialNullRef");
         }
-    }
+
+        [Fact]
+        [Trait(Category.AcceptanceType, Category.CheckIn)]
+        public void testgensetazvm()
+        {
+            TestRunner.RunTestScript("TestGen-setazvm");
+        }
+
+        [Fact]
+        [Trait(Category.AcceptanceType, Category.CheckIn)]
+        public void testgensetazvmdatadisk()
+        {
+            TestRunner.RunTestScript("TestGen-setazvmdatadisk");
+        }
+            }
 }

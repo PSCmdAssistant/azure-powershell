@@ -20,6 +20,12 @@
 
 -->
 ## Upcoming Release
+* Added new optional parameter `-AvailabilityPolicy` to `Set-AzVMDataDisk` and `New-AzDiskUpdateConfig` cmdlets.
+    - The `-AvailabilityPolicy` parameter accepts values 'AutomaticReattach' and 'None', allowing users to set or clear the availability policy on disks.
+
+* Upgraded nuget package to signed package.
+* Upgraded Azure.Core to 1.44.1.
+* Compute gallery related cmdlets will now use 2024-03-03 GalleryRP API calls. 
 * Upgraded nuget package to signed package.
 * Upgraded Azure.Core to 1.44.1.
 * Compute gallery related cmdlets will now use 2024-03-03 GalleryRP API calls. 
