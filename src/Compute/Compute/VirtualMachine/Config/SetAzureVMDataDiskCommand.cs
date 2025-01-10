@@ -1,4 +1,4 @@
-﻿// ----------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------
 //
 // Copyright Microsoft Corporation
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -92,6 +92,12 @@ namespace Microsoft.Azure.Commands.Compute
             ValueFromPipelineByPropertyName = false)]
         public SwitchParameter WriteAccelerator { get; set; }
 
+        [Parameter(
+            Mandatory = false,
+            HelpMessage = "2 values - 'AutomaticReattach': Will set/update property on disk and 'None': Will clear property on disk")]
+        [ValidateSet("AutomaticReattach", "None", IgnoreCase = true)]
+        public string AvailabilityPolicy { get; set; }
+
         public override void ExecuteCmdlet()
         {
             var storageProfile = this.VM.StorageProfile;
@@ -150,6 +156,11 @@ namespace Microsoft.Azure.Commands.Compute
                     {
                         dataDisk.ManagedDisk.DiskEncryptionSet = new DiskEncryptionSetParameters(this.DiskEncryptionSetId);
                     }
+                }
+
+                if (this.IsParameterBound(c => c.AvailabilityPolicy))
+                {
+                    dataDisk.ManagedDisk.AvailabilityPolicy = this.AvailabilityPolicy;
                 }
 
                 dataDisk.WriteAcceleratorEnabled = this.WriteAccelerator.IsPresent;
