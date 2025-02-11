@@ -20,6 +20,8 @@
 
 -->
 ## Upcoming Release
+* Added new optional parameter `maxPatchPublishDate` to the `Invoke-AzVMInstallPatch` cmdlet
+    - Allows installation of patches published on or before a specified date.
 
 ## Version 9.1.0
 * Added new parameter `EncryptionIdentity` to cmdlet `Set-AzVmssDiskEncryptionExtension`
