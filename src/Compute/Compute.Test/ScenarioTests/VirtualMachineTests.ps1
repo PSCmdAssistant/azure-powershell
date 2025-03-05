@@ -7889,3 +7889,84 @@ function Test-EncryptionIdentityNotPartOfAssignedIdentitiesInAzureVm{
     }
 }
 
+
+function TestGen-newazvmconfig
+{
+    # Setup
+    $rgname = Get-ComputeTestResourceName;
+    $loc = Get-Location;
+
+    try
+    {
+        $location = $loc;
+        New-AzResourceGroup -Name $rgname -Location $loc -Force;
+        
+        # create credential
+        $password = Get-PasswordForVM;
+        $securePassword = $password | ConvertTo-SecureString -AsPlainText -Force;
+        $user = Get-ComputeTestResourceName;
+        $cred = New-Object System.Management.Automation.PSCredential ($user, $securePassword);
+
+        # Add one VM from creation with new parameters
+        $vmname = 'vm' + $rgname;
+        $Placement = 'Any';
+        $includeZones = @('1', '2');
+        $excludeZones = @('3');
+        $AlignRegionalDisksToVMZone = $true;
+        $VMSize = "Standard_DS2_v2";
+
+        # Create VM configuration
+        $vmConfig = New-AzVMConfig -VMName $vmname -VMSize $VMSize -AlignRegionalDisksToVMZone $AlignRegionalDisksToVMZone;
+
+        # Add placement properties
+        $vmConfig = Set-AzVMPlacement -VM $vmConfig -Placement $Placement -IncludeZones $includeZones -ExcludeZones $excludeZones;
+
+        # Validate VM configuration
+        Assert-NotNull $vmConfig.Placement "Placement should not be null";
+        Assert-Equal $vmConfig.Placement "Any" "Placement should be 'Any'";
+        Assert-Equal $vmConfig.AlignRegionalDisksToVMZone $true "AlignRegionalDisksToVMZone should be true";
+
+        # Clean up
+        Remove-AzResourceGroup -Name $rgname -Force -ErrorAction SilentlyContinue;
+    }
+    catch
+    {
+        Write-Error "Test failed: $_";
+        Remove-AzResourceGroup -Name $rgname -Force -ErrorAction SilentlyContinue;
+    }
+}
+
+function TestGen-newazvm
+{
+    # To have a test recording 
+    Get-AzVm 
+
+    $name = Get-ComputeTestResourceName;
+    $vmname = 'vm' + $name;
+    $location = Get-Location;
+    $resourceGroupName = "rg" + $name;
+
+    # Create a new VM with the new 'Placement' parameter
+    $vmConfig = New-AzVmConfig -VMName $vmname -VMSize 'Standard_DS1_v2' -AlignRegionalDisksToVMZone $true
+    $vmConfig = Set-AzVMPlacement -VM $vmConfig -Placement "Any" -IncludeZones @("1", "2") -ExcludeZones @("3")
+
+    # Validate the VM configuration
+    Assert-AreEqual $vmConfig.Placement.ZonePlacementPolicy "Any"
+    Assert-Contains $vmConfig.Placement.IncludeZones "1"
+    Assert-Contains $vmConfig.Placement.IncludeZones "2"
+    Assert-NotContains $vmConfig.Placement.ExcludeZones "3"
+    Assert-AreEqual $vmConfig.AlignRegionalDisksToVMZone $true
+
+    # Create the VM
+    New-AzVM -ResourceGroupName $resourceGroupName -Location $location -VM $vmConfig
+
+    # Validate the VM creation
+    $vm = Get-AzVM -ResourceGroupName $resourceGroupName -Name $vmname
+    Assert-NotNullOrEmpty $vm
+    Assert-AreEqual $vm.Name $vmname
+    Assert-AreEqual $vm.Location $location
+
+    # Clean up resources
+    Remove-AzVM -ResourceGroupName $resourceGroupName -Name $vmname -Force
+    Remove-AzResourceGroup -Name $resourceGroupName -Force
+}

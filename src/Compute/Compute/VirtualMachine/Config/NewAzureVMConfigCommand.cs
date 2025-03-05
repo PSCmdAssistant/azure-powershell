@@ -1,4 +1,4 @@
-// ----------------------------------------------------------------------------------
+ // ----------------------------------------------------------------------------------
 //
 // Copyright Microsoft Corporation
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -218,6 +218,11 @@ namespace Microsoft.Azure.Commands.Compute
            ValueFromPipelineByPropertyName = true,
            Mandatory = false)]
         public bool? EnableSecureBoot { get; set; } = null;
+
+        [Parameter(
+            Mandatory = false,
+            HelpMessage = "Specifies whether the regional disks should be aligned/moved to the VM zone. This is applicable only for VMs with placement property set. Please note that this change is irreversible.")]
+        public bool AlignRegionalDisksToVMZone { get; set; }
 
         public override void ExecuteCmdlet()
         {
@@ -454,6 +459,11 @@ namespace Microsoft.Azure.Commands.Compute
                     vm.SecurityProfile.UefiSettings = new UefiSettings();
                 }
                 vm.SecurityProfile.UefiSettings.SecureBootEnabled = this.EnableSecureBoot;
+            }
+
+            if (this.IsParameterBound(c => c.AlignRegionalDisksToVMZone))
+            {
+                vm.AlignRegionalDisksToVMZone = this.AlignRegionalDisksToVMZone;
             }
 
             WriteObject(vm);
