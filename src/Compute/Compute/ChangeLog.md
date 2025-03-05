@@ -20,6 +20,12 @@
 
 -->
 ## Upcoming Release
+* Added new `Placement` parameter to `New-AzVM` cmdlet
+    - Specifies the policy for virtual machine's placement in availability zone with options for automatic zone selection and optional inclusion/exclusion of specific zones.
+* Added new `AlignRegionalDisksToVMZone` parameter to `New-AzVM` cmdlet
+    - Allows alignment of regional disks to the VM zone, applicable only for VMs with the placement property set.
+* Added new `AlignRegionalDisksToVMZone` parameter to `New-AzVMConfig` cmdlet
+    - Enables alignment of regional disks to the VM zone, similar to the `New-AzVM` cmdlet.
 
 ## Version 9.1.0
 * Added new parameter `EncryptionIdentity` to cmdlet `Set-AzVmssDiskEncryptionExtension`
