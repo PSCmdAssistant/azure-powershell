@@ -1,4 +1,4 @@
-//
+ //
 // Copyright (c) Microsoft and contributors.  All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -387,6 +387,32 @@ namespace Microsoft.Azure.Commands.Compute.Automation
             HelpMessage = "Specifies whether resilient VM deletion should be enabled on the virtual machine scale set. The default value is false.")]
         public SwitchParameter EnableResilientVMDelete { get; set; }
 
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "Specifies whether automatic zone rebalancing policy should be enabled.")]
+        public bool? EnableAutomaticZoneRebalancingPolicy { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "Specifies the strategy for automatic zone rebalancing.")]
+        [PSArgumentCompleter("Recreate", "TargetScaleOut")]
+        public string AutomaticZoneRebalanceStrategy { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "Specifies the behavior for automatic zone rebalancing.")]
+        [PSArgumentCompleter("CreateBeforeDelete")]
+        public string AutomaticZoneRebalanceBehavior { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "Specifies the target instance count for automatic zone rebalancing.")]
+        public int AutomaticZoneRebalanceTargetInstanceCount { get; set; }
+
         protected override void ProcessRecord()
         {
             if (ShouldProcess("VirtualMachineScaleSet", "New"))
@@ -435,6 +461,9 @@ namespace Microsoft.Azure.Commands.Compute.Automation
 
             //ResiliencyPolicy
             ResiliencyPolicy vResiliencyPolicy = null;
+
+            // AutomaticZoneRebalancePolicy
+            AutomaticZoneRebalancePolicy vAutomaticZoneRebalancePolicy = null;
 
             if (this.IsParameterBound(c => c.SkuName))
             {
@@ -1063,6 +1092,42 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                 vVirtualMachineProfile.SecurityPostureReference.ExcludeExtensions = this.SecurityPostureExcludeExtension;
             }
 
+            if (this.IsParameterBound(c => c.EnableAutomaticZoneRebalancingPolicy))
+            {
+                if (vAutomaticZoneRebalancePolicy == null)
+                {
+                    vAutomaticZoneRebalancePolicy = new AutomaticZoneRebalancePolicy();
+                }
+                vAutomaticZoneRebalancePolicy.Enabled = this.EnableAutomaticZoneRebalancingPolicy;
+            }
+
+            if (this.IsParameterBound(c => c.AutomaticZoneRebalanceStrategy))
+            {
+                if (vAutomaticZoneRebalancePolicy == null)
+                {
+                    vAutomaticZoneRebalancePolicy = new AutomaticZoneRebalancePolicy();
+                }
+                vAutomaticZoneRebalancePolicy.Strategy = this.AutomaticZoneRebalanceStrategy;
+            }
+
+            if (this.IsParameterBound(c => c.AutomaticZoneRebalanceBehavior))
+            {
+                if (vAutomaticZoneRebalancePolicy == null)
+                {
+                    vAutomaticZoneRebalancePolicy = new AutomaticZoneRebalancePolicy();
+                }
+                vAutomaticZoneRebalancePolicy.Behavior = this.AutomaticZoneRebalanceBehavior;
+            }
+
+            if (this.IsParameterBound(c => c.AutomaticZoneRebalanceTargetInstanceCount))
+            {
+                if (vAutomaticZoneRebalancePolicy == null)
+                {
+                    vAutomaticZoneRebalancePolicy = new AutomaticZoneRebalancePolicy();
+                }
+                vAutomaticZoneRebalancePolicy.TargetInstanceCount = this.AutomaticZoneRebalanceTargetInstanceCount;
+            }
+
             var vVirtualMachineScaleSet = new PSVirtualMachineScaleSet
             {
                 Overprovision = this.IsParameterBound(c => c.Overprovision) ? this.Overprovision : (bool?)null,
@@ -1087,7 +1152,96 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                 SpotRestorePolicy = this.IsParameterBound(c => c.EnableSpotRestore) ? new SpotRestorePolicy(true, this.SpotRestoreTimeout) : null,
                 PriorityMixPolicy = vPriorityMixPolicy,
                 SkuProfile = vSkuProfile,
-                ResiliencyPolicy = vResiliencyPolicy
+                ResiliencyPolicy = vResiliencyPolicy,
+                AutomaticZoneRebalancePolicy = vAutomaticZoneRebalancePolicy
+            };
+
+            WriteObject(vVirtualMachineScaleSet);
+        }
+    }
+
+    [Cmdlet(VerbsData.Update, ResourceManager.Common.AzureRMConstants.AzureRMPrefix + "Vmss", SupportsShouldProcess = true, DefaultParameterSetName = "DefaultParameterSet")]
+    [OutputType(typeof(PSVirtualMachineScaleSet))]
+    public partial class UpdateAzureRmVmssCommand : Microsoft.Azure.Commands.ResourceManager.Common.AzureRMCmdlet
+    {
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "Specifies whether automatic zone rebalancing policy should be enabled.")]
+        public bool? EnableAutomaticZoneRebalancingPolicy { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "Specifies the strategy for automatic zone rebalancing.")]
+        [PSArgumentCompleter("Recreate", "TargetScaleOut")]
+        public string AutomaticZoneRebalanceStrategy { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "Specifies the behavior for automatic zone rebalancing.")]
+        [PSArgumentCompleter("CreateBeforeDelete")]
+        public string AutomaticZoneRebalanceBehavior { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "Specifies the target instance count for automatic zone rebalancing.")]
+        public int AutomaticZoneRebalanceTargetInstanceCount { get; set; }
+
+        protected override void ProcessRecord()
+        {
+            if (ShouldProcess("VirtualMachineScaleSet", "Update"))
+            {
+                Run();
+            }
+        }
+
+        private void Run()
+        {
+            // AutomaticZoneRebalancePolicy
+            AutomaticZoneRebalancePolicy vAutomaticZoneRebalancePolicy = null;
+
+            if (this.IsParameterBound(c => c.EnableAutomaticZoneRebalancingPolicy))
+            {
+                if (vAutomaticZoneRebalancePolicy == null)
+                {
+                    vAutomaticZoneRebalancePolicy = new AutomaticZoneRebalancePolicy();
+                }
+                vAutomaticZoneRebalancePolicy.Enabled = this.EnableAutomaticZoneRebalancingPolicy;
+            }
+
+            if (this.IsParameterBound(c => c.AutomaticZoneRebalanceStrategy))
+            {
+                if (vAutomaticZoneRebalancePolicy == null)
+                {
+                    vAutomaticZoneRebalancePolicy = new AutomaticZoneRebalancePolicy();
+                }
+                vAutomaticZoneRebalancePolicy.Strategy = this.AutomaticZoneRebalanceStrategy;
+            }
+
+            if (this.IsParameterBound(c => c.AutomaticZoneRebalanceBehavior))
+            {
+                if (vAutomaticZoneRebalancePolicy == null)
+                {
+                    vAutomaticZoneRebalancePolicy = new AutomaticZoneRebalancePolicy();
+                }
+                vAutomaticZoneRebalancePolicy.Behavior = this.AutomaticZoneRebalanceBehavior;
+            }
+
+            if (this.IsParameterBound(c => c.AutomaticZoneRebalanceTargetInstanceCount))
+            {
+                if (vAutomaticZoneRebalancePolicy == null)
+                {
+                    vAutomaticZoneRebalancePolicy = new AutomaticZoneRebalancePolicy();
+                }
+                vAutomaticZoneRebalancePolicy.TargetInstanceCount = this.AutomaticZoneRebalanceTargetInstanceCount;
+            }
+
+            var vVirtualMachineScaleSet = new PSVirtualMachineScaleSet
+            {
+                AutomaticZoneRebalancePolicy = vAutomaticZoneRebalancePolicy
             };
 
             WriteObject(vVirtualMachineScaleSet);
