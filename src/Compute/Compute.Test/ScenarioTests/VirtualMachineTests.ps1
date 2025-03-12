@@ -7889,3 +7889,39 @@ function Test-EncryptionIdentityNotPartOfAssignedIdentitiesInAzureVm{
     }
 }
 
+
+function TestGen-newazvm
+{
+    # To have a test recording
+    Get-AzVmss
+
+    $name = Get-ComputeTestResourceName;
+    $vmssName = 'vmss' + $name;
+    $location = Get-Location;
+
+    # Create a new VMSS configuration with new parameters
+    $vmssConfig = New-AzVmssConfig -VMSSName $vmssName -Location $location -SkuCapacity 2 -SkuName 'Standard_DS1_v2' `
+        -EnableAutomaticZoneRebalancingPolicy $true `
+        -AutomaticZoneRebalanceStrategy 'Recreate' `
+        -AutomaticZoneRebalanceBehavior 'CreateBeforeDelete' `
+        -AutomaticZoneRebalanceTargetInstanceCount 3
+
+    # Validate New-AzVmssConfig
+    Assert-AreEqual $vmssConfig.EnableAutomaticZoneRebalancingPolicy $true
+    Assert-AreEqual $vmssConfig.AutomaticZoneRebalanceStrategy 'Recreate'
+    Assert-AreEqual $vmssConfig.AutomaticZoneRebalanceBehavior 'CreateBeforeDelete'
+    Assert-AreEqual $vmssConfig.AutomaticZoneRebalanceTargetInstanceCount 3
+
+    # Update the VMSS with new parameters
+    $vmssConfigUpdated = Update-AzVmss -VMSS $vmssConfig `
+        -EnableAutomaticZoneRebalancingPolicy $false `
+        -AutomaticZoneRebalanceStrategy 'TargetScaleOut' `
+        -AutomaticZoneRebalanceBehavior 'CreateBeforeDelete' `
+        -AutomaticZoneRebalanceTargetInstanceCount 5
+
+    # Validate Update-AzVmss
+    Assert-AreEqual $vmssConfigUpdated.EnableAutomaticZoneRebalancingPolicy $false
+    Assert-AreEqual $vmssConfigUpdated.AutomaticZoneRebalanceStrategy 'TargetScaleOut'
+    Assert-AreEqual $vmssConfigUpdated.AutomaticZoneRebalanceBehavior 'CreateBeforeDelete'
+    Assert-AreEqual $vmssConfigUpdated.AutomaticZoneRebalanceTargetInstanceCount 5
+}

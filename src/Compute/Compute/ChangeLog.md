@@ -20,6 +20,12 @@
 
 -->
 ## Upcoming Release
+* Added new parameters to `New-AzVmssConfig` and `Update-AzVmss` cmdlets for automatic zone rebalancing.
+    - `EnableAutomaticZoneRebalancingPolicy`: Allows enabling or disabling automatic zone balancing for VMSS.
+    - `AutomaticZoneRebalanceStrategy`: Specifies the strategy/actions taken to balance the scale set, with possible values 'Recreate' and 'TargetScaleOut'.
+    - `AutomaticZoneRebalanceBehavior`: Specifies detailed behavior for the rebalance strategy, with possible value 'CreateBeforeDelete'.
+    - `AutomaticZoneRebalanceTargetInstanceCount`: Sets the target instance count the zonal scale set aims to reach.
+* Added breaking change message for `Get-AzVMSize`.
 * Added breaking change message for `Get-AzVMSize`.
 
 ## Version 9.1.0

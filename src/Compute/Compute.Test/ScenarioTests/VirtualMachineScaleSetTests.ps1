@@ -5679,3 +5679,235 @@ function Test-EncryptionIdentityNotPartOfAzureVmssConfig{
         clean-ResourceGroup $rgName;
     }
 }
+
+function TestGen-newazvmssconfig
+{
+    # Setup
+    $rgname = Get-ComputeTestResourceName;
+    $loc = Get-Location;
+
+    try
+    {
+        # Common
+        New-AzResourceGroup -Name $rgname -Location $loc -Force;
+        $vmssName = 'vmss' + $rgname;
+
+        # Create Vmss with new parameters
+        $vmssConfig = New-AzVmssConfig -Location $loc `
+            -EnableAutomaticZoneRebalancingPolicy $true `
+            -AutomaticZoneRebalanceStrategy 'Recreate' `
+            -AutomaticZoneRebalanceBehavior 'CreateBeforeDelete' `
+            -AutomaticZoneRebalanceTargetInstanceCount 5;
+
+        New-AzVmss -ResourceGroupName $rgname -VMScaleSetName $vmssName -VirtualMachineScaleSet $vmssConfig;
+        $vmssGet = Get-AzVmss -ResourceGroupName $rgname -VMScaleSetName $vmssName;
+
+        # Assertions
+        Assert-IsTrue $vmssGet.EnableAutomaticZoneRebalancingPolicy;
+        Assert-AreEqual $vmssGet.AutomaticZoneRebalanceStrategy 'Recreate';
+        Assert-AreEqual $vmssGet.AutomaticZoneRebalanceBehavior 'CreateBeforeDelete';
+        Assert-AreEqual $vmssGet.AutomaticZoneRebalanceTargetInstanceCount 5;
+    }
+    finally
+    {
+        # Cleanup
+        Remove-AzResourceGroup -Name $rgname -Force;
+    }
+}
+
+function TestGen-newazvmss
+{
+    # Setup
+    $rgname = Get-ComputeTestResourceName;
+    $loc = Get-ComputeVMLocation;
+
+    try
+    {
+        # Common
+        New-AzResourceGroup -Name $rgname -Location $loc -Force;
+
+        $vmssName = 'vs' + $rgname;
+
+        $domainNameLabel1 = "d1" + $rgname;
+        $enable = $true;
+        $securityTypeST = "Standard";
+        $adminUsername = Get-ComputeTestResourceName;
+        $password = Get-PasswordForVM;
+        $adminPassword = $password | ConvertTo-SecureString -AsPlainText -Force;
+        $cred = New-Object System.Management.Automation.PSCredential ($adminUsername, $adminPassword);
+
+        # New parameters for the design request
+        $enableAutomaticZoneRebalancingPolicy = $true;
+        $automaticZoneRebalanceStrategy = "Recreate";
+        $automaticZoneRebalanceBehavior = "CreateBeforeDelete";
+        $automaticZoneRebalanceTargetInstanceCount = 5;
+
+        # Create VMSS with new parameters
+        $vmss = New-AzVmssConfig -ResourceGroupName $rgname -Credential $cred -VMScaleSetName $vmssName -SecurityType $securityTypeST -DomainNameLabel $domainNameLabel1 `
+            -EnableAutomaticZoneRebalancingPolicy $enableAutomaticZoneRebalancingPolicy `
+            -AutomaticZoneRebalanceStrategy $automaticZoneRebalanceStrategy `
+            -AutomaticZoneRebalanceBehavior $automaticZoneRebalanceBehavior `
+            -AutomaticZoneRebalanceTargetInstanceCount $automaticZoneRebalanceTargetInstanceCount;
+
+        # Assertions to verify the new parameters
+        Assert-AreEqual $vmss.EnableAutomaticZoneRebalancingPolicy $enableAutomaticZoneRebalancingPolicy;
+        Assert-AreEqual $vmss.AutomaticZoneRebalanceStrategy $automaticZoneRebalanceStrategy;
+        Assert-AreEqual $vmss.AutomaticZoneRebalanceBehavior $automaticZoneRebalanceBehavior;
+        Assert-AreEqual $vmss.AutomaticZoneRebalanceTargetInstanceCount $automaticZoneRebalanceTargetInstanceCount;
+    }
+    finally
+    {
+        # Cleanup
+        Remove-AzResourceGroup -Name $rgname -Force;
+    }
+}
+
+function TestGen-updateazvmss
+{
+    # Setup
+    $rgname = Get-ComputeTestResourceName;
+    $loc = Get-Location;
+
+    try
+    {
+        # Common
+        New-AzResourceGroup -Name $rgname -Location $loc -Force;
+
+        $vmssSize = 'Standard_D4s_v3';
+        $PublisherName = "MicrosoftWindowsServer";
+        $Offer = "WindowsServer";
+        $SKU = "2016-datacenter-gensecond";
+        $securityType = "TrustedLaunch";
+        $enable = $true;
+        $disable = $false;
+
+        # NRP
+        $vnetworkName = 'vnet' + $rgname;
+        $subnetName = 'subnet' + $rgname;
+        $subnet = New-AzVirtualNetworkSubnetConfig -Name $subnetName -AddressPrefix "10.0.0.0/24";
+        $vnet = New-AzVirtualNetwork -Name $vnetworkName -ResourceGroupName $rgname -Location $loc -AddressPrefix "10.0.0.0/16" -Subnet $subnet;
+        $vnet = Get-AzVirtualNetwork -Name $vnetworkName -ResourceGroupName $rgname;
+        $subnetId = $vnet.Subnets[0].Id;
+
+        # New VMSS Parameters
+        $vmssName1 = 'vmss1' + $rgname;
+        $vmssType = 'Microsoft.Compute/virtualMachineScaleSets';
+
+        $adminUsername = Get-ComputeTestResourceName;
+        $adminPassword = Get-PasswordForVM | ConvertTo-SecureString -AsPlainText -Force;
+
+        $imgRef = New-Object -TypeName 'Microsoft.Azure.Commands.Compute.Models.PSVirtualMachineImage';
+        $imgRef.PublisherName = $PublisherName;
+        $imgRef.Offer = $Offer;
+        $imgRef.Skus = $SKU;
+        $imgRef.Version = "latest";
+        
+        $ipCfg = New-AzVmssIPConfig -Name 'test' -SubnetId $subnetId;
+
+        $vmss = New-AzVmssConfig -Location $loc -SkuCapacity 2 -SkuName $vmssSize -UpgradePolicyMode 'Manual' `
+            | Add-AzVmssNetworkInterfaceConfiguration -Name 'test' -Primary $true -IPConfiguration $ipCfg `
+            | Set-AzVmssOSProfile -ComputerNamePrefix 'test' -AdminUsername $adminUsername -AdminPassword $adminPassword `
+            | Set-AzVmssStorageProfile -OsDiskCreateOption 'FromImage' -OsDiskCaching 'ReadOnly' `
+            -ImageReferenceOffer $imgRef.Offer -ImageReferenceSku $imgRef.Skus -ImageReferenceVersion $imgRef.Version `
+            -ImageReferencePublisher $imgRef.PublisherName `
+            -EnableAutomaticZoneRebalancingPolicy $true `
+            -AutomaticZoneRebalanceStrategy 'Recreate' `
+            -AutomaticZoneRebalanceBehavior 'CreateBeforeDelete' `
+            -AutomaticZoneRebalanceTargetInstanceCount 3;
+
+        # Create TL Vmss
+        $result = New-AzVmss -ResourceGroupName $rgname -VMScaleSetName $vmssName1 -VirtualMachineScaleSet $vmss;
+        $vmssGet = Get-AzVmss -ResourceGroupName $rgname -VMScaleSetName $vmssName1; 
+        Assert-AreEqual $vmssGet.VirtualMachineProfile.SecurityProfile.SecurityType $securityType;
+
+        # Test update functionality
+        Update-AzVmss -ResourceGroupName $rgname -VMScaleSetName $vmssName1 -VirtualMachineScaleSet $vmssGet -SecurityType $securityType -EnableSecureBoot $disable -EnableVtpm $disable `
+            -EnableAutomaticZoneRebalancingPolicy $false `
+            -AutomaticZoneRebalanceStrategy 'TargetScaleOut' `
+            -AutomaticZoneRebalanceBehavior 'CreateBeforeDelete' `
+            -AutomaticZoneRebalanceTargetInstanceCount 5;
+
+        $vmssGet = Get-AzVmss -ResourceGroupName $rgname -VMScaleSetName $vmssName1;
+        Assert-AreEqual $vmssGet.VirtualMachineProfile.SecurityProfile.SecurityType $securityType;
+        Assert-AreEqual $vmssGet.VirtualMachineProfile.AutomaticZoneRebalancingPolicy.Enabled $false;
+        Assert-AreEqual $vmssGet.VirtualMachineProfile.AutomaticZoneRebalanceStrategy 'TargetScaleOut';
+        Assert-AreEqual $vmssGet.VirtualMachineProfile.AutomaticZoneRebalanceBehavior 'CreateBeforeDelete';
+        Assert-AreEqual $vmssGet.VirtualMachineProfile.AutomaticZoneRebalanceTargetInstanceCount 5;
+
+        $vmssUp1 = Update-AzVmss -ResourceGroupName $rgname -VMScaleSetName $vmssName1 -VirtualMachineScaleSet $vmssGet -EnableVtpm $true;
+        $vmssGet1 = Get-AzVmss -ResourcegroupName $rgname -VMScaleSetName $vmssName1;
+        Assert-AreEqual $vmssGet1.VirtualMachineProfile.SecurityProfile.UefiSettings.VTpmEnabled $true;
+
+        $vmssUp2 = Update-AzVmss -ResourceGroupName $rgname -VMScaleSetName $vmssName1 -VirtualMachineScaleSet $vmssGet1 -EnableSecureBoot $true;
+        $vmssGet2 = Get-AzVmss -ResourcegroupName $rgname -VMScaleSetName $vmssName1;
+        Assert-AreEqual $vmssGet2.VirtualMachineProfile.SecurityProfile.UefiSettings.SecureBootEnabled $true;
+    }
+    finally
+    {
+        # Cleanup
+        Remove-AzResourceGroup -Name $rgname -Force -AsJob;
+    }
+}
+
+function TestGen-updateazvm
+{
+    # Setup
+    $rgname = Get-ComputeTestResourceName
+
+    try
+    {
+        # Common
+        $loc = Get-Location;
+        New-AzResourceGroup -Name $rgname -Location $loc -Force;
+
+        # New VMSS Parameters
+        $vmssName = 'vmssUpdateTest' + $rgname;
+        $vmName = 'vm' + $rgname;
+
+        $adminUsername = 'Foo12';
+        $adminPassword = $PLACEHOLDER;
+        $securePassword = ConvertTo-SecureString $adminPassword -AsPlainText -Force;
+        $cred = New-Object System.Management.Automation.PSCredential ($adminUsername, $securePassword);
+
+        $VmssFlex = New-AzVmss `
+          -ResourceGroupName $rgname `
+          -Name $vmssName `
+          -OrchestrationMode 'Flexible' `
+          -Location $loc `
+          -Credential $cred `
+          -DomainNameLabel "scaleset-70f699" `
+          -SecurityType "Standard" `
+          -EnableAutomaticZoneRebalancingPolicy $true `
+          -AutomaticZoneRebalanceStrategy 'Recreate' `
+          -AutomaticZoneRebalanceBehavior 'CreateBeforeDelete' `
+          -AutomaticZoneRebalanceTargetInstanceCount 5
+
+        $vm = New-AzVm `
+          -ResourceGroupName $rgname `
+          -Location $loc `
+          -Name $vmName `
+          -Credential $cred `
+          -DomainNameLabel "scaleset-70f699"
+
+        # Update VMSS with new parameters
+        Update-AzVmss `
+          -ResourceGroupName $rgname `
+          -VMScaleSetName $vmssName `
+          -EnableAutomaticZoneRebalancingPolicy $true `
+          -AutomaticZoneRebalanceStrategy 'TargetScaleOut' `
+          -AutomaticZoneRebalanceBehavior 'CreateBeforeDelete' `
+          -AutomaticZoneRebalanceTargetInstanceCount 10
+
+        $updatedVmss = Get-AzVmss -ResourceGroupName $rgname -VMScaleSetName $vmssName
+        Assert-AreEqual $true $updatedVmss.EnableAutomaticZoneRebalancingPolicy
+        Assert-AreEqual 'TargetScaleOut' $updatedVmss.AutomaticZoneRebalanceStrategy
+        Assert-AreEqual 'CreateBeforeDelete' $updatedVmss.AutomaticZoneRebalanceBehavior
+        Assert-AreEqual 10 $updatedVmss.AutomaticZoneRebalanceTargetInstanceCount
+
+    }
+    finally
+    {
+        # Cleanup
+        Remove-AzResourceGroup -Name $rgname -Force -AsJob
+    }
+}
