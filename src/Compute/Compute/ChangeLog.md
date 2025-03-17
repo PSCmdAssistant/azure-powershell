@@ -20,6 +20,10 @@
 
 -->
 ## Upcoming Release
+* Introduced new parameter `ReplicationMode` to `New-AzGalleryImageVersion` cmdlet.
+    - Allows users to choose between 'Full' and 'Shallow' replication modes, enabling quicker provisioning for testing purposes with 'Shallow' mode. 
+
+* Added breaking change message for `Get-AzVMSize`.
 * Added breaking change message for `Get-AzVMSize`.
 
 ## Version 9.1.0
