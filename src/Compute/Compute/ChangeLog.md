@@ -20,6 +20,9 @@
 
 -->
 ## Upcoming Release
+* Added new parameter `EnableIntegrityMonitoring` to cmdlet `Set-AzVmUefi`
+    - This flag enables Integrity Monitoring (Guest Attestation) on Azure VMs.
+* Added breaking change message for `Get-AzVMSize`.
 * Added breaking change message for `Get-AzVMSize`.
 
 ## Version 9.1.0
