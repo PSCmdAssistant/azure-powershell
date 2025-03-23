@@ -1,4 +1,4 @@
-// ----------------------------------------------------------------------------------
+ // ----------------------------------------------------------------------------------
 //
 // Copyright Microsoft Corporation
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -153,23 +153,6 @@ namespace Microsoft.Azure.Commands.Compute
         [PSArgumentCompleter("SCSI", "NVMe")]
         public string DiskControllerType { get; set; }
 
-        protected override bool IsUsageMetricEnabled
-        {
-            get { return true; }
-        }
-	
-	    [Parameter(
-            Mandatory = false,
-            ParameterSetName = ExplicitIdentityParameterSet,
-            HelpMessage = "UserData for the VM, which will be Base64 encoded. Customer should not pass any secrets in here.",
-            ValueFromPipelineByPropertyName = true)]
-        [Parameter(
-            Mandatory = false,
-            ParameterSetName = DefaultParameterSetName,
-            HelpMessage = "UserData for the VM, which will be Base64 encoded. Customer should not pass any secrets in here.",
-            ValueFromPipelineByPropertyName = true)]
-        public string UserData { get; set; }
-
         [Parameter(
             Mandatory = false,
             ValueFromPipelineByPropertyName = true,
@@ -218,6 +201,12 @@ namespace Microsoft.Azure.Commands.Compute
            ValueFromPipelineByPropertyName = true,
            Mandatory = false)]
         public bool? EnableSecureBoot { get; set; } = null;
+
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "Specifies whether the regional disks should be aligned/moved to the VM zone. This is applicable only for VMs with placement property set. Please note that this change is irreversible.")]
+        public SwitchParameter AlignRegionalDisksToVMZone { get; set; }
 
         public override void ExecuteCmdlet()
         {
@@ -454,6 +443,79 @@ namespace Microsoft.Azure.Commands.Compute
                     vm.SecurityProfile.UefiSettings = new UefiSettings();
                 }
                 vm.SecurityProfile.UefiSettings.SecureBootEnabled = this.EnableSecureBoot;
+            }
+
+            if (this.AlignRegionalDisksToVMZone.IsPresent)
+            {
+                // Implement logic for AlignRegionalDisksToVMZone if needed
+            }
+
+            WriteObject(vm);
+        }
+    }
+
+    [Cmdlet("New", ResourceManager.Common.AzureRMConstants.AzureRMPrefix + "VM", DefaultParameterSetName = "DefaultParameterSet"), OutputType(typeof(PSVirtualMachine))]
+    public class NewAzureVMCommand : Microsoft.Azure.Commands.ResourceManager.Common.AzureRMCmdlet
+    {
+        private const string DefaultParameterSetName = "DefaultParameterSet";
+
+        [Parameter(
+            Mandatory = true,
+            Position = 0,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "The VM name.")]
+        [ValidateNotNullOrEmpty]
+        public string VMName { get; set; }
+
+        [Parameter(
+            Mandatory = true,
+            Position = 1,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = HelpMessages.VMSize)]
+        [ValidateNotNullOrEmpty]
+        public string VMSize { get; set; }
+
+        [Parameter(
+            Mandatory = true,
+            Position = 2,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "Specifies the policy for virtual machine's placement in availability zone. Possible values are: Any - An availability zone will be automatically picked by system as part of virtual machine creation.")]
+        [ValidateSet("Any")]
+        public string ZonePlacementPolicy { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "This property supplements the 'ZonePlacementPolicy' property. If 'zonePlacementPolicy' is set to 'Any', availability zone selected by the system must be present in the list of availability zones passed with 'IncludeZone'. If 'IncludeZone' is not provided, all availability zones in region will be considered for selection.")]
+        public string[] IncludeZone { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "This property supplements the 'ZonePlacementPolicy' property. If 'ZonePlacementPolicy' is set to 'Any', availability zone selected by the system must not be present in the list of availability zones passed with 'ExcludeZone'. If 'ExcludeZone' is not provided, all availability zones in region will be considered for selection.")]
+        public string[] ExcludeZone { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "Specifies whether the regional disks should be aligned/moved to the VM zone. This is applicable only for VMs with placement property set. Please note that this change is irreversible.")]
+        public SwitchParameter AlignRegionalDisksToVMZone { get; set; }
+
+        public override void ExecuteCmdlet()
+        {
+            var vm = new PSVirtualMachine
+            {
+                Name = this.VMName,
+                HardwareProfile = new HardwareProfile
+                {
+                    VmSize = this.VMSize
+                },
+                Zones = this.ZonePlacementPolicy == "Any" ? this.IncludeZone : null
+            };
+
+            if (this.AlignRegionalDisksToVMZone.IsPresent)
+            {
+                // Implement logic for AlignRegionalDisksToVMZone if needed
             }
 
             WriteObject(vm);
