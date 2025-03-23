@@ -20,6 +20,14 @@
 
 -->
 ## Upcoming Release
+* Added new parameters to `New-AzVM` cmdlet:
+    - `ZonePlacementPolicy`: Specifies the policy for virtual machine's placement in availability zone.
+    - `IncludeZone`: Supplements the 'ZonePlacementPolicy' property to include specific availability zones.
+    - `ExcludeZone`: Supplements the 'ZonePlacementPolicy' property to exclude specific availability zones.
+    - `AlignRegionalDisksToVMZone`: Specifies whether regional disks should be aligned/moved to the VM zone.
+* Added new parameter `AlignRegionalDisksToVMZone` to `New-AzVMConfig` cmdlet.
+
+* Added breaking change message for `Get-AzVMSize`.
 * Added breaking change message for `Get-AzVMSize`.
 
 ## Version 9.1.0

@@ -7889,3 +7889,111 @@ function Test-EncryptionIdentityNotPartOfAssignedIdentitiesInAzureVm{
     }
 }
 
+
+function TestGen-newazvmconfig
+{
+    # Setup
+    $rgname = Get-ComputeTestResourceName;
+    $loc = Get-Location;
+
+    try
+    {
+        $location = $loc;
+        New-AzResourceGroup -Name $rgname -Location $loc -Force;
+        
+        # create credential
+        $password = Get-PasswordForVM;
+        $securePassword = $password | ConvertTo-SecureString -AsPlainText -Force;
+        $user = Get-ComputeTestResourceName;
+        $cred = New-Object System.Management.Automation.PSCredential ($user, $securePassword);
+
+        # Add one VM from creation with new parameters
+        $vmname = 'vm' + $rgname;
+        $domainNameLabel = "d1" + $rgname;
+        $securityType_TL = "TrustedLaunch";
+        $PublisherName = "MicrosoftWindowsServer";
+        $Offer = "WindowsServer";
+        $SKU = "2022-datacenter-azure-edition";
+        $version = "latest";
+        $disable = $false;
+        $enable = $true;
+        $galleryName = "g" + $rgname;
+        $vnetname = "vn" + $rgname;
+        $vnetAddress = "10.0.0.0/16";
+        $subnetname = "slb" + $rgname;
+        $subnetAddress = "10.0.2.0/24";
+        $pubipname = "p" + $rgname;
+        $OSDiskName = $vmname + "-osdisk";
+        $NICName = $vmname+ "-nic";
+        $NSGName = $vmname + "-NSG";
+        $nsgrulename = "nsr" + $rgname;
+        $OSDiskSizeinGB = 128;
+        $VMSize = "Standard_DS2_v2";
+        $vmname2 = "2" + $vmname;
+
+        # Create VM with ZonePlacementPolicy and IncludeZone
+        $vm = New-AzVM -ResourceGroupName $rgname -Location $loc -Name $vmname -Credential $cred -ZonePlacementPolicy "Any" -IncludeZone @("1", "2") -AlignRegionalDisksToVMZone
+
+        # Validate VM creation
+        $vm | Should -Not -BeNullOrEmpty
+        $vm.ZonePlacementPolicy | Should -Be "Any"
+        $vm.IncludeZone | Should -Be @("1", "2")
+        $vm.AlignRegionalDisksToVMZone | Should -Be $true
+
+        # Create VM with ExcludeZone
+        $vm2 = New-AzVM -ResourceGroupName $rgname -Location $loc -Name $vmname2 -Credential $cred -ZonePlacementPolicy "Any" -ExcludeZone @("3") -AlignRegionalDisksToVMZone
+
+        # Validate VM creation
+        $vm2 | Should -Not -BeNullOrEmpty
+        $vm2.ZonePlacementPolicy | Should -Be "Any"
+        $vm2.ExcludeZone | Should -Be @("3")
+        $vm2.AlignRegionalDisksToVMZone | Should -Be $true
+    }
+    finally
+    {
+        # Cleanup
+        Remove-AzResourceGroup -Name $rgname -Force -ErrorAction SilentlyContinue;
+    }
+}
+
+function TestGen-newazvm
+{
+    # To have a test recording 
+    Get-AzVm 
+
+    $name = Get-ComputeTestResourceName;
+    $vmname = 'vm' + $name;
+    $location = Get-Location;
+
+    # Test New-AzVM with ZonePlacementPolicy and IncludeZone
+    $vmConfig = New-AzVmConfig -VMName $vmname -VMSize 'testVMSize' -AlignRegionalDisksToVMZone
+    $vm = New-AzVM -ResourceGroupName $name -Location $location -VM $vmConfig -ZonePlacementPolicy 'Any' -IncludeZone @('1', '2')
+
+    # Validate ZonePlacementPolicy and IncludeZone
+    Assert-AreEqual $vm.ZonePlacementPolicy 'Any'
+    Assert-Contains $vm.IncludeZone '1'
+    Assert-Contains $vm.IncludeZone '2'
+
+    # Test New-AzVM with ZonePlacementPolicy and ExcludeZone
+    $vmConfig = New-AzVmConfig -VMName $vmname -VMSize 'testVMSize' -AlignRegionalDisksToVMZone
+    $vm = New-AzVM -ResourceGroupName $name -Location $location -VM $vmConfig -ZonePlacementPolicy 'Any' -ExcludeZone @('3')
+
+    # Validate ZonePlacementPolicy and ExcludeZone
+    Assert-AreEqual $vm.ZonePlacementPolicy 'Any'
+    Assert-Contains $vm.ExcludeZone '3'
+
+    # Test New-AzVMConfig with AlignRegionalDisksToVMZone
+    $vmConfig = New-AzVmConfig -VMName $vmname -VMSize 'testVMSize' -AlignRegionalDisksToVMZone
+
+    # Validate AlignRegionalDisksToVMZone
+    Assert-IsTrue $vmConfig.AlignRegionalDisksToVMZone
+
+    # Test New-AzVM without ZonePlacementPolicy
+    $vmConfig = New-AzVmConfig -VMName $vmname -VMSize 'testVMSize'
+    $vm = New-AzVM -ResourceGroupName $name -Location $location -VM $vmConfig
+
+    # Validate default behavior when ZonePlacementPolicy is not specified
+    Assert-Null $vm.ZonePlacementPolicy
+    Assert-Null $vm.IncludeZone
+    Assert-Null $vm.ExcludeZone
+}
