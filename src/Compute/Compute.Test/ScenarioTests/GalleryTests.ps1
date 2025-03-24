@@ -990,3 +990,126 @@ function Test-GalleryImageDefinitionDefaults
     }
 }
 
+
+function TestGen-newazgallery
+{
+    # Setup
+    $rgname = Get-ComputeTestResourceName;
+    $galleryName = 'gallery' + $rgname;
+    $imageDefinitionName = 'imageDef' + $rgname;
+    $imageVersionName = '1.0.0';
+
+    try
+    {
+        $loc = Get-Location;
+        New-AzResourceGroup -Name $rgname -Location $loc -Force;
+
+        # Create gallery
+        New-AzGallery -ResourceGroupName $rgname -Location $loc -Name $galleryName -Permission 'Private'
+
+        # Create image definition
+        New-AzGalleryImageDefinition -ResourceGroupName $rgname -GalleryName $galleryName -Location $loc -Name $imageDefinitionName -Publisher 'PublisherName' -Offer 'OfferName' -Sku 'SkuName' -OsType 'Windows' -OsState 'Generalized'
+
+        # Create image version with Full replication mode
+        $imageVersionFull = New-AzGalleryImageVersion -ResourceGroupName $rgname -GalleryName $galleryName -ImageDefinitionName $imageDefinitionName -Location $loc -Name $imageVersionName -ReplicationMode 'Full'
+
+        # Check Full replication mode
+        Assert-AreEqual $imageVersionFull.ReplicationMode 'Full'
+
+        # Create image version with Shallow replication mode
+        $imageVersionShallow = New-AzGalleryImageVersion -ResourceGroupName $rgname -GalleryName $galleryName -ImageDefinitionName $imageDefinitionName -Location $loc -Name $imageVersionName -ReplicationMode 'Shallow'
+
+        # Check Shallow replication mode
+        Assert-AreEqual $imageVersionShallow.ReplicationMode 'Shallow'
+    }
+    finally
+    {
+        # Cleanup
+        Remove-AzResourceGroup -Name $rgname -Force -Confirm:$false
+    }
+}
+
+function TestGen-newazgalleryimageversion
+{
+    # Setup
+    $rgname = Get-ComputeTestResourceName;
+    $galleryName = 'gallery' + $rgname;
+    $galleryImageName = 'galleryimage' + $rgname;
+    $galleryImageVersionName = 'imageversion' + $rgname;
+
+    try
+    {
+        # Common
+        [string]$loc = Get-Location;
+        $loc = $loc.Replace(' ', '');
+        New-AzResourceGroup -Name $rgname -Location $loc -Force;
+        $description1 = "Original Description";
+
+        # Gallery
+        New-AzGallery -ResourceGroupName $rgname -Name $galleryName -Description $description1 -Location $loc;
+
+        $gallery = Get-AzGallery -ResourceGroupName $rgname -Name $galleryName;
+        Verify-Gallery $gallery $rgname $galleryName $loc $description1;
+        $output = $gallery | Out-String;
+
+        # Gallery Image Definition
+        $publisherName = "galleryPublisher20180927";
+        $offerName = "galleryOffer20180927";
+        $skuName = "gallerySku20180927";
+        $eula = "eula";
+        $privacyStatementUri = "https://www.microsoft.com";
+        $releaseNoteUri = "https://www.microsoft.com";
+        $disallowedDiskTypes = "Premium_LRS";
+        $endOfLifeDate = [DateTime]::ParseExact('12 07 2025 18 02', 'HH mm yyyy dd MM', $null);
+        $minMemory = 1;
+        $maxMemory = 100;
+        $minVCPU = 2;
+        $maxVCPU = 32;
+        $purchasePlanName = "purchasePlanName";
+        $purchasePlanProduct = "purchasePlanProduct";
+        $purchasePlanPublisher = "20";
+        $osState = "Generalized";
+        $osType = "Windows";
+
+        New-AzGalleryImageDefinition -ResourceGroupName $rgname -GalleryName $galleryName -Name $galleryImageName `
+                                          -Location $loc -Publisher $publisherName -Offer $offerName -Sku $skuName `
+                                          -OsState $osState -OsType $osType `
+                                          -Description $description1 -Eula $eula `
+                                          -PrivacyStatementUri $privacyStatementUri -ReleaseNoteUri $releaseNoteUri `
+                                          -DisallowedDiskType $disallowedDiskTypes -EndOfLifeDate $endOfLifeDate `
+                                          -MinimumMemory $minMemory -MaximumMemory $maxMemory `
+                                          -MinimumVCPU $minVCPU -MaximumVCPU $maxVCPU `
+                                          -PurchasePlanName $purchasePlanName `
+                                          -PurchasePlanProduct $purchasePlanProduct `
+                                          -PurchasePlanPublisher $purchasePlanPublisher;
+
+        $definition = Get-AzGalleryImageDefinition -ResourceGroupName $rgname -GalleryName $galleryName -Name $galleryImageName;
+        $output = $definition | Out-String;
+        Verify-GalleryImageDefinition $definition $rgname $galleryImageName $loc $description1 `
+                                      $eula $privacyStatementUri $releaseNoteUri `
+                                      $osType $osState $endOfLifeDate `
+                                      $publisherName $offerName $skuName `
+                                      $minVCPU $maxVCPU $minMemory $maxMemory `
+                                      $disallowedDiskTypes `
+                                      $purchasePlanName $purchasePlanPublisher $purchasePlanProduct;
+
+        # Gallery Image Version with ReplicationMode
+        $galleryImageVersionName = "1.0.0";
+        $replicationMode = "Shallow"; # Testing the new parameter
+
+        New-AzGalleryImageVersion -ResourceGroupName $rgname -GalleryName $galleryName -GalleryImageDefinitionName $galleryImageName `
+                                  -GalleryImageVersionName $galleryImageVersionName -Location $loc -ReplicationMode $replicationMode;
+
+        $imageVersion = Get-AzGalleryImageVersion -ResourceGroupName $rgname -GalleryName $galleryName -GalleryImageDefinitionName $galleryImageName -GalleryImageVersionName $galleryImageVersionName;
+        $output = $imageVersion | Out-String;
+        Verify-GalleryImageVersion $imageVersion $rgname $galleryImageName $galleryImageVersionName $loc $replicationMode;
+
+        # Verify ReplicationMode
+        Assert-AreEqual $imageVersion.ReplicationMode $replicationMode;
+    }
+    finally
+    {
+        # Cleanup
+        Remove-AzResourceGroup -Name $rgname -Force -AsJob;
+    }
+}
