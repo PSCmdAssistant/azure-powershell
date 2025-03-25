@@ -1,4 +1,4 @@
-﻿// ----------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------
 //
 // Copyright Microsoft Corporation
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -46,6 +46,12 @@ namespace Microsoft.Azure.Commands.Compute
            ValueFromPipelineByPropertyName = true)]
         public bool EnableSecureBoot { get; set; }
 
+        [Parameter(
+           Mandatory = false,
+           ValueFromPipelineByPropertyName = true,
+           HelpMessage = "This flag enables Integrity Monitoring (Guest Attestation) on Azure VMs.")]
+        public bool EnableIntegrityMonitoring { get; set; }
+
         public override void ExecuteCmdlet()
         {
             if(this.VM.SecurityProfile == null)
@@ -57,6 +63,8 @@ namespace Microsoft.Azure.Commands.Compute
                 VTpmEnabled = this.EnableVtpm,
                 SecureBootEnabled = this.EnableSecureBoot
             };
+
+            this.VM.SecurityProfile.SecurityType = this.EnableIntegrityMonitoring ? SecurityTypes.TrustedLaunch : SecurityTypes.Standard;
 
             WriteObject(this.VM);
         }

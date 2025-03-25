@@ -7889,3 +7889,137 @@ function Test-EncryptionIdentityNotPartOfAssignedIdentitiesInAzureVm{
     }
 }
 
+
+function TestGen-setazvm
+{
+    # Setup
+    $rgname = Get-ComputeTestResourceName;
+    $loc = Get-ComputeVMLocation;
+
+    try
+    {
+        New-AzResourceGroup -Name $rgname -Location $loc -Force;
+        # VM Profile & Hardware
+        $vmname = 'vm' + $rgname;
+        $domainNameLabel = "d1" + $rgname;
+
+        $vnetname = "vn" + $rgname;
+        $vnetAddress = "10.0.0.0/16";
+        $subnetname = "slb" + $rgname;
+        $subnetAddress = "10.0.2.0/24";
+        $OSDiskName = $vmname + "-osdisk";
+        $NICName = $vmname+ "-nic";
+        $NSGName = $vmname + "-NSG";
+        $OSDiskSizeinGB = 128;
+        $VMSize = "Standard_DS2_v2";
+        $PublisherName = "MicrosoftWindowsServer";
+        $Offer = "WindowsServer";
+        $SKU = "2022-datacenter-azure-edition";
+        $version = "latest";
+        $securityTypeTL = "TrustedLaunch";
+        $secureboot = $true;
+        $vtpm = $true;
+        $enableIntegrityMonitoring = $true;
+
+        # Creating a VM using Simple parameterset
+        $password = Get-PasswordForVM;
+        $securePassword = $password | ConvertTo-SecureString -AsPlainText -Force;
+        $user = Get-ComputeTestResourceName;
+        $cred = New-Object System.Management.Automation.PSCredential ($user, $securePassword);
+
+        $frontendSubnet = New-AzVirtualNetworkSubnetConfig -Name $subnetname -AddressPrefix $subnetAddress;
+
+        $vnet = New-AzVirtualNetwork -Name $vnetname -ResourceGroupName $rgname -Location $loc -AddressPrefix $vnetAddress -Subnet $frontendSubnet;
+
+        $nsgRuleRDP = New-AzNetworkSecurityRuleConfig -Name RDP  -Protocol Tcp  -Direction Inbound -Priority 1001 -SourceAddressPrefix * -SourcePortRange * -DestinationAddressPrefix * -DestinationPortRange 3389 -Access Allow;
+        $nsg = New-AzNetworkSecurityGroup -ResourceGroupName $RGName -Location $loc -Name $NSGName  -SecurityRules $nsgRuleRDP;
+        $nic = New-AzNetworkInterface -Name $NICName -ResourceGroupName $RGName -Location $loc -SubnetId $vnet.Subnets[0].Id -NetworkSecurityGroupId $nsg.Id -EnableAcceleratedNetworking;
+
+        # VM
+        $vmConfig = New-AzVMConfig -VMName $vmName -VMSize $VMSize;
+        Set-AzVMOperatingSystem -VM $vmConfig -Windows -ComputerName $vmName -Credential $cred;
+        Set-AzVMSourceImage -VM $vmConfig -PublisherName $PublisherName -Offer $Offer -Skus $SKU -Version $version ;
+        Add-AzVMNetworkInterface -VM $vmConfig -Id $nic.Id;
+
+        # Set UEFI settings with Integrity Monitoring
+        Set-AzVmUefi -VM $vmConfig -EnableIntegrityMonitoring $enableIntegrityMonitoring;
+
+        New-AzVM -ResourceGroupName $rgname -Location $loc -VM $vmConfig;
+
+        $vm = Get-AzVM -ResourceGroupName $rgname -Name $vmname;
+
+        # Validate VMConfig scenario
+        Assert-AreEqual $vm.SecurityProfile.SecurityType $securityTypeTL;
+        Assert-AreEqual $vm.SecurityProfile.UefiSettings.SecureBootEnabled $secureboot;
+        Assert-AreEqual $vm.SecurityProfile.UefiSettings.VTpmEnabled $vtpm;
+        Assert-AreEqual $vm.SecurityProfile.UefiSettings.EnableIntegrityMonitoring $enableIntegrityMonitoring;
+    }
+    finally
+    {
+        # Cleanup
+        Remove-AzResourceGroup -Name $rgname -Force;
+    }
+}
+
+function TestGen-setazvmuefi
+{
+    # Setup
+    $loc = Get-Location;
+    $rgname = "testgenrg";
+
+    try
+    {
+        # Create Resource Group
+        New-AzResourceGroup -Name $rgname -Location $loc -Force;
+
+        # VM Configuration
+        $vmname = 'testvm';
+        $vmSize = "Standard_DC2as_v5";
+        $computerName = "testcomp";
+        $identityType = "SystemAssigned";
+        $user = "admin01";
+        $password = Get-PasswordForVM;
+        $securePassword = $password | ConvertTo-SecureString -AsPlainText -Force;
+        $cred = New-Object System.Management.Automation.PSCredential ($user, $securePassword);
+
+        # Network Configuration
+        $subnetPrefix = "subnet";
+        $vnetPrefix = "vnet";
+        $pubIpPrefix = "pubip";
+        $nicPrefix = "nic";
+        $domainNameLabel = "d" + $rgname;
+
+        $subnet = New-AzVirtualNetworkSubnetConfig -Name ($subnetPrefix + $rgname) -AddressPrefix "10.0.0.0/24";
+        $vnet = New-AzVirtualNetwork -Force -Name ($vnetPrefix + $rgname) -ResourceGroupName $rgname -Location $loc -AddressPrefix "10.0.0.0/16" -Subnet $subnet;
+        $vnet = Get-AzVirtualNetwork -Name ($vnetPrefix + $rgname) -ResourceGroupName $rgname;
+        $subnetId = $vnet.Subnets[0].Id;
+        $pubip = New-AzPublicIpAddress -Force -Name ($pubIpPrefix + $rgname) -ResourceGroupName $rgname -Location $loc -AllocationMethod Static -DomainNameLabel $domainNameLabel;
+        $pubip = Get-AzPublicIpAddress -Name ($pubIpPrefix + $rgname) -ResourceGroupName $rgname;
+        $pubipId = $pubip.Id;
+        $nic = New-AzNetworkInterface -Force -Name ($nicPrefix + $rgname) -ResourceGroupName $rgname -Location $loc -SubnetId $subnetId -PublicIpAddressId $pubip.Id;
+        $nic = Get-AzNetworkInterface -Name ($nicPrefix + $rgname) -ResourceGroupName $rgname;
+        $nicId = $nic.Id;
+
+        # Create VM
+        $VirtualMachine = New-AzVMConfig -VMName $vmname -VMSize $vmSize;
+        $VirtualMachine = Set-AzVMOperatingSystem -VM $VirtualMachine -Windows -ComputerName $computerName -Credential $cred -ProvisionVMAgent -EnableAutoUpdate;
+        $VirtualMachine = Set-AzVMSourceImage -VM $VirtualMachine -PublisherName 'MicrosoftWindowsServer' -Offer 'windowsserver' -Skus '2022-datacenter-smalldisk-g2' -Version "latest";
+        $VirtualMachine = Add-AzVMNetworkInterface -VM $VirtualMachine -Id $nicId;
+
+        # Set UEFI with Integrity Monitoring
+        $VirtualMachine = Set-AzVmUefi -VM $VirtualMachine -EnableVtpm $true -EnableSecureBoot $true -EnableIntegrityMonitoring $true;
+
+        # Deploy VM
+        New-AzVM -ResourceGroupName $rgname -Location $loc -Vm $VirtualMachine;
+        $vm = Get-AzVm -ResourceGroupName $rgname -Name $vmname;
+
+        # Assert Integrity Monitoring is enabled
+        Assert-AreEqual $true $vm.SecurityProfile.UefiSettings.EnableIntegrityMonitoring;
+
+    }
+    finally
+    {
+        # Cleanup
+        Remove-AzResourceGroup -Name $rgname -Force -AsJob;
+    }
+}
