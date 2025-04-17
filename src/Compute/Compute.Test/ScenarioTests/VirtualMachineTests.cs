@@ -695,5 +695,12 @@ namespace Microsoft.Azure.Commands.Compute.Test.ScenarioTests
         {
             TestRunner.RunTestScript("Test-VirtualMachinePlacement");
         }
-    }
+
+        [Fact]
+        [Trait(Category.AcceptanceType, Category.CheckIn)]
+        public void testgennewazvm()
+        {
+            TestRunner.RunTestScript("TestGen-newazvm");
+        }
+        }
 }
