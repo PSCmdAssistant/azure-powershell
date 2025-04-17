@@ -1,4 +1,4 @@
-﻿// ----------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------
 //
 // Copyright Microsoft Corporation
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -233,6 +233,10 @@ namespace Microsoft.Azure.Commands.Compute.Automation
         [PSArgumentCompleter("Critical", "Security", "Other")]
         public string[] ClassificationToIncludeForLinux { get; set; }
 
+        [Parameter(
+            Mandatory = false,
+            HelpMessage = "This is used to install patches that were published on or before this given max published date. It should be a dateTime parsable date string.")]
+        public string MaxPatchPublishDate { get; set; }
 
         [Parameter(Mandatory = false, HelpMessage = "Run cmdlet in the background")]
         public SwitchParameter AsJob { get; set; }
@@ -277,6 +281,11 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                     VirtualMachineInstallPatchesParameters vmInstallPatchesParameters = new VirtualMachineInstallPatchesParameters();
                     vmInstallPatchesParameters.MaximumDuration = this.MaximumDuration;
                     vmInstallPatchesParameters.RebootSetting = this.RebootSetting;
+
+                    if (this.IsParameterBound(c => c.MaxPatchPublishDate))
+                    {
+                        vmInstallPatchesParameters.MaxPatchPublishDate = this.MaxPatchPublishDate;
+                    }
 
                     // divde linux and windows 
                     if (this.Windows.IsPresent)
