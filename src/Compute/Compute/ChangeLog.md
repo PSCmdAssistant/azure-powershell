@@ -20,6 +20,8 @@
 
 -->
 ## Upcoming Release
+* Added new cmdlet `Invoke-AzVMInstallPatch` to install patches on Azure VMs.
+    - Introduced optional parameter `maxPatchPublishDate` to specify the maximum publish date for patches, accepting a dateTime parsable string.
 * Added new cmdlets `Add-AzVmssSkuProfileVMSize` and `Remove-AzVmssSkuProfileVMSize` to add and remove VM sizes to and from the VMSS SkuProfile.
 * Added new parameters `ZonePlacementPolicy`, `IncludeZone`, `ExcludeZone`, and `AlignRegionalDisksToVMZone` to cmdlets `New-AzVM` and `New-AzVmConfig`
 * Added new parameter `AlignRegionalDisksToVMZone` to cmdlet `Update-AzVM`.
