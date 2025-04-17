@@ -1,4 +1,4 @@
-﻿// ----------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------
 //
 // Copyright Microsoft Corporation
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -186,7 +186,7 @@ namespace Microsoft.Azure.Commands.Compute.Automation
         [Parameter(
             Mandatory = false,
             ParameterSetName = LinuxResourceIDParameterSet,
-            HelpMessage = "Packages to include in the patch operation. Format: packageName_packageVersion. This parameter is only available for Linux VM.")]
+            HelpMessage = "Packages to exclude in the patch operation. Format: packageName_packageVersion. This parameter is only available for Linux VM.")]
         public string[] PackageNameMaskToInclude { get; set; }
 
         [Parameter(
@@ -233,6 +233,19 @@ namespace Microsoft.Azure.Commands.Compute.Automation
         [PSArgumentCompleter("Critical", "Security", "Other")]
         public string[] ClassificationToIncludeForLinux { get; set; }
 
+        [Parameter(
+            Mandatory = false,
+            ParameterSetName = WindowsDefaultParameterSet,
+            HelpMessage = "This is used to install patches that were published on or before this given max published date. It should be a dateTime parsable date string.")]
+        [Parameter(
+            Mandatory = false,
+            ParameterSetName = WindowsInputObjectParameterSet,
+            HelpMessage = "This is used to install patches that were published on or before this given max published date. It should be a dateTime parsable date string.")]
+        [Parameter(
+            Mandatory = false,
+            ParameterSetName = WindowsResourceIDParameterSet,
+            HelpMessage = "This is used to install patches that were published on or before this given max published date. It should be a dateTime parsable date string.")]
+        public string MaxPatchPublishDate { get; set; }
 
         [Parameter(Mandatory = false, HelpMessage = "Run cmdlet in the background")]
         public SwitchParameter AsJob { get; set; }
@@ -300,6 +313,11 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                         if (this.ExcludeKBsRequiringReboot.IsPresent)
                         {
                             vmInstallPatchesParameters.WindowsParameters.ExcludeKbsRequiringReboot = true;
+                        }
+
+                        if (this.IsParameterBound(c => c.MaxPatchPublishDate))
+                        {
+                            vmInstallPatchesParameters.WindowsParameters.MaxPatchPublishDate = this.MaxPatchPublishDate;
                         }
                     }
                     else if (this.Linux.IsPresent)
