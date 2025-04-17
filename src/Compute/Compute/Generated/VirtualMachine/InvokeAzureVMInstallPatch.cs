@@ -1,10 +1,9 @@
-﻿// ----------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------
 //
 // Copyright Microsoft Corporation
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// http://www.apache.org/licenses/LICENSE-2.0
+// You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -233,6 +232,10 @@ namespace Microsoft.Azure.Commands.Compute.Automation
         [PSArgumentCompleter("Critical", "Security", "Other")]
         public string[] ClassificationToIncludeForLinux { get; set; }
 
+        [Parameter(
+            Mandatory = false,
+            HelpMessage = "This is used to install patches that were published on or before this given max published date.")]
+        public string MaxPatchPublishDate { get; set; }
 
         [Parameter(Mandatory = false, HelpMessage = "Run cmdlet in the background")]
         public SwitchParameter AsJob { get; set; }
@@ -277,6 +280,11 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                     VirtualMachineInstallPatchesParameters vmInstallPatchesParameters = new VirtualMachineInstallPatchesParameters();
                     vmInstallPatchesParameters.MaximumDuration = this.MaximumDuration;
                     vmInstallPatchesParameters.RebootSetting = this.RebootSetting;
+
+                    if (this.IsParameterBound(c => c.MaxPatchPublishDate))
+                    {
+                        vmInstallPatchesParameters.MaxPatchPublishDate = this.MaxPatchPublishDate;
+                    }
 
                     // divde linux and windows 
                     if (this.Windows.IsPresent)
