@@ -1,4 +1,4 @@
-//
+ //
 // Copyright (c) Microsoft and contributors.  All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -387,6 +387,28 @@ namespace Microsoft.Azure.Commands.Compute.Automation
             HelpMessage = "Specifies whether resilient VM deletion should be enabled on the virtual machine scale set. The default value is false.")]
         public SwitchParameter EnableResilientVMDelete { get; set; }
 
+        [Parameter(
+            Mandatory = false,
+            HelpMessage = "Specifies whether automatic zone rebalancing policy should be enabled.")]
+        public bool EnableAutomaticZoneRebalancingPolicy { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            HelpMessage = "Specifies the strategy/actions taken to balance the scale set.")]
+        [PSArgumentCompleter("Recreate", "TargetScaleOut")]
+        public string AutomaticZoneRebalanceStrategy { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            HelpMessage = "Specifies detailed behavior for the rebalance strategy. Currently only applicable when the RebalanceStrategy is set to 'Recreate'.")]
+        [PSArgumentCompleter("CreateBeforeDelete")]
+        public string AutomaticZoneRebalanceBehavior { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            HelpMessage = "The target instance count the zonal scale set aims to reach. Only applicable when the RebalanceStrategy is set to 'TargetScaleOut'.")]
+        public int AutomaticZoneRebalanceTargetInstanceCount { get; set; }
+
         protected override void ProcessRecord()
         {
             if (ShouldProcess("VirtualMachineScaleSet", "New"))
@@ -436,631 +458,43 @@ namespace Microsoft.Azure.Commands.Compute.Automation
             //ResiliencyPolicy
             ResiliencyPolicy vResiliencyPolicy = null;
 
-            if (this.IsParameterBound(c => c.SkuName))
+            // ZoneRebalancingPolicy
+            ZoneRebalancingPolicy vZoneRebalancingPolicy = null;
+
+            if (this.IsParameterBound(c => c.EnableAutomaticZoneRebalancingPolicy))
             {
-                if (vSku == null)
+                if (vZoneRebalancingPolicy == null)
                 {
-                    vSku = new Sku();
+                    vZoneRebalancingPolicy = new ZoneRebalancingPolicy();
                 }
-                vSku.Name = this.SkuName;
+                vZoneRebalancingPolicy.Enabled = this.EnableAutomaticZoneRebalancingPolicy;
             }
 
-            if (this.IsParameterBound(c => c.EnableResilientVMCreate))
+            if (this.IsParameterBound(c => c.AutomaticZoneRebalanceStrategy))
             {
-                if (vResiliencyPolicy == null)
+                if (vZoneRebalancingPolicy == null)
                 {
-                    vResiliencyPolicy = new ResiliencyPolicy();
+                    vZoneRebalancingPolicy = new ZoneRebalancingPolicy();
                 }
-                vResiliencyPolicy.ResilientVMCreationPolicy = new ResilientVMCreationPolicy(this.EnableResilientVMCreate.ToBool());
+                vZoneRebalancingPolicy.Strategy = this.AutomaticZoneRebalanceStrategy;
             }
 
-            if (this.IsParameterBound(c => c.EnableResilientVMDelete))
+            if (this.IsParameterBound(c => c.AutomaticZoneRebalanceBehavior))
             {
-                if (vResiliencyPolicy == null)
+                if (vZoneRebalancingPolicy == null)
                 {
-                    vResiliencyPolicy = new ResiliencyPolicy();
+                    vZoneRebalancingPolicy = new ZoneRebalancingPolicy();
                 }
-                vResiliencyPolicy.ResilientVMDeletionPolicy = new ResilientVMDeletionPolicy(this.EnableResilientVMDelete.ToBool());
+                vZoneRebalancingPolicy.Behavior = this.AutomaticZoneRebalanceBehavior;
             }
 
-            if (this.IsParameterBound(c => c.SkuTier))
+            if (this.IsParameterBound(c => c.AutomaticZoneRebalanceTargetInstanceCount))
             {
-                if (vSku == null)
+                if (vZoneRebalancingPolicy == null)
                 {
-                    vSku = new Sku();
+                    vZoneRebalancingPolicy = new ZoneRebalancingPolicy();
                 }
-                vSku.Tier = this.SkuTier;
-            }
-
-            if (this.IsParameterBound(c => c.SkuCapacity))
-            {
-                if (vSku == null)
-                {
-                    vSku = new Sku();
-                }
-                vSku.Capacity = this.SkuCapacity;
-            }
-
-            if (this.IsParameterBound(c => c.PlanName))
-            {
-                if (vPlan == null)
-                {
-                    vPlan = new Plan();
-                }
-                vPlan.Name = this.PlanName;
-            }
-
-            if (this.IsParameterBound(c => c.PlanPublisher))
-            {
-                if (vPlan == null)
-                {
-                    vPlan = new Plan();
-                }
-                vPlan.Publisher = this.PlanPublisher;
-            }
-
-            if (this.IsParameterBound(c => c.PlanProduct))
-            {
-                if (vPlan == null)
-                {
-                    vPlan = new Plan();
-                }
-                vPlan.Product = this.PlanProduct;
-            }
-
-            if (this.IsParameterBound(c => c.PlanPromotionCode))
-            {
-                if (vPlan == null)
-                {
-                    vPlan = new Plan();
-                }
-                vPlan.PromotionCode = this.PlanPromotionCode;
-            }
-
-            if (this.IsParameterBound(c => c.UpgradePolicyMode))
-            {
-                if (vUpgradePolicy == null)
-                {
-                    vUpgradePolicy = new UpgradePolicy();
-                }
-                vUpgradePolicy.Mode = this.UpgradePolicyMode;
-            }
-
-            if (this.IsParameterBound(c => c.RollingUpgradePolicy))
-            {
-                if (vUpgradePolicy == null)
-                {
-                    vUpgradePolicy = new UpgradePolicy();
-                }
-                vUpgradePolicy.RollingUpgradePolicy = this.RollingUpgradePolicy;
-            }
-
-            if (this.EnableAutomaticOSUpgrade.IsPresent)
-            {
-                if (vUpgradePolicy == null)
-                {
-                    vUpgradePolicy = new UpgradePolicy();
-                }
-                if (vUpgradePolicy.AutomaticOSUpgradePolicy == null)
-                {
-                    vUpgradePolicy.AutomaticOSUpgradePolicy = new AutomaticOSUpgradePolicy();
-                }
-                vUpgradePolicy.AutomaticOSUpgradePolicy.EnableAutomaticOSUpgrade = this.EnableAutomaticOSUpgrade.IsPresent;
-            }
-
-            if (this.EnableAutomaticRepair.IsPresent)
-            {
-                if (vAutomaticRepairsPolicy == null)
-                {
-                    vAutomaticRepairsPolicy = new AutomaticRepairsPolicy();
-                }
-                vAutomaticRepairsPolicy.Enabled = this.EnableAutomaticRepair.IsPresent;
-            }
-
-            if (this.EncryptionAtHost.IsPresent)
-            {
-                if (vVirtualMachineProfile == null)
-                {
-                    vVirtualMachineProfile = new PSVirtualMachineScaleSetVMProfile();
-                }
-                if (vVirtualMachineProfile.SecurityProfile == null)
-                {
-                    vVirtualMachineProfile.SecurityProfile = new SecurityProfile();
-                }
-                vVirtualMachineProfile.SecurityProfile.EncryptionAtHost = this.EncryptionAtHost;
-            }
-
-            if (this.IsParameterBound(c => c.CapacityReservationGroupId))
-            {
-                if (vVirtualMachineProfile == null)
-                {
-                    vVirtualMachineProfile = new PSVirtualMachineScaleSetVMProfile();
-                }
-                if (vVirtualMachineProfile.CapacityReservation == null)
-                {
-                    vVirtualMachineProfile.CapacityReservation = new CapacityReservationProfile();
-                }
-                vVirtualMachineProfile.CapacityReservation.CapacityReservationGroup = new SubResource(this.CapacityReservationGroupId);
-            }
-
-            if (this.IsParameterBound(c => c.AutomaticRepairGracePeriod))
-            {
-                if (vAutomaticRepairsPolicy == null)
-                {
-                    vAutomaticRepairsPolicy = new AutomaticRepairsPolicy();
-                }
-                vAutomaticRepairsPolicy.GracePeriod = this.AutomaticRepairGracePeriod;
-            }
-
-            if (this.IsParameterBound(c => c.DisableAutoRollback))
-            {
-                if (vUpgradePolicy == null)
-                {
-                    vUpgradePolicy = new UpgradePolicy();
-                }
-                if (vUpgradePolicy.AutomaticOSUpgradePolicy == null)
-                {
-                    vUpgradePolicy.AutomaticOSUpgradePolicy = new AutomaticOSUpgradePolicy();
-                }
-                vUpgradePolicy.AutomaticOSUpgradePolicy.DisableAutomaticRollback = this.DisableAutoRollback;
-            }
-
-            if (this.IsParameterBound(c => c.OsProfile))
-            {
-                if (vVirtualMachineProfile == null)
-                {
-                    vVirtualMachineProfile = new PSVirtualMachineScaleSetVMProfile();
-                }
-                vVirtualMachineProfile.OsProfile = this.OsProfile;
-            }
-
-            if (this.IsParameterBound(c => c.StorageProfile))
-            {
-                if (vVirtualMachineProfile == null)
-                {
-                    vVirtualMachineProfile = new PSVirtualMachineScaleSetVMProfile();
-                }
-                vVirtualMachineProfile.StorageProfile = this.StorageProfile;
-            }
-
-            if (this.IsParameterBound(c => c.HealthProbeId))
-            {
-                if (vVirtualMachineProfile == null)
-                {
-                    vVirtualMachineProfile = new PSVirtualMachineScaleSetVMProfile();
-                }
-                if (vVirtualMachineProfile.NetworkProfile == null)
-                {
-                    vVirtualMachineProfile.NetworkProfile = new VirtualMachineScaleSetNetworkProfile();
-                }
-                if (vVirtualMachineProfile.NetworkProfile.HealthProbe == null)
-                {
-                    vVirtualMachineProfile.NetworkProfile.HealthProbe = new ApiEntityReference();
-                }
-                vVirtualMachineProfile.NetworkProfile.HealthProbe.Id = this.HealthProbeId;
-            }
-
-            if (this.IsParameterBound(c => c.NetworkInterfaceConfiguration))
-            {
-                if (vVirtualMachineProfile == null)
-                {
-                    vVirtualMachineProfile = new PSVirtualMachineScaleSetVMProfile();
-                }
-                if (vVirtualMachineProfile.NetworkProfile == null)
-                {
-                    vVirtualMachineProfile.NetworkProfile = new VirtualMachineScaleSetNetworkProfile();
-                }
-                vVirtualMachineProfile.NetworkProfile.NetworkInterfaceConfigurations = this.NetworkInterfaceConfiguration;
-            }
-
-            if (this.IsParameterBound(c => c.SecurityType))
-            {
-                if (vVirtualMachineProfile == null)
-                {
-                    vVirtualMachineProfile = new PSVirtualMachineScaleSetVMProfile();
-                }
-                if (vVirtualMachineProfile.SecurityProfile == null)
-                {
-                    vVirtualMachineProfile.SecurityProfile = new SecurityProfile();
-                }
-                vVirtualMachineProfile.SecurityProfile.SecurityType = this.SecurityType;
-                if (vVirtualMachineProfile.SecurityProfile.SecurityType != null
-                    && vVirtualMachineProfile.SecurityProfile.SecurityType.ToLower() == ConstantValues.TrustedLaunchSecurityType || vVirtualMachineProfile.SecurityProfile.SecurityType.ToLower() == ConstantValues.ConfidentialVMSecurityType)
-                {
-                    if (vVirtualMachineProfile.SecurityProfile.UefiSettings == null)
-                    {
-                        vVirtualMachineProfile.SecurityProfile.UefiSettings = new UefiSettings();
-                    }
-                    vVirtualMachineProfile.SecurityProfile.UefiSettings.VTpmEnabled = vVirtualMachineProfile.SecurityProfile.UefiSettings.VTpmEnabled == null ? true : this.EnableVtpm;
-                    vVirtualMachineProfile.SecurityProfile.UefiSettings.SecureBootEnabled = vVirtualMachineProfile.SecurityProfile.UefiSettings.SecureBootEnabled == null ? true : this.EnableSecureBoot;
-                }
-            }
-
-            if (this.IsParameterBound(c => c.EnableVtpm))
-            {
-                if (vVirtualMachineProfile == null)
-                {
-                    vVirtualMachineProfile = new PSVirtualMachineScaleSetVMProfile();
-                }
-                if (vVirtualMachineProfile.SecurityProfile == null)
-                {
-                    vVirtualMachineProfile.SecurityProfile = new SecurityProfile();
-                }
-                if (vVirtualMachineProfile.SecurityProfile.UefiSettings == null)
-                {
-                    vVirtualMachineProfile.SecurityProfile.UefiSettings = new UefiSettings();
-                }
-                vVirtualMachineProfile.SecurityProfile.UefiSettings.VTpmEnabled = this.EnableVtpm;
-            }
-
-            if (this.IsParameterBound(c => c.EnableSecureBoot))
-            {
-                if (vVirtualMachineProfile == null)
-                {
-                    vVirtualMachineProfile = new PSVirtualMachineScaleSetVMProfile();
-                }
-                if (vVirtualMachineProfile.SecurityProfile == null)
-                {
-                    vVirtualMachineProfile.SecurityProfile = new SecurityProfile();
-                }
-                if (vVirtualMachineProfile.SecurityProfile.UefiSettings == null)
-                {
-                    vVirtualMachineProfile.SecurityProfile.UefiSettings = new UefiSettings();
-                }
-                vVirtualMachineProfile.SecurityProfile.UefiSettings.SecureBootEnabled = this.EnableSecureBoot;
-            }
-            if (this.IsParameterBound(c => c.BootDiagnostic))
-            {
-                if (vVirtualMachineProfile == null)
-                {
-                    vVirtualMachineProfile = new PSVirtualMachineScaleSetVMProfile();
-                }
-                if (vVirtualMachineProfile.DiagnosticsProfile == null)
-                {
-                    vVirtualMachineProfile.DiagnosticsProfile = new DiagnosticsProfile();
-                }
-                vVirtualMachineProfile.DiagnosticsProfile.BootDiagnostics = this.BootDiagnostic;
-            }
-
-            if (this.IsParameterBound(c => c.Extension))
-            {
-                if (vVirtualMachineProfile == null)
-                {
-                    vVirtualMachineProfile = new PSVirtualMachineScaleSetVMProfile();
-                }
-                if (vVirtualMachineProfile.ExtensionProfile == null)
-                {
-                    vVirtualMachineProfile.ExtensionProfile = new PSVirtualMachineScaleSetExtensionProfile();
-                }
-                vVirtualMachineProfile.ExtensionProfile.Extensions = this.Extension;
-            }
-
-            if (this.IsParameterBound(c => c.LicenseType))
-            {
-                if (vVirtualMachineProfile == null)
-                {
-                    vVirtualMachineProfile = new PSVirtualMachineScaleSetVMProfile();
-                }
-                vVirtualMachineProfile.LicenseType = this.LicenseType;
-            }
-
-            if (this.IsParameterBound(c => c.Priority))
-            {
-                if (vVirtualMachineProfile == null)
-                {
-                    vVirtualMachineProfile = new PSVirtualMachineScaleSetVMProfile();
-                }
-                vVirtualMachineProfile.Priority = this.Priority;
-            }
-
-
-            if (this.IsParameterBound(c => c.EvictionPolicy))
-            {
-                if (vVirtualMachineProfile == null)
-                {
-                    vVirtualMachineProfile = new PSVirtualMachineScaleSetVMProfile();
-                }
-                vVirtualMachineProfile.EvictionPolicy = this.EvictionPolicy;
-            }
-
-            if (this.IsParameterBound(c => c.MaxPrice))
-            {
-                if (vVirtualMachineProfile == null)
-                {
-                    vVirtualMachineProfile = new PSVirtualMachineScaleSetVMProfile();
-                }
-                if (vVirtualMachineProfile.BillingProfile == null)
-                {
-                    vVirtualMachineProfile.BillingProfile = new BillingProfile();
-                }
-                vVirtualMachineProfile.BillingProfile.MaxPrice = this.MaxPrice;
-            }
-
-            if (this.TerminateScheduledEvents.IsPresent)
-            {
-                if (vVirtualMachineProfile == null)
-                {
-                    vVirtualMachineProfile = new PSVirtualMachineScaleSetVMProfile();
-                }
-                if (vVirtualMachineProfile.ScheduledEventsProfile == null)
-                {
-                    vVirtualMachineProfile.ScheduledEventsProfile = new ScheduledEventsProfile();
-                }
-                if (vVirtualMachineProfile.ScheduledEventsProfile.TerminateNotificationProfile == null)
-                {
-                    vVirtualMachineProfile.ScheduledEventsProfile.TerminateNotificationProfile = new TerminateNotificationProfile();
-                }
-                vVirtualMachineProfile.ScheduledEventsProfile.TerminateNotificationProfile.Enable = this.TerminateScheduledEvents.IsPresent;
-            }
-
-            if (this.IsParameterBound(c => c.TerminateScheduledEventNotBeforeTimeoutInMinutes))
-            {
-                if (vVirtualMachineProfile == null)
-                {
-                    vVirtualMachineProfile = new PSVirtualMachineScaleSetVMProfile();
-                }
-                if (vVirtualMachineProfile.ScheduledEventsProfile == null)
-                {
-                    vVirtualMachineProfile.ScheduledEventsProfile = new ScheduledEventsProfile();
-                }
-                if (vVirtualMachineProfile.ScheduledEventsProfile.TerminateNotificationProfile == null)
-                {
-                    vVirtualMachineProfile.ScheduledEventsProfile.TerminateNotificationProfile = new TerminateNotificationProfile();
-                }
-                vVirtualMachineProfile.ScheduledEventsProfile.TerminateNotificationProfile.NotBeforeTimeout = XmlConvert.ToString(new TimeSpan(0, this.TerminateScheduledEventNotBeforeTimeoutInMinutes, 0));
-            }
-
-            if (this.IsParameterBound(c => c.ProximityPlacementGroupId))
-            {
-                if (vProximityPlacementGroup == null)
-                {
-                    vProximityPlacementGroup = new SubResource();
-                }
-                vProximityPlacementGroup.Id = this.ProximityPlacementGroupId;
-            }
-
-            if (this.EnableUltraSSD.IsPresent)
-            {
-                if (vAdditionalCapabilities == null)
-                {
-                    vAdditionalCapabilities = new AdditionalCapabilities(true);
-                }
-            }
-
-            if (this.IsParameterBound(c => c.ScaleInPolicy))
-            {
-                if (vScaleInPolicy == null)
-                {
-                    vScaleInPolicy = new ScaleInPolicy();
-                }
-                vScaleInPolicy.Rules = this.ScaleInPolicy;
-            }
-
-            if (this.IsParameterBound(c => c.IdentityType))
-            {
-                if (vIdentity == null)
-                {
-                    vIdentity = new VirtualMachineScaleSetIdentity();
-                }
-                vIdentity.Type = this.IdentityType;
-            }
-
-            if (this.IsParameterBound(c => c.IdentityId))
-            {
-                if (vIdentity == null)
-                {
-                    vIdentity = new VirtualMachineScaleSetIdentity();
-                }
-
-                vIdentity.UserAssignedIdentities = new Dictionary<string, UserAssignedIdentitiesValue>();
-
-                foreach (var id in this.IdentityId)
-                {
-                    vIdentity.UserAssignedIdentities.Add(id, new UserAssignedIdentitiesValue());
-                }
-            }
-
-            if (this.IsParameterBound(c => c.EncryptionIdentity))
-            {
-                if (vVirtualMachineProfile == null)
-                {
-                    vVirtualMachineProfile = new PSVirtualMachineScaleSetVMProfile();
-                }
-                if (vVirtualMachineProfile.SecurityProfile == null)
-                {
-                    vVirtualMachineProfile.SecurityProfile = new SecurityProfile();
-                }
-
-                if (vVirtualMachineProfile.SecurityProfile.EncryptionIdentity == null)
-                {
-                    vVirtualMachineProfile.SecurityProfile.EncryptionIdentity = new EncryptionIdentity();
-                }
-
-                if (String.IsNullOrEmpty(vVirtualMachineProfile.SecurityProfile.EncryptionIdentity.UserAssignedIdentityResourceId) ||
-                    !vVirtualMachineProfile.SecurityProfile.EncryptionIdentity.UserAssignedIdentityResourceId.Equals(
-                        this.EncryptionIdentity, StringComparison.OrdinalIgnoreCase))
-                {
-                    vVirtualMachineProfile.SecurityProfile.EncryptionIdentity.UserAssignedIdentityResourceId = this.EncryptionIdentity;
-                }
-            }
-
-            if (this.IsParameterBound(c => c.EdgeZone))
-            {
-                vExtendedLocation = new CM.PSExtendedLocation(this.EdgeZone);
-            }
-
-            if (this.IsParameterBound(c => c.UserData))
-            {
-                if (!ValidateBase64EncodedString.ValidateStringIsBase64Encoded(this.UserData))
-                {
-                    this.UserData = ValidateBase64EncodedString.EncodeStringToBase64(this.UserData);
-                    this.WriteInformation(ValidateBase64EncodedString.UserDataEncodeNotification, new string[] { "PSHOST" });
-                }
-
-                if (vVirtualMachineProfile == null)
-                {
-                    vVirtualMachineProfile = new PSVirtualMachineScaleSetVMProfile();
-                }
-                vVirtualMachineProfile.UserData = this.UserData;
-            }
-
-            if (this.IsParameterBound(c => c.AutomaticRepairAction))
-            {
-                if (vAutomaticRepairsPolicy == null)
-                {
-                    vAutomaticRepairsPolicy = new AutomaticRepairsPolicy();
-                }
-                vAutomaticRepairsPolicy.RepairAction = this.AutomaticRepairAction;
-            }
-
-            if (this.IsParameterBound(c => c.BaseRegularPriorityCount))
-            {
-                if (vPriorityMixPolicy == null)
-                {
-                    vPriorityMixPolicy = new PriorityMixPolicy();
-                }
-                vPriorityMixPolicy.BaseRegularPriorityCount = this.BaseRegularPriorityCount;
-            }
-
-            if (this.IsParameterBound(c => c.RegularPriorityPercentage))
-            {
-                if (vPriorityMixPolicy == null)
-                {
-                    vPriorityMixPolicy = new PriorityMixPolicy();
-                }
-                vPriorityMixPolicy.RegularPriorityPercentageAboveBase = this.RegularPriorityPercentage;
-            }
-
-            if (this.IsParameterBound(c => c.SkuProfileVmSize))
-            {
-                if (vSkuProfile == null)
-                {
-                    vSkuProfile = new SkuProfile();
-                    vSkuProfile.VmSizes = new List<SkuProfileVMSize>();
-                }
-                foreach (string vmSize in this.SkuProfileVmSize)
-                {
-                    vSkuProfile.VmSizes.Add(new SkuProfileVMSize()
-                    {
-                        Name = vmSize,
-                    });
-                }
-
-                if (this.IsParameterBound(c => c.SkuProfileAllocationStrategy))
-                {
-                    vSkuProfile.AllocationStrategy = this.SkuProfileAllocationStrategy;
-                }
-                else
-                {
-                    vSkuProfile.AllocationStrategy = "LowestPrice";
-                }
-
-                if (!this.IsParameterBound(c => c.SkuName))
-                {
-                    if (vSku == null)
-                    {
-                        vSku = new Sku();
-                    }
-                    vSku.Name = VmSizeMix;
-                }
-            }
-
-            if (this.IsParameterBound(c => c.ImageReferenceId))
-            {
-                if (vVirtualMachineProfile == null)
-                {
-                    vVirtualMachineProfile = new PSVirtualMachineScaleSetVMProfile();
-                }
-
-                if (vVirtualMachineProfile.StorageProfile == null)
-                {
-                    vVirtualMachineProfile.StorageProfile = new VirtualMachineScaleSetStorageProfile();
-                }
-
-                if (vVirtualMachineProfile.StorageProfile.ImageReference == null)
-                {
-                    vVirtualMachineProfile.StorageProfile.ImageReference = new ImageReference();
-                }
-                vVirtualMachineProfile.StorageProfile.ImageReference.Id = this.ImageReferenceId;
-            }
-
-            if (this.IsParameterBound(c => c.SharedGalleryImageId))
-            {
-                if (vVirtualMachineProfile == null)
-                {
-                    vVirtualMachineProfile = new PSVirtualMachineScaleSetVMProfile();
-                }
-
-                if (vVirtualMachineProfile.StorageProfile == null)
-                {
-                    vVirtualMachineProfile.StorageProfile = new VirtualMachineScaleSetStorageProfile();
-                }
-
-                if (vVirtualMachineProfile.StorageProfile.ImageReference == null)
-                {
-                    vVirtualMachineProfile.StorageProfile.ImageReference = new ImageReference();
-                }
-                vVirtualMachineProfile.StorageProfile.ImageReference.SharedGalleryImageId = this.SharedGalleryImageId;
-            }
-
-            if (this.IsParameterBound(c => c.OSImageScheduledEventEnabled))
-            {
-                if (vVirtualMachineProfile == null)
-                {
-                    vVirtualMachineProfile = new PSVirtualMachineScaleSetVMProfile();
-                }
-                if (vVirtualMachineProfile.ScheduledEventsProfile == null)
-                {
-                    vVirtualMachineProfile.ScheduledEventsProfile = new ScheduledEventsProfile();
-                }
-                if (vVirtualMachineProfile.ScheduledEventsProfile.OsImageNotificationProfile == null)
-                {
-                    vVirtualMachineProfile.ScheduledEventsProfile.OsImageNotificationProfile = new OSImageNotificationProfile();
-                }
-                vVirtualMachineProfile.ScheduledEventsProfile.OsImageNotificationProfile.Enable = this.OSImageScheduledEventEnabled;
-            }
-
-            if (this.IsParameterBound(c => c.OSImageScheduledEventNotBeforeTimeoutInMinutes))
-            {
-                if (vVirtualMachineProfile == null)
-                {
-                    vVirtualMachineProfile = new PSVirtualMachineScaleSetVMProfile();
-                }
-                if (vVirtualMachineProfile.ScheduledEventsProfile == null)
-                {
-                    vVirtualMachineProfile.ScheduledEventsProfile = new ScheduledEventsProfile();
-                }
-                if (vVirtualMachineProfile.ScheduledEventsProfile.OsImageNotificationProfile == null)
-                {
-                    vVirtualMachineProfile.ScheduledEventsProfile.OsImageNotificationProfile = new OSImageNotificationProfile();
-                }
-                vVirtualMachineProfile.ScheduledEventsProfile.OsImageNotificationProfile.NotBeforeTimeout = this.OSImageScheduledEventNotBeforeTimeoutInMinutes;
-            }
-
-            if (this.IsParameterBound(c => c.SecurityPostureId))
-            {
-                if (vVirtualMachineProfile == null)
-                {
-                    vVirtualMachineProfile = new PSVirtualMachineScaleSetVMProfile();
-                }
-                if (vVirtualMachineProfile.SecurityPostureReference == null)
-                {
-                    vVirtualMachineProfile.SecurityPostureReference = new SecurityPostureReference();
-                }
-                vVirtualMachineProfile.SecurityPostureReference.Id = this.SecurityPostureId;
-            }
-
-            if (this.IsParameterBound(c => c.SecurityPostureExcludeExtension))
-            {
-                if (vVirtualMachineProfile == null)
-                {
-                    vVirtualMachineProfile = new PSVirtualMachineScaleSetVMProfile();
-                }
-                if (vVirtualMachineProfile.SecurityPostureReference == null)
-                {
-                    vVirtualMachineProfile.SecurityPostureReference = new SecurityPostureReference();
-                }
-                vVirtualMachineProfile.SecurityPostureReference.ExcludeExtensions = this.SecurityPostureExcludeExtension;
+                vZoneRebalancingPolicy.TargetInstanceCount = this.AutomaticZoneRebalanceTargetInstanceCount;
             }
 
             var vVirtualMachineScaleSet = new PSVirtualMachineScaleSet
@@ -1087,7 +521,8 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                 SpotRestorePolicy = this.IsParameterBound(c => c.EnableSpotRestore) ? new SpotRestorePolicy(true, this.SpotRestoreTimeout) : null,
                 PriorityMixPolicy = vPriorityMixPolicy,
                 SkuProfile = vSkuProfile,
-                ResiliencyPolicy = vResiliencyPolicy
+                ResiliencyPolicy = vResiliencyPolicy,
+                ZoneRebalancingPolicy = vZoneRebalancingPolicy
             };
 
             WriteObject(vVirtualMachineScaleSet);
