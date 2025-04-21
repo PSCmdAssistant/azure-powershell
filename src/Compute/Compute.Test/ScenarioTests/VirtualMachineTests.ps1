@@ -7946,3 +7946,61 @@ function Test-VirtualMachinePlacement
         Clean-ResourceGroup $rgname;
     }
 }
+function TestGen-newazvm {
+    # To have a test recording
+    Get-AzVm
+
+    $name = Get-ComputeTestResourceName
+    $vmssName = 'vmss' + $name
+    $location = Get-Location
+
+    # Create a new VMSS configuration with the new parameters
+    $vmssConfig = New-AzVmssConfig -VMSSName $vmssName -Location $location -SkuCapacity 2 -SkuName 'Standard_DS1_v2' `
+        -EnableAutomaticZoneRebalancingPolicy $true `
+        -AutomaticZoneRebalanceStrategy 'Recreate' `
+        -AutomaticZoneRebalanceBehavior 'CreateBeforeDelete' `
+        -AutomaticZoneRebalanceTargetInstanceCount 5
+
+    # Validate the new parameters in the VMSS configuration
+    Assert-AreEqual $vmssConfig.EnableAutomaticZoneRebalancingPolicy $true
+    Assert-AreEqual $vmssConfig.AutomaticZoneRebalanceStrategy 'Recreate'
+    Assert-AreEqual $vmssConfig.AutomaticZoneRebalanceBehavior 'CreateBeforeDelete'
+    Assert-AreEqual $vmssConfig.AutomaticZoneRebalanceTargetInstanceCount 5
+
+    # Update an existing VMSS with the new parameters
+    $vmssConfigUpdated = Update-AzVmss -VMSSName $vmssName -Location $location `
+        -EnableAutomaticZoneRebalancingPolicy $false `
+        -AutomaticZoneRebalanceStrategy 'TargetScaleOut' `
+        -AutomaticZoneRebalanceTargetInstanceCount 10
+
+    # Validate the updated parameters in the VMSS configuration
+    Assert-AreEqual $vmssConfigUpdated.EnableAutomaticZoneRebalancingPolicy $false
+    Assert-AreEqual $vmssConfigUpdated.AutomaticZoneRebalanceStrategy 'TargetScaleOut'
+    Assert-Null $vmssConfigUpdated.AutomaticZoneRebalanceBehavior
+    Assert-AreEqual $vmssConfigUpdated.AutomaticZoneRebalanceTargetInstanceCount 10
+
+    # Test invalid values for the new parameters
+    try {
+        $vmssConfigInvalid = New-AzVmssConfig -VMSSName $vmssName -Location $location `
+            -AutomaticZoneRebalanceStrategy 'InvalidStrategy'
+        Assert-Fail "Expected an error for invalid AutomaticZoneRebalanceStrategy"
+    } catch {
+        Assert-Contains $_.Exception.Message "Invalid value for AutomaticZoneRebalanceStrategy"
+    }
+
+    try {
+        $vmssConfigInvalid = New-AzVmssConfig -VMSSName $vmssName -Location $location `
+            -AutomaticZoneRebalanceBehavior 'InvalidBehavior'
+        Assert-Fail "Expected an error for invalid AutomaticZoneRebalanceBehavior"
+    } catch {
+        Assert-Contains $_.Exception.Message "Invalid value for AutomaticZoneRebalanceBehavior"
+    }
+
+    try {
+        $vmssConfigInvalid = New-AzVmssConfig -VMSSName $vmssName -Location $location `
+            -AutomaticZoneRebalanceTargetInstanceCount -1
+        Assert-Fail "Expected an error for negative AutomaticZoneRebalanceTargetInstanceCount"
+    } catch {
+        Assert-Contains $_.Exception.Message "AutomaticZoneRebalanceTargetInstanceCount must be a positive integer"
+    }
+}
