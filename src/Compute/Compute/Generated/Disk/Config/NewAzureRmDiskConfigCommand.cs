@@ -1,4 +1,4 @@
-//
+ //
 // Copyright (c) Microsoft and contributors.  All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -254,6 +254,19 @@ namespace Microsoft.Azure.Commands.Compute.Automation
             HelpMessage = "Setting this property to true improves reliability and performance of data disks that are frequently (more than 5 times a day) by detached from one virtual machine and attached to another. This property should not be set for disks that are not detached and attached frequently as it causes the disks to not align with the fault domain of the virtual machine.")]
         public bool? OptimizedForFrequentAttach { get; set; }
 
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "Specifies the type of disk controller. Possible values are SCSI and NVME.")]
+        [PSArgumentCompleter("SCSI", "NVME")]
+        public string DiskControllerType { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "Specifies the version of encryption settings.")]
+        public string EncryptionSettingsVersion { get; set; }
+
         protected override void ProcessRecord()
         {
             if (ShouldProcess("Disk", "New"))
@@ -460,6 +473,24 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                     vSupportedCapabilities = new SupportedCapabilities();
                 }
                 vSupportedCapabilities.Architecture = this.Architecture;
+            }
+
+            if (this.IsParameterBound(c => c.DiskControllerType))
+            {
+                if (vCreationData == null)
+                {
+                    vCreationData = new CreationData();
+                }
+                vCreationData.DiskControllerType = this.DiskControllerType;
+            }
+
+            if (this.IsParameterBound(c => c.EncryptionSettingsVersion))
+            {
+                if (vEncryptionSettingsCollection == null)
+                {
+                    vEncryptionSettingsCollection = new EncryptionSettingsCollection();
+                }
+                vEncryptionSettingsCollection.EncryptionSettingsVersion = this.EncryptionSettingsVersion;
             }
 
             var vDisk = new PSDisk
