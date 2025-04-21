@@ -1864,3 +1864,99 @@ function Test-DiskGrantAccessGetSASWithTL
 		Clean-ResourceGroup $rgname;
 	}
 }
+function TestGen-newazdiskconfig {
+    $rgname = Get-ComputeTestResourceName;
+    $loc = Get-Location;
+
+    try {
+        # Create Resource Group
+        New-AzResourceGroup -Name $rgname -Location $loc -Force;
+
+        # Setup
+        $diskName = 'disk' + $rgname;
+        $diskAccountType = 'Premium_LRS';
+        $createOption = 'Empty';
+        $diskSize = 32;
+        $diskControllerType1 = 'SCSI';
+        $diskControllerType2 = 'NVME';
+        $encryptionSettingsVersion1 = '1.0';
+        $encryptionSettingsVersion2 = '2.0';
+
+        # Test New-AzDiskConfig with DiskControllerType and EncryptionSettingsVersion
+        $diskConfig1 = New-AzDiskConfig -Location $loc -AccountType $diskAccountType -CreateOption $createOption -DiskSizeGB $diskSize -DiskControllerType $diskControllerType1 -EncryptionSettingsVersion $encryptionSettingsVersion1;
+        Assert-AreEqual $diskConfig1.DiskControllerType $diskControllerType1;
+        Assert-AreEqual $diskConfig1.EncryptionSettingsVersion $encryptionSettingsVersion1;
+
+        $diskConfig2 = New-AzDiskConfig -Location $loc -AccountType $diskAccountType -CreateOption $createOption -DiskSizeGB $diskSize -DiskControllerType $diskControllerType2 -EncryptionSettingsVersion $encryptionSettingsVersion2;
+        Assert-AreEqual $diskConfig2.DiskControllerType $diskControllerType2;
+        Assert-AreEqual $diskConfig2.EncryptionSettingsVersion $encryptionSettingsVersion2;
+
+        # Test New-AzDisk with DiskControllerType and EncryptionSettingsVersion
+        New-AzDisk -ResourceGroupName $rgname -DiskName $diskName -Disk $diskConfig1;
+        $disk = Get-AzDisk -ResourceGroupName $rgname -DiskName $diskName;
+        Assert-AreEqual $disk.DiskControllerType $diskControllerType1;
+        Assert-AreEqual $disk.EncryptionSettingsVersion $encryptionSettingsVersion1;
+
+        # Update Disk with new DiskControllerType and EncryptionSettingsVersion
+        $diskUpdateConfig = New-AzDiskUpdateConfig -DiskControllerType $diskControllerType2 -EncryptionSettingsVersion $encryptionSettingsVersion2;
+        Update-AzDisk -ResourceGroupName $rgname -DiskName $diskName -DiskUpdate $diskUpdateConfig;
+        $diskUpdated = Get-AzDisk -ResourceGroupName $rgname -DiskName $diskName;
+        Assert-AreEqual $diskUpdated.DiskControllerType $diskControllerType2;
+        Assert-AreEqual $diskUpdated.EncryptionSettingsVersion $encryptionSettingsVersion2;
+
+    } finally {
+        # Cleanup
+        Remove-AzResourceGroup -Name $rgname -Force -Confirm:$false;
+    }
+}
+
+function TestGen-newazdisk {
+    $rgname = Get-ComputeTestResourceName;
+    $loc = Get-Location;
+
+    try {
+        # Create a new resource group
+        New-AzResourceGroup -Name $rgname -Location $loc -Force;
+
+        # Setup
+        $diskName = 'disk' + $rgname;
+        $diskAccountType = 'Premium_LRS';
+        $createOption = 'Empty';
+        $diskSize = 32;
+        $diskControllerType1 = 'SCSI';
+        $diskControllerType2 = 'NVME';
+        $encryptionSettingsVersion1 = '1.0';
+        $encryptionSettingsVersion2 = '2.0';
+
+        # Test New-AzDiskConfig with DiskControllerType and EncryptionSettingsVersion
+        $diskConfig = New-AzDiskConfig -Location $loc -AccountType $diskAccountType -CreateOption $createOption -DiskSizeGB $diskSize -DiskControllerType $diskControllerType1 -EncryptionSettingsVersion $encryptionSettingsVersion1;
+        Assert-AreEqual $diskConfig.DiskControllerType $diskControllerType1;
+        Assert-AreEqual $diskConfig.EncryptionSettingsVersion $encryptionSettingsVersion1;
+
+        # Test New-AzDisk with DiskControllerType and EncryptionSettingsVersion
+        New-AzDisk -ResourceGroupName $rgname -DiskName $diskName -Disk $diskConfig;
+        $disk = Get-AzDisk -ResourceGroupName $rgname -DiskName $diskName;
+        Assert-AreEqual $disk.DiskControllerType $diskControllerType1;
+        Assert-AreEqual $disk.EncryptionSettingsVersion $encryptionSettingsVersion1;
+
+        # Update DiskControllerType and EncryptionSettingsVersion
+        $diskUpdateConfig = New-AzDiskUpdateConfig -DiskControllerType $diskControllerType2 -EncryptionSettingsVersion $encryptionSettingsVersion2;
+        Update-AzDisk -ResourceGroupName $rgname -DiskName $diskName -DiskUpdate $diskUpdateConfig;
+        $diskUpdated = Get-AzDisk -ResourceGroupName $rgname -DiskName $diskName;
+        Assert-AreEqual $diskUpdated.DiskControllerType $diskControllerType2;
+        Assert-AreEqual $diskUpdated.EncryptionSettingsVersion $encryptionSettingsVersion2;
+
+        # Test New-AzDiskConfig with only one optional parameter
+        $diskConfigPartial = New-AzDiskConfig -Location $loc -AccountType $diskAccountType -CreateOption $createOption -DiskSizeGB $diskSize -DiskControllerType $diskControllerType1;
+        Assert-AreEqual $diskConfigPartial.DiskControllerType $diskControllerType1;
+        Assert-Null $diskConfigPartial.EncryptionSettingsVersion;
+
+        $diskConfigPartial2 = New-AzDiskConfig -Location $loc -AccountType $diskAccountType -CreateOption $createOption -DiskSizeGB $diskSize -EncryptionSettingsVersion $encryptionSettingsVersion1;
+        Assert-Null $diskConfigPartial2.DiskControllerType;
+        Assert-AreEqual $diskConfigPartial2.EncryptionSettingsVersion $encryptionSettingsVersion1;
+
+    } finally {
+        # Cleanup
+        Remove-AzResourceGroup -Name $rgname -Force -ErrorAction SilentlyContinue;
+    }
+}

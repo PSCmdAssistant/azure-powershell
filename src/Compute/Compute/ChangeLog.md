@@ -20,6 +20,9 @@
 
 -->
 ## Upcoming Release
+* Added new parameters `DiskControllerType` and `EncryptionSettingsVersion` to cmdlets `New-AzDisk` and `New-AzDiskConfig`.
+    - `DiskControllerType` supports values `SCSI` and `NVME`.
+    - Both parameters are optional and enhance disk configuration flexibility.
 * Added new cmdlets `Add-AzVmssSkuProfileVMSize` and `Remove-AzVmssSkuProfileVMSize` to add and remove VM sizes to and from the VMSS SkuProfile.
 * Added new parameters `ZonePlacementPolicy`, `IncludeZone`, `ExcludeZone`, and `AlignRegionalDisksToVMZone` to cmdlets `New-AzVM` and `New-AzVmConfig`
 * Added new parameter `AlignRegionalDisksToVMZone` to cmdlet `Update-AzVM`.
