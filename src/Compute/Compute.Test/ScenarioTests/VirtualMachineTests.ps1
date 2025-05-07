@@ -7946,3 +7946,46 @@ function Test-VirtualMachinePlacement
         Clean-ResourceGroup $rgname;
     }
 }
+function TestGen-newazvm
+{
+    # To have a test recording
+    Get-AzVm
+
+    $name = Get-ComputeTestResourceName
+    $vmssName = 'vmss' + $name
+    $location = Get-Location
+
+    # Test New-AzVmssConfig with new parameters
+    $vmssConfig = New-AzVmssConfig -VMSSName $vmssName -Location $location `
+        -EnableAutomaticZoneRebalancingPolicy $true `
+        -AutomaticZoneRebalanceStrategy 'Recreate' `
+        -AutomaticZoneRebalanceBehavior 'CreateBeforeDelete' `
+        -AutomaticZoneRebalanceTargetInstanceCount 5
+
+    # Validate New-AzVmssConfig
+    Assert-AreEqual $vmssConfig.EnableAutomaticZoneRebalancingPolicy $true
+    Assert-AreEqual $vmssConfig.AutomaticZoneRebalanceStrategy 'Recreate'
+    Assert-AreEqual $vmssConfig.AutomaticZoneRebalanceBehavior 'CreateBeforeDelete'
+    Assert-AreEqual $vmssConfig.AutomaticZoneRebalanceTargetInstanceCount 5
+
+    # Test Update-AzVmss with new parameters
+    $vmssConfigUpdated = Update-AzVmss -VMSS $vmssConfig `
+        -EnableAutomaticZoneRebalancingPolicy $false `
+        -AutomaticZoneRebalanceStrategy 'TargetScaleOut' `
+        -AutomaticZoneRebalanceTargetInstanceCount 10
+
+    # Validate Update-AzVmss
+    Assert-AreEqual $vmssConfigUpdated.EnableAutomaticZoneRebalancingPolicy $false
+    Assert-AreEqual $vmssConfigUpdated.AutomaticZoneRebalanceStrategy 'TargetScaleOut'
+    Assert-AreEqual $vmssConfigUpdated.AutomaticZoneRebalanceTargetInstanceCount 10
+
+    # Test Update-AzVmss with partial parameters
+    $vmssConfigPartialUpdate = Update-AzVmss -VMSS $vmssConfigUpdated `
+        -AutomaticZoneRebalanceBehavior 'CreateBeforeDelete'
+
+    # Validate partial Update-AzVmss
+    Assert-AreEqual $vmssConfigPartialUpdate.AutomaticZoneRebalanceBehavior 'CreateBeforeDelete'
+    Assert-AreEqual $vmssConfigPartialUpdate.AutomaticZoneRebalanceStrategy 'TargetScaleOut'
+    Assert-AreEqual $vmssConfigPartialUpdate.EnableAutomaticZoneRebalancingPolicy $false
+    Assert-AreEqual $vmssConfigPartialUpdate.AutomaticZoneRebalanceTargetInstanceCount 10
+}

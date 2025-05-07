@@ -465,5 +465,33 @@ namespace Microsoft.Azure.Commands.Compute.Test.ScenarioTests
         {
             TestRunner.RunTestScript("Test-EncryptionIdentityNotPartOfAzureVmssConfig");
         }
-    }
+
+        [Fact]
+        [Trait(Category.AcceptanceType, Category.CheckIn)]
+        public void testgennewazvmssconfig()
+        {
+            TestRunner.RunTestScript("TestGen-newazvmssconfig");
+        }
+
+        [Fact]
+        [Trait(Category.AcceptanceType, Category.CheckIn)]
+        public void testgennewazvmss()
+        {
+            TestRunner.RunTestScript("TestGen-newazvmss");
+        }
+
+        [Fact]
+        [Trait(Category.AcceptanceType, Category.CheckIn)]
+        public void testgenupdateazvmss()
+        {
+            TestRunner.RunTestScript("TestGen-updateazvmss");
+        }
+
+        [Fact]
+        [Trait(Category.AcceptanceType, Category.CheckIn)]
+        public void testgenupdateazvm()
+        {
+            TestRunner.RunTestScript("TestGen-updateazvm");
+        }
+                    }
 }
