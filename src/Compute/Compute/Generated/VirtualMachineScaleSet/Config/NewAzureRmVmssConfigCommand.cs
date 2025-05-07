@@ -1,4 +1,4 @@
-//
+ //
 // Copyright (c) Microsoft and contributors.  All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,15 +23,14 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Xml;
 using System.Management.Automation;
+using System.Xml;
 using Microsoft.Azure.Commands.Compute.Automation.Models;
+using Microsoft.Azure.Commands.Compute.Common;
 using Microsoft.Azure.Commands.ResourceManager.Common.ArgumentCompleters;
 using Microsoft.Azure.Management.Compute.Models;
-using Microsoft.WindowsAzure.Commands.Common.CustomAttributes;
 using Microsoft.WindowsAzure.Commands.Utilities.Common;
 using CM = Microsoft.Azure.Commands.Compute.Models;
-using Microsoft.Azure.Commands.Compute.Common;
 
 namespace Microsoft.Azure.Commands.Compute.Automation
 {
@@ -387,6 +386,32 @@ namespace Microsoft.Azure.Commands.Compute.Automation
             HelpMessage = "Specifies whether resilient VM deletion should be enabled on the virtual machine scale set. The default value is false.")]
         public SwitchParameter EnableResilientVMDelete { get; set; }
 
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "Specifies whether Automatic Zone Rebalance should be enabled on the virtual machine scale set. The default value is false.")]
+        public SwitchParameter EnableAutomaticZoneRebalance { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "Specifies the strategy for Automatic Zone Rebalance.")]
+        [PSArgumentCompleter("Recreate", "TargetScaleOut")]
+        public string AutomaticZoneRebalanceStrategy { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "Specifies the behavior for Automatic Zone Rebalance.")]
+        [PSArgumentCompleter("CreateBeforeDelete")]
+        public string AutomaticZoneRebalanceBehavior { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "The target instance count the zonal scale set aims to reach. Only applicable when the RebalanceStrategy is set to 'TargetScaleOut'.")]
+        public int AutomaticZoneRebalanceTargetInstanceCount { get; set; }
+
         protected override void ProcessRecord()
         {
             if (ShouldProcess("VirtualMachineScaleSet", "New"))
@@ -461,6 +486,58 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                     vResiliencyPolicy = new ResiliencyPolicy();
                 }
                 vResiliencyPolicy.ResilientVMDeletionPolicy = new ResilientVMDeletionPolicy(this.EnableResilientVMDelete.ToBool());
+            }
+
+            if (this.EnableAutomaticZoneRebalance.IsPresent)
+            {
+                if (vResiliencyPolicy == null)
+                {
+                    vResiliencyPolicy = new ResiliencyPolicy();
+                }
+                if (vResiliencyPolicy.AutomaticZoneRebalancingPolicy == null)
+                {
+                    vResiliencyPolicy.AutomaticZoneRebalancingPolicy = new AutomaticZoneRebalancingPolicy();
+                }
+                vResiliencyPolicy.AutomaticZoneRebalancingPolicy.Enabled = this.EnableAutomaticZoneRebalance.IsPresent;
+            }
+
+            if (this.IsParameterBound(c => c.AutomaticZoneRebalanceStrategy))
+            {
+                if (vResiliencyPolicy == null)
+                {
+                    vResiliencyPolicy = new ResiliencyPolicy();
+                }
+                if (vResiliencyPolicy.AutomaticZoneRebalancingPolicy == null)
+                {
+                    vResiliencyPolicy.AutomaticZoneRebalancingPolicy = new AutomaticZoneRebalancingPolicy();
+                }
+                vResiliencyPolicy.AutomaticZoneRebalancingPolicy.RebalanceStrategy = this.AutomaticZoneRebalanceStrategy;
+            }
+
+            if (this.IsParameterBound(c => c.AutomaticZoneRebalanceBehavior))
+            {
+                if (vResiliencyPolicy == null)
+                {
+                    vResiliencyPolicy = new ResiliencyPolicy();
+                }
+                if (vResiliencyPolicy.AutomaticZoneRebalancingPolicy == null)
+                {
+                    vResiliencyPolicy.AutomaticZoneRebalancingPolicy = new AutomaticZoneRebalancingPolicy();
+                }
+                vResiliencyPolicy.AutomaticZoneRebalancingPolicy.RebalanceBehavior = this.AutomaticZoneRebalanceBehavior;
+            }
+
+            if (this.IsParameterBound(c => c.AutomaticZoneRebalanceTargetInstanceCount))
+            {
+                if (vResiliencyPolicy == null)
+                {
+                    vResiliencyPolicy = new ResiliencyPolicy();
+                }
+                if (vResiliencyPolicy.AutomaticZoneRebalancingPolicy == null)
+                {
+                    vResiliencyPolicy.AutomaticZoneRebalancingPolicy = new AutomaticZoneRebalancingPolicy();
+                }
+                vResiliencyPolicy.AutomaticZoneRebalancingPolicy.TargetInstanceCount = this.AutomaticZoneRebalanceTargetInstanceCount;
             }
 
             if (this.IsParameterBound(c => c.SkuTier))
