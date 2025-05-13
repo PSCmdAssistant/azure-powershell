@@ -1,4 +1,4 @@
-//
+ //
 // Copyright (c) Microsoft and contributors.  All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -254,6 +254,19 @@ namespace Microsoft.Azure.Commands.Compute.Automation
             HelpMessage = "Setting this property to true improves reliability and performance of data disks that are frequently (more than 5 times a day) by detached from one virtual machine and attached to another. This property should not be set for disks that are not detached and attached frequently as it causes the disks to not align with the fault domain of the virtual machine.")]
         public bool? OptimizedForFrequentAttach { get; set; }
 
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "The Disk Controller Type. Possible values are SCSI or NVME.")]
+        [PSArgumentCompleter("SCSI", "NVME")]
+        public string DiskControllerType { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "Specifies the version of the Encryption Settings (for example, 1.0 or 2.0).")]
+        public string EncryptionSettingsVersion { get; set; }
+
         protected override void ProcessRecord()
         {
             if (ShouldProcess("Disk", "New"))
@@ -421,6 +434,15 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                 vEncryptionSettingsCollection.EncryptionSettings[0].KeyEncryptionKey = this.KeyEncryptionKey;
             }
 
+            if (this.IsParameterBound(c => c.EncryptionSettingsVersion))
+            {
+                if (vEncryptionSettingsCollection == null)
+                {
+                    vEncryptionSettingsCollection = new EncryptionSettingsCollection();
+                }
+                vEncryptionSettingsCollection.Version = this.EncryptionSettingsVersion;
+            }
+
             if (this.IsParameterBound(c => c.DiskEncryptionSetId))
             {
                 if (vEncryption == null)
@@ -489,7 +511,9 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                 SupportedCapabilities = vSupportedCapabilities,
                 PublicNetworkAccess = this.IsParameterBound(c => c.PublicNetworkAccess) ? PublicNetworkAccess : null,
                 DataAccessAuthMode = this.IsParameterBound(c => c.DataAccessAuthMode) ? DataAccessAuthMode : null,
-                OptimizedForFrequentAttach = this.IsParameterBound(c => c.OptimizedForFrequentAttach) ? OptimizedForFrequentAttach : null
+                OptimizedForFrequentAttach = this.IsParameterBound(c => c.OptimizedForFrequentAttach) ? OptimizedForFrequentAttach : null,
+                DiskControllerType = this.IsParameterBound(c => c.DiskControllerType) ? this.DiskControllerType : null,
+                EncryptionSettingsVersion = this.IsParameterBound(c => c.EncryptionSettingsVersion) ? this.EncryptionSettingsVersion : null
             };
 
             WriteObject(vDisk);
