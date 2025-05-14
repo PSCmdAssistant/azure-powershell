@@ -1864,3 +1864,92 @@ function Test-DiskGrantAccessGetSASWithTL
 		Clean-ResourceGroup $rgname;
 	}
 }
+function TestGen-newazdiskconfig
+{
+    $rgname = Get-ComputeTestResourceName;
+    $loc = Get-Location;
+
+    try
+    {
+        # Create Resource Group
+        New-AzResourceGroup -Name $rgname -Location $loc -Force;
+
+        # Setup
+        $diskName = 'disk' + $rgname;
+        $diskAccountType = 'Premium_LRS';
+        $createOption = 'Empty';
+        $diskSize = 32;
+        $diskControllerType1 = 'SCSI';
+        $diskControllerType2 = 'NVME';
+        $encryptionSettingsVersion1 = '1.0';
+        $encryptionSettingsVersion2 = '2.0';
+
+        # Test DiskConfig with DiskControllerType and EncryptionSettingsVersion
+        $diskConfig1 = New-AzDiskConfig -Location $loc -AccountType $diskAccountType -CreateOption $createOption -DiskSizeGB $diskSize -DiskControllerType $diskControllerType1 -EncryptionSettingsVersion $encryptionSettingsVersion1;
+        New-AzDisk -ResourceGroupName $rgname -DiskName $diskName -Disk $diskConfig1;
+        $disk1 = Get-AzDisk -ResourceGroupName $rgname -DiskName $diskName;
+        Assert-AreEqual $disk1.DiskControllerType $diskControllerType1;
+        Assert-AreEqual $disk1.EncryptionSettingsVersion $encryptionSettingsVersion1;
+
+        # Update DiskConfig with new DiskControllerType and EncryptionSettingsVersion
+        $diskUpdateConfig = New-AzDiskUpdateConfig -DiskControllerType $diskControllerType2 -EncryptionSettingsVersion $encryptionSettingsVersion2;
+        Update-AzDisk -ResourceGroupName $rgname -DiskName $diskName -DiskUpdate $diskUpdateConfig;
+        $diskUpdated = Get-AzDisk -ResourceGroupName $rgname -DiskName $diskName;
+        Assert-AreEqual $diskUpdated.DiskControllerType $diskControllerType2;
+        Assert-AreEqual $diskUpdated.EncryptionSettingsVersion $encryptionSettingsVersion2;
+
+        # Cleanup
+        Remove-AzDisk -ResourceGroupName $rgname -DiskName $diskName -Force;
+        Remove-AzResourceGroup -Name $rgname -Force;
+    }
+    catch
+    {
+        Write-Error "Test failed: $_";
+        throw $_;
+    }
+}
+
+function TestGen-newazdisk
+{
+    $rgname = Get-ComputeTestResourceName;
+    $loc = Get-Location;
+
+    try
+    {
+        # Create Resource Group
+        New-AzResourceGroup -Name $rgname -Location $loc -Force;
+
+        # Setup
+        $diskName = 'disk' + $rgname;
+        $diskAccountType = 'Premium_LRS';
+        $createOption = 'Empty';
+        $diskSize = 32;
+        $diskControllerType1 = 'SCSI';
+        $diskControllerType2 = 'NVME';
+        $encryptionSettingsVersion1 = '1.0';
+        $encryptionSettingsVersion2 = '2.0';
+
+        # Test DiskControllerType and EncryptionSettingsVersion in New-AzDiskConfig
+        $diskConfig1 = New-AzDiskConfig -Location $loc -AccountType $diskAccountType -CreateOption $createOption -DiskSizeGB $diskSize -DiskControllerType $diskControllerType1 -EncryptionSettingsVersion $encryptionSettingsVersion1;
+        New-AzDisk -ResourceGroupName $rgname -DiskName $diskName -Disk $diskConfig1;
+        $disk1 = Get-AzDisk -ResourceGroupName $rgname -DiskName $diskName;
+        Assert-AreEqual $disk1.DiskControllerType $diskControllerType1;
+        Assert-AreEqual $disk1.EncryptionSettingsVersion $encryptionSettingsVersion1;
+
+        # Update DiskControllerType and EncryptionSettingsVersion
+        $diskUpdateConfig = New-AzDiskUpdateConfig -DiskControllerType $diskControllerType2 -EncryptionSettingsVersion $encryptionSettingsVersion2;
+        Update-AzDisk -ResourceGroupName $rgname -DiskName $diskName -DiskUpdate $diskUpdateConfig;
+        $diskUpdated = Get-AzDisk -ResourceGroupName $rgname -DiskName $diskName;
+        Assert-AreEqual $diskUpdated.DiskControllerType $diskControllerType2;
+        Assert-AreEqual $diskUpdated.EncryptionSettingsVersion $encryptionSettingsVersion2;
+
+        # Cleanup
+        Remove-AzDisk -ResourceGroupName $rgname -DiskName $diskName -Force;
+        Remove-AzResourceGroup -Name $rgname -Force;
+    }
+    catch
+    {
+        Write-Error "Test failed: $_";
+        throw;
+    }
+}
