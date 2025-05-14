@@ -1,4 +1,4 @@
-//
+ //
 // Copyright (c) Microsoft and contributors.  All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -7,7 +7,7 @@
 //   http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
+distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //
 // See the License for the specific language governing permissions and
@@ -55,6 +55,17 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                     string diskName = this.DiskName;
                     Disk disk = new Disk();
                     ComputeAutomationAutoMapperProfile.Mapper.Map<PSDisk, Disk>(this.Disk, disk);
+
+                    // Apply overrides from cmdlet parameters if provided
+                    if (!string.IsNullOrEmpty(this.DiskControllerType))
+                    {
+                        disk.DiskControllerType = this.DiskControllerType;
+                    }
+
+                    if (!string.IsNullOrEmpty(this.EncryptionSettingsVersion))
+                    {
+                        disk.EncryptionSettingsVersion = this.EncryptionSettingsVersion;
+                    }
 
                     Dictionary<string, List<string>> auxAuthHeader = null;
                     if (!string.IsNullOrEmpty(disk.CreationData?.GalleryImageReference?.Id))
@@ -205,5 +216,18 @@ namespace Microsoft.Azure.Commands.Compute.Automation
 
         [Parameter(Mandatory = false, HelpMessage = "Run cmdlet in the background")]
         public SwitchParameter AsJob { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "Specifies the disk controller type.")]
+        [ValidateSet("SCSI", "NVME", IgnoreCase = true)]
+        public string DiskControllerType { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "Specifies the encryption settings version.")]
+        public string EncryptionSettingsVersion { get; set; }
     }
 }
