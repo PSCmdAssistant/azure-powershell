@@ -1,4 +1,4 @@
-//
+ //
 // Copyright (c) Microsoft and contributors.  All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -55,6 +55,17 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                     string diskName = this.DiskName;
                     Disk disk = new Disk();
                     ComputeAutomationAutoMapperProfile.Mapper.Map<PSDisk, Disk>(this.Disk, disk);
+
+                    // Apply new optional parameters when they are explicitly provided by the user.
+                    if (this.MyInvocation.BoundParameters.ContainsKey(nameof(DiskControllerType)))
+                    {
+                        disk.DiskControllerType = this.DiskControllerType;
+                    }
+
+                    if (this.MyInvocation.BoundParameters.ContainsKey(nameof(EncryptionSettingsVersion)))
+                    {
+                        disk.EncryptionSettingsVersion = this.EncryptionSettingsVersion;
+                    }
 
                     Dictionary<string, List<string>> auxAuthHeader = null;
                     if (!string.IsNullOrEmpty(disk.CreationData?.GalleryImageReference?.Id))
@@ -205,5 +216,16 @@ namespace Microsoft.Azure.Commands.Compute.Automation
 
         [Parameter(Mandatory = false, HelpMessage = "Run cmdlet in the background")]
         public SwitchParameter AsJob { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            HelpMessage = "Specifies the disk controller type to use with the disk. Possible values include 'SCSI' and 'NVME'.")]
+        [ValidateSet("SCSI", "NVME", IgnoreCase = true)]
+        public string DiskControllerType { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            HelpMessage = "Specifies the encryption settings version for the disk.")]
+        public string EncryptionSettingsVersion { get; set; }
     }
 }
