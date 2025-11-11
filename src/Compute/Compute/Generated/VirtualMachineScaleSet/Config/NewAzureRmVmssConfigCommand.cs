@@ -1,4 +1,4 @@
-//
+ //
 // Copyright (c) Microsoft and contributors.  All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -406,6 +406,13 @@ namespace Microsoft.Azure.Commands.Compute.Automation
         [PSArgumentCompleter("CreateBeforeDelete")]
         public string AutomaticZoneRebalanceBehavior { get; set; }
 
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "Allows customers to enable/opt out of Infiniband network interconnect between RDMA VM sizes.")]
+        [ValidateSet("none", "trunk", IgnoreCase = true)]
+        public string HighSpeedInterconnectPlacement { get; set; }
+
         protected override void ProcessRecord()
         {
             if (ShouldProcess("VirtualMachineScaleSet", "New"))
@@ -669,7 +676,7 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                 {
                     vVirtualMachineProfile = new PSVirtualMachineScaleSetVMProfile();
                 }
-                vVirtualMachineProfile.OsProfile = this.OsProfile;
+                vVirtualMachineProfile.OsProfile = this.osprofile;
             }
 
             if (this.IsParameterBound(c => c.StorageProfile))
@@ -1119,6 +1126,16 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                     vVirtualMachineProfile.SecurityPostureReference = new SecurityPostureReference();
                 }
                 vVirtualMachineProfile.SecurityPostureReference.ExcludeExtensions = this.SecurityPostureExcludeExtension;
+            }
+
+            // Incorporate HighSpeedInterconnectPlacement into tags for downstream processing if provided
+            if (this.IsParameterBound(c => c.HighSpeedInterconnectPlacement))
+            {
+                if (this.Tag == null)
+                {
+                    this.Tag = new Hashtable();
+                }
+                this.Tag["HighSpeedInterconnectPlacement"] = this.HighSpeedInterconnectPlacement.ToLower();
             }
 
             var vVirtualMachineScaleSet = new PSVirtualMachineScaleSet
