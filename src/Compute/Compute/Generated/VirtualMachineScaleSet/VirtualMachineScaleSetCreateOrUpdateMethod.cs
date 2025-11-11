@@ -1,4 +1,4 @@
-//
+ //
 // Copyright (c) Microsoft and contributors.  All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -42,6 +42,13 @@ using Microsoft.WindowsAzure.Storage.Shared.Protocol;
 
 namespace Microsoft.Azure.Commands.Compute.Automation
 {
+    // Enum representing High Speed Interconnect Placement options
+    public enum HighSpeedInterconnectPlacement
+    {
+        None,
+        Trunk
+    }
+
     [GenericBreakingChangeWithVersion("In the next breaking change period (Nov 2025), the default VM size will change from 'Standard_Ds1_v2' to 'Standard_D2s_v5'.", "15.0.0", "11.0.0")]
     [Cmdlet(VerbsCommon.New, ResourceManager.Common.AzureRMConstants.AzureRMPrefix + "Vmss", DefaultParameterSetName = "DefaultParameter", SupportsShouldProcess = true)]
     [OutputType(typeof(PSVirtualMachineScaleSet))]
@@ -50,6 +57,9 @@ namespace Microsoft.Azure.Commands.Compute.Automation
         private const string SimpleParameterSet = "SimpleParameterSet", DefaultParameter = "DefaultParameter";
         private const int vmssFlexibleOrchestrationModeNetworkAPIVersionMinimumInt = 20201101;
         private const string vmssFlexibleOrchestrationModeNetworkAPIVersionMinimum = "2020-11-01";
+
+        private const int HighSpeedInterconnectPlacementNetworkAPIVersionMinimumInt = 20250401;
+        private const string HighSpeedInterconnectPlacementNetworkAPIVersionMinimum = "2025-04-01";
 
         private const int FirstPortRangeStart = 50000;
         private const string vmSizeMix = "Mix";
@@ -92,6 +102,10 @@ namespace Microsoft.Azure.Commands.Compute.Automation
             }
             else if (specificImageRespone.Body.HyperVGeneration.ToUpper() == HyperVGenerations.V1)
             {
+                if (this.VirtualMachineScaleSet.VirtualMachineProfile == null)
+                {
+                    this.VirtualMachineScaleSet.VirtualMachineProfile = new PSVirtualMachineScaleSetVMProfile();
+                }
                 if (this.VirtualMachineScaleSet.VirtualMachineProfile.SecurityProfile == null)
                 {
                     this.VirtualMachineScaleSet.VirtualMachineProfile.SecurityProfile = new SecurityProfile();
@@ -198,6 +212,10 @@ namespace Microsoft.Azure.Commands.Compute.Automation
 
         private void trustedLaunchDefaultingImageValues()
         {
+            if (this.VirtualMachineScaleSet.VirtualMachineProfile == null)
+            {
+                this.VirtualMachineScaleSet.VirtualMachineProfile = new PSVirtualMachineScaleSetVMProfile();
+            }
             if (this.VirtualMachineScaleSet.VirtualMachineProfile.StorageProfile == null)
             {
                 this.VirtualMachineScaleSet.VirtualMachineProfile.StorageProfile = new VirtualMachineScaleSetStorageProfile();
@@ -340,6 +358,33 @@ namespace Microsoft.Azure.Commands.Compute.Automation
         {
             var parameters = new VirtualMachineScaleSet();
             ComputeAutomationAutoMapperProfile.Mapper.Map<PSVirtualMachineScaleSet, VirtualMachineScaleSet>(this.VirtualMachineScaleSet, parameters);
+
+            // Apply HighSpeedInterconnectPlacement if specified
+            if (this.IsParameterBound(c => c.HighSpeedInterconnectPlacement))
+            {
+                // Ensure NetworkProfile and API version meet minimum requirement
+                if (parameters.VirtualMachineProfile == null)
+                {
+                    parameters.VirtualMachineProfile = new VirtualMachineScaleSetVMProfile();
+                }
+                if (parameters.VirtualMachineProfile.NetworkProfile == null)
+                {
+                    parameters.VirtualMachineProfile.NetworkProfile = new VirtualMachineScaleSetNetworkProfile();
+                }
+
+                if (string.IsNullOrEmpty(parameters.VirtualMachineProfile.NetworkProfile.NetworkApiVersion) ||
+                    convertAPIVersionToInt(parameters.VirtualMachineProfile.NetworkProfile.NetworkApiVersion) < HighSpeedInterconnectPlacementNetworkAPIVersionMinimumInt)
+                {
+                    parameters.VirtualMachineProfile.NetworkProfile.NetworkApiVersion = HighSpeedInterconnectPlacementNetworkAPIVersionMinimum;
+                }
+
+                // Add/overwrite the additional property for high speed interconnect placement
+                if (parameters.AdditionalProperties == null)
+                {
+                    parameters.AdditionalProperties = new Dictionary<string, object>();
+                }
+                parameters.AdditionalProperties["highSpeedInterconnectPlacement"] = this.HighSpeedInterconnectPlacement.ToString().ToLower();
+            }
 
             CheckImageVersionWarning(parameters);
             SetDefaultOrchestrationMode(parameters);
@@ -499,5 +544,11 @@ namespace Microsoft.Azure.Commands.Compute.Automation
             Mandatory = false,
             HelpMessage = "Used to make a request conditional for the GET and HEAD methods. The server will only return the requested resources if none of the listed ETag values match the current entity. Used to make a request conditional for the GET and HEAD methods. The server will only return the requested resources if none of the listed ETag values match the current entity. Set to '*' to allow a new record set to be created, but to prevent updating an existing record set. Other values will result in error from server as they are not supported.")]
         public string IfNoneMatch { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            HelpMessage = "Allows customers to enable/opt out of Infiniband network interconnect between RDMA VM sizes.")]
+        [ValidateSet("none", "trunk", IgnoreCase = true)]
+        public HighSpeedInterconnectPlacement? HighSpeedInterconnectPlacement { get; set; }
     }
 }
