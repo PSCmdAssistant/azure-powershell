@@ -1,4 +1,4 @@
-//
+ //
 // Copyright (c) Microsoft and contributors.  All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation;
 using System.Xml;
+using System.Reflection;
 using Microsoft.Azure.Commands.Compute.Automation.Models;
 using Microsoft.Azure.Commands.Compute.Common;
 using Microsoft.Azure.Commands.ResourceManager.Common.ArgumentCompleters;
@@ -406,6 +407,13 @@ namespace Microsoft.Azure.Commands.Compute.Automation
         [PSArgumentCompleter("CreateBeforeDelete")]
         public string AutomaticZoneRebalanceBehavior { get; set; }
 
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "Allows customers to enable/opt out of Infiniband network interconnect between RDMA VM sizes.")]
+        [PSArgumentCompleter("none", "trunk")]
+        public string HighSpeedInterconnectPlacement { get; set; }
+
         protected override void ProcessRecord()
         {
             if (ShouldProcess("VirtualMachineScaleSet", "New"))
@@ -709,6 +717,35 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                     vVirtualMachineProfile.NetworkProfile = new VirtualMachineScaleSetNetworkProfile();
                 }
                 vVirtualMachineProfile.NetworkProfile.NetworkInterfaceConfigurations = this.NetworkInterfaceConfiguration;
+            }
+
+            if (this.IsParameterBound(c => c.HighSpeedInterconnectPlacement))
+            {
+                if (vVirtualMachineProfile == null)
+                {
+                    vVirtualMachineProfile = new PSVirtualMachineScaleSetVMProfile();
+                }
+                // Attempt to set property via reflection to maintain compatibility irrespective of SDK version
+                var np = vVirtualMachineProfile.NetworkProfile;
+                if (np == null)
+                {
+                    np = new VirtualMachineScaleSetNetworkProfile();
+                    vVirtualMachineProfile.NetworkProfile = np;
+                }
+                var hsipProp = np.GetType().GetProperty("HighSpeedInterconnectPlacement", BindingFlags.Public | BindingFlags.Instance);
+                if (hsipProp != null && hsipProp.CanWrite)
+                {
+                    hsipProp.SetValue(np, this.HighSpeedInterconnectPlacement, null);
+                }
+                else
+                {
+                    // Fallback: set on VM profile if property exists there
+                    var vmProfProp = vVirtualMachineProfile.GetType().GetProperty("HighSpeedInterconnectPlacement", BindingFlags.Public | BindingFlags.Instance);
+                    if (vmProfProp != null && vmProfProp.CanWrite)
+                    {
+                        vmProfProp.SetValue(vVirtualMachineProfile, this.HighSpeedInterconnectPlacement, null);
+                    }
+                }
             }
 
             if (this.IsParameterBound(c => c.SecurityType))
@@ -1147,6 +1184,16 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                 SkuProfile = vSkuProfile,
                 ResiliencyPolicy = vResiliencyPolicy
             };
+
+            // Apply HighSpeedInterconnectPlacement if requested and property exists
+            if (this.IsParameterBound(c => c.HighSpeedInterconnectPlacement))
+            {
+                var hsipProp = vVirtualMachineScaleSet.GetType().GetProperty("HighSpeedInterconnectPlacement", BindingFlags.Public | BindingFlags.Instance);
+                if (hsipProp != null && hsipProp.CanWrite)
+                {
+                    hsipProp.SetValue(vVirtualMachineScaleSet, this.HighSpeedInterconnectPlacement, null);
+                }
+            }
 
             WriteObject(vVirtualMachineScaleSet);
         }

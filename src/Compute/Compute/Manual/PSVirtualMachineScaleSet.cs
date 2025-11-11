@@ -16,6 +16,12 @@
 
 namespace Microsoft.Azure.Commands.Compute.Automation.Models
 {
+    public enum HighSpeedInterconnectPlacement
+    {
+        None,
+        Trunk
+    }
+
     public partial class PSVirtualMachineScaleSet
     {
         // Gets or sets the FQDN.
@@ -23,6 +29,8 @@ namespace Microsoft.Azure.Commands.Compute.Automation.Models
 
         // Gets or sets the AddProxyAgentExtension.
         public bool? AddProxyAgentExtension { get; set; }
+
+        public HighSpeedInterconnectPlacement? HighSpeedInterconnectPlacement { get; set; }
 
     }
 }
