@@ -137,5 +137,19 @@ namespace Microsoft.Azure.Commands.Compute.Test.ScenarioTests
         {
             TestRunner.RunTestScript("Test-SimpleNewVmssSkipExtOverprovision");
         }
+
+        [Fact]
+        [Trait(Category.AcceptanceType, Category.CheckIn)]
+        public void TestSimpleNewVmssWithHighSpeedInterconnectPlacement()
+        {
+            TestRunner.RunTestScript("Test-SimpleNewVmssWithHighSpeedInterconnectPlacement");
+        }
+
+        [Fact]
+        [Trait(Category.AcceptanceType, Category.CheckIn)]
+        public void TestVmssConfigWithHighSpeedInterconnectPlacement()
+        {
+            TestRunner.RunTestScript("Test-VmssConfigWithHighSpeedInterconnectPlacement");
+        }
     }
 }
