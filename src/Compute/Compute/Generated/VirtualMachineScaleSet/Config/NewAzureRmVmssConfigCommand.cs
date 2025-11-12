@@ -1,4 +1,4 @@
-//
+ //
 // Copyright (c) Microsoft and contributors.  All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation;
 using System.Xml;
+using System.Reflection;
 using Microsoft.Azure.Commands.Compute.Automation.Models;
 using Microsoft.Azure.Commands.Compute.Common;
 using Microsoft.Azure.Commands.ResourceManager.Common.ArgumentCompleters;
@@ -34,6 +35,12 @@ using CM = Microsoft.Azure.Commands.Compute.Models;
 
 namespace Microsoft.Azure.Commands.Compute.Automation
 {
+    public enum HighSpeedInterconnectPlacement
+    {
+        None,
+        Trunk
+    }
+
     [Cmdlet(VerbsCommon.New, ResourceManager.Common.AzureRMConstants.AzureRMPrefix + "VmssConfig", SupportsShouldProcess = true, DefaultParameterSetName = "DefaultParameterSet")]
     [OutputType(typeof(PSVirtualMachineScaleSet))]
     public partial class NewAzureRmVmssConfigCommand : Microsoft.Azure.Commands.ResourceManager.Common.AzureRMCmdlet
@@ -405,6 +412,14 @@ namespace Microsoft.Azure.Commands.Compute.Automation
             HelpMessage = "Specifies the behavior for Automatic Zone Rebalance.")]
         [PSArgumentCompleter("CreateBeforeDelete")]
         public string AutomaticZoneRebalanceBehavior { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "Allows customers to enable/opt out of Infiniband network interconnect between RDMA VM sizes.")]
+        [PSArgumentCompleter("none", "trunk")]
+        [ValidateSet("none", "trunk", IgnoreCase = true)]
+        public HighSpeedInterconnectPlacement? HighSpeedInterconnectPlacement { get; set; }
 
         protected override void ProcessRecord()
         {
@@ -877,11 +892,41 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                 vProximityPlacementGroup.Id = this.ProximityPlacementGroupId;
             }
 
-            if (this.EnableUltraSSD.IsPresent)
+            // Handle AdditionalCapabilities for UltraSSD and HighSpeedInterconnectPlacement
+            if (this.EnableUltraSSD.IsPresent || this.IsParameterBound(c => c.HighSpeedInterconnectPlacement))
             {
                 if (vAdditionalCapabilities == null)
                 {
-                    vAdditionalCapabilities = new AdditionalCapabilities(true);
+                    vAdditionalCapabilities = new AdditionalCapabilities();
+                }
+
+                // Set UltraSSD if requested
+                if (this.EnableUltraSSD.IsPresent)
+                {
+                    // Use reflection to remain compatible with different SDK versions
+                    try
+                    {
+                        var ultraProp = vAdditionalCapabilities.GetType().GetProperty("UltraSSDEnabled", BindingFlags.Public | BindingFlags.Instance);
+                        if (ultraProp != null && ultraProp.CanWrite)
+                        {
+                            ultraProp.SetValue(vAdditionalCapabilities, this.EnableUltraSSD.ToBool(), null);
+                        }
+                    }
+                    catch { }
+                }
+
+                // Set HighSpeedInterconnectPlacement if provided
+                if (this.IsParameterBound(c => c.HighSpeedInterconnectPlacement))
+                {
+                    try
+                    {
+                        var hsProp = vAdditionalCapabilities.GetType().GetProperty("HighSpeedInterconnectPlacement", BindingFlags.Public | BindingFlags.Instance);
+                        if (hsProp != null && hsProp.CanWrite)
+                        {
+                            hsProp.SetValue(vAdditionalCapabilities, this.HighSpeedInterconnectPlacement.ToString(), null);
+                        }
+                    }
+                    catch { }
                 }
             }
 
@@ -1151,4 +1196,4 @@ namespace Microsoft.Azure.Commands.Compute.Automation
             WriteObject(vVirtualMachineScaleSet);
         }
     }
-}
+}.

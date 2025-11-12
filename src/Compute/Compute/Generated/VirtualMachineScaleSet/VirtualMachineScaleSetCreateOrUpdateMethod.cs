@@ -1,4 +1,4 @@
-//
+ //
 // Copyright (c) Microsoft and contributors.  All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -51,6 +51,9 @@ namespace Microsoft.Azure.Commands.Compute.Automation
         private const int vmssFlexibleOrchestrationModeNetworkAPIVersionMinimumInt = 20201101;
         private const string vmssFlexibleOrchestrationModeNetworkAPIVersionMinimum = "2020-11-01";
 
+        private const int HighSpeedInterconnectPlacementNetworkAPIVersionMinimumInt = 20250401;
+        private const string HighSpeedInterconnectPlacementNetworkAPIVersionMinimum = "2025-04-01";
+
         private const int FirstPortRangeStart = 50000;
         private const string vmSizeMix = "Mix";
         private const int DefaultPortRangeSize = 2000;
@@ -92,6 +95,10 @@ namespace Microsoft.Azure.Commands.Compute.Automation
             }
             else if (specificImageRespone.Body.HyperVGeneration.ToUpper() == HyperVGenerations.V1)
             {
+                if (this.VirtualMachineScaleSet.VirtualMachineProfile == null)
+                {
+                    this.VirtualMachineScaleSet.VirtualMachineProfile = new PSVirtualMachineScaleSetVMProfile();
+                }
                 if (this.VirtualMachineScaleSet.VirtualMachineProfile.SecurityProfile == null)
                 {
                     this.VirtualMachineScaleSet.VirtualMachineProfile.SecurityProfile = new SecurityProfile();
@@ -198,6 +205,10 @@ namespace Microsoft.Azure.Commands.Compute.Automation
 
         private void trustedLaunchDefaultingImageValues()
         {
+            if (this.VirtualMachineScaleSet.VirtualMachineProfile == null)
+            {
+                this.VirtualMachineScaleSet.VirtualMachineProfile = new PSVirtualMachineScaleSetVMProfile();
+            }
             if (this.VirtualMachineScaleSet.VirtualMachineProfile.StorageProfile == null)
             {
                 this.VirtualMachineScaleSet.VirtualMachineProfile.StorageProfile = new VirtualMachineScaleSetStorageProfile();
@@ -330,7 +341,12 @@ namespace Microsoft.Azure.Commands.Compute.Automation
 
         private int convertAPIVersionToInt(string networkAPIVersion)
         {
-            string networkAPIVersionString = String.Join("", networkAPIVersion.Split('-'));
+            if (string.IsNullOrEmpty(networkAPIVersion))
+            {
+                return 0;
+            }
+            // Remove '-' and '_' to create an integer comparable version
+            string networkAPIVersionString = networkAPIVersion.Replace("-", "").Replace("_", "");
             int apiversionInt = Convert.ToInt32(networkAPIVersionString);
 
             return apiversionInt;
@@ -345,6 +361,7 @@ namespace Microsoft.Azure.Commands.Compute.Automation
             SetDefaultOrchestrationMode(parameters);
             ConfigureFlexibleOrchestrationMode(parameters);
             ConfigureSecuritySettings(parameters);
+            ConfigureHighSpeedInterconnectPlacement(parameters);
 
             return parameters;
         }
@@ -389,6 +406,58 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                 {
                     parameters.VirtualMachineProfile.SecurityProfile.UefiSettings = new UefiSettings(true, true);
                 }
+            }
+        }
+
+        private void ConfigureHighSpeedInterconnectPlacement(VirtualMachineScaleSet parameters)
+        {
+            if (this.IsParameterBound(c => c.HighSpeedInterconnectPlacement))
+            {
+                // Validate API version support
+                if (parameters?.VirtualMachineProfile?.NetworkProfile == null ||
+                    string.IsNullOrEmpty(parameters.VirtualMachineProfile.NetworkProfile.NetworkApiVersion) ||
+                    convertAPIVersionToInt(parameters.VirtualMachineProfile.NetworkProfile.NetworkApiVersion) < HighSpeedInterconnectPlacementNetworkAPIVersionMinimumInt)
+                {
+                    throw new Exception($"HighSpeedInterconnectPlacement requires NetworkApiVersion {HighSpeedInterconnectPlacementNetworkAPIVersionMinimum} or higher.");
+                }
+
+                // Attempt to set the property on the SDK object if available
+                try
+                {
+                    var prop = parameters.GetType().GetProperty("HighSpeedInterconnectPlacement");
+                    if (prop != null && prop.CanWrite)
+                    {
+                        prop.SetValue(parameters, this.HighSpeedInterconnectPlacement, null);
+                        return;
+                    }
+
+                    // Fallback: try to set on NetworkProfile if property exists there
+                    var netProfileProp = parameters?.VirtualMachineProfile?.NetworkProfile?.GetType().GetProperty("HighSpeedInterconnectPlacement");
+                    if (netProfileProp != null && netProfileProp.CanWrite)
+                    {
+                        netProfileProp.SetValue(parameters.VirtualMachineProfile.NetworkProfile, this.HighSpeedInterconnectPlacement, null);
+                        return;
+                    }
+
+                    // As a last resort, store in AdditionalProperties (dynamic bag) if present
+                    var addPropsProp = parameters.GetType().GetProperty("AdditionalProperties");
+                    if (addPropsProp != null)
+                    {
+                        var dict = addPropsProp.GetValue(parameters) as IDictionary<string, object>;
+                        if (dict != null)
+                        {
+                            dict["highSpeedInterconnectPlacement"] = this.HighSpeedInterconnectPlacement;
+                            return;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception("Failed to set HighSpeedInterconnectPlacement: " + ex.Message);
+                }
+
+                // If none of the above worked, warn but continue
+                WriteWarning("HighSpeedInterconnectPlacement parameter was provided but could not be set on the request due to unsupported SDK version.");
             }
         }
 
@@ -499,5 +568,16 @@ namespace Microsoft.Azure.Commands.Compute.Automation
             Mandatory = false,
             HelpMessage = "Used to make a request conditional for the GET and HEAD methods. The server will only return the requested resources if none of the listed ETag values match the current entity. Used to make a request conditional for the GET and HEAD methods. The server will only return the requested resources if none of the listed ETag values match the current entity. Set to '*' to allow a new record set to be created, but to prevent updating an existing record set. Other values will result in error from server as they are not supported.")]
         public string IfNoneMatch { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            HelpMessage = "Allows customers to enable/opt out of Infiniband network interconnect between RDMA VM sizes.",
+            ParameterSetName = DefaultParameter)]
+        [Parameter(
+            Mandatory = false,
+            HelpMessage = "Allows customers to enable/opt out of Infiniband network interconnect between RDMA VM sizes.",
+            ParameterSetName = SimpleParameterSet)]
+        [ValidateSet("none", "trunk", IgnoreCase = true)]
+        public string HighSpeedInterconnectPlacement { get; set; }
     }
 }
