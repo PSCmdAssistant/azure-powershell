@@ -8116,3 +8116,37 @@ function Test-VirtualMachineGalleryApplicationFlags
         Clean-ResourceGroup $resourceGroupName
     }
 }
+function TestGen-newazvm
+{
+    # Test for New-AzVmss with HighSpeedInterconnectPlacement parameter
+    $location = Get-Location
+    $resourceGroupName = Get-ComputeTestResourceName
+    $vmssName = "vmss" + $resourceGroupName
+
+    # Create a resource group
+    New-AzResourceGroup -Name $resourceGroupName -Location $location
+
+    # Test with HighSpeedInterconnectPlacement set to 'none'
+    $vmssConfigNone = New-AzVmssConfig -Location $location -SkuCapacity 2 -SkuName "Standard_D2_v2" -HighSpeedInterconnectPlacement "none"
+    $vmssNone = New-AzVmss -ResourceGroupName $resourceGroupName -VMScaleSetName $vmssName -VirtualMachineScaleSet $vmssConfigNone
+
+    # Validate HighSpeedInterconnectPlacement is set to 'none'
+    Assert-AreEqual $vmssNone.VirtualMachineProfile.NetworkProfile.NetworkInterfaceConfigurations[0].HighSpeedInterconnectPlacement "none"
+
+    # Test with HighSpeedInterconnectPlacement set to 'trunk'
+    $vmssConfigTrunk = New-AzVmssConfig -Location $location -SkuCapacity 2 -SkuName "Standard_D2_v2" -HighSpeedInterconnectPlacement "trunk"
+    $vmssTrunk = New-AzVmss -ResourceGroupName $resourceGroupName -VMScaleSetName $vmssName -VirtualMachineScaleSet $vmssConfigTrunk
+
+    # Validate HighSpeedInterconnectPlacement is set to 'trunk'
+    Assert-AreEqual $vmssTrunk.VirtualMachineProfile.NetworkProfile.NetworkInterfaceConfigurations[0].HighSpeedInterconnectPlacement "trunk"
+
+    # Test default behavior (HighSpeedInterconnectPlacement not specified)
+    $vmssConfigDefault = New-AzVmssConfig -Location $location -SkuCapacity 2 -SkuName "Standard_D2_v2"
+    $vmssDefault = New-AzVmss -ResourceGroupName $resourceGroupName -VMScaleSetName $vmssName -VirtualMachineScaleSet $vmssConfigDefault
+
+    # Validate HighSpeedInterconnectPlacement is not set
+    Assert-Null $vmssDefault.VirtualMachineProfile.NetworkProfile.NetworkInterfaceConfigurations[0].HighSpeedInterconnectPlacement
+
+    # Cleanup
+    Remove-AzResourceGroup -Name $resourceGroupName -Force
+}
