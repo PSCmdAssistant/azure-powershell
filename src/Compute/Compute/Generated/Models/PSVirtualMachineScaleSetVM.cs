@@ -46,6 +46,7 @@ namespace Microsoft.Azure.Commands.Compute.Automation.Models
         public string VmId { get; set; }
         public VirtualMachineScaleSetVMInstanceView InstanceView { get; set; }
         public HardwareProfile HardwareProfile { get; set; }
+        public string ResilientVMDeletionStatus { get; set; }
         public StorageProfile StorageProfile { get; set; }
         public AdditionalCapabilities AdditionalCapabilities { get; set; }
         public OSProfile OsProfile { get; set; }
