@@ -25,6 +25,11 @@ using Microsoft.Azure.Management.Compute.Models;
 
 namespace Microsoft.Azure.Commands.Compute.Automation.Models
 {
+    public class DiskAvailabilityPolicy
+    {
+        public string ActionOnDiskDelay { get; set; }
+    }
+
     public partial class PSDiskUpdate
     {
         public OperatingSystemTypes? OsType { get; set; }
@@ -57,5 +62,7 @@ namespace Microsoft.Azure.Commands.Compute.Automation.Models
         //     Gets or sets possible values include: 'Enabled', 'Disabled'
         public string PublicNetworkAccess { get; set; }
         public string DataAccessAuthMode { get; set; }
+
+        public DiskAvailabilityPolicy AvailabilityPolicy { get; set; }
     }
 }
