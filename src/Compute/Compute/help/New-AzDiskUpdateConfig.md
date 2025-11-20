@@ -20,8 +20,8 @@ New-AzDiskUpdateConfig [[-SkuName] <String>] [-Tier <String>] [-DiskIOPSReadOnly
  [-EncryptionSettingsEnabled <Boolean>] [-DiskEncryptionKey <KeyVaultAndSecretReference>]
  [-KeyEncryptionKey <KeyVaultAndKeyReference>] [-DiskEncryptionSetId <String>] [-EncryptionType <String>]
  [-BurstingEnabled <Boolean>] [-PublicNetworkAccess <String>] [-AcceleratedNetwork <Boolean>]
- [-DataAccessAuthMode <String>] [-Architecture <String>] [-DefaultProfile <IAzureContextContainer>]
- [-WhatIf] [-Confirm] [<CommonParameters>]
+ [-DataAccessAuthMode <String>] [-Architecture <String>] [-SupportedSecurityOption <String>]
+ [-DefaultProfile <IAzureContextContainer>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -52,6 +52,14 @@ New-AzDiskUpdateConfig -DiskSizeGB 10 | Update-AzDisk -ResourceGroupName 'Resour
 ```
 
 This command updates an existing disk with name 'Disk01' in resource group 'ResourceGroup01' to 10 GB disk size.
+
+### Example 3
+```powershell
+$updateconfig = New-AzDiskUpdateConfig -SupportedSecurityOption "TrustedLaunchSupported"
+Update-AzDisk -ResourceGroupName 'ResourceGroup01' -DiskName 'Disk01' -DiskUpdate $updateconfig
+```
+
+This command updates an existing disk to set SupportedSecurityOption to 'TrustedLaunchSupported', enabling it to be used with Trusted Launch VMs.
 
 ## PARAMETERS
 
@@ -403,6 +411,22 @@ Indicates if the OS on the disk supports hibernation with $true or $false
 
 ```yaml
 Type: System.Nullable`1[System.Boolean]
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: True (ByPropertyName)
+Accept wildcard characters: False
+```
+
+### -SupportedSecurityOption
+Refers to the security capability of the disk supported to create a Trusted launch or Confidential VM.
+Possible values include: 'TrustedLaunchSupported', 'TrustedLaunchAndConfidentialVMSupported'
+
+```yaml
+Type: System.String
 Parameter Sets: (All)
 Aliases:
 
