@@ -104,6 +104,17 @@ New-AzDisk -ResourceGroupName 'ResourceGroup01' -DiskName 'Disk01' -Disk $diskCo
 
 Creation of managed disk using CreateOption of Import, with SupportedSecurityOption as TrustedLaunchSupported
 
+### Example 6
+```powershell
+$diskconfig = New-AzDiskConfig -Location 'Central US' -SkuName 'Standard_LRS' -OsType 'Windows' -UploadSizeInBytes 35183298347520 -CreateOption 'Upload' -SupportedSecurityOption 'TrustedLaunchSupported'
+New-AzDisk -ResourceGroupName 'ResourceGroup01' -DiskName 'Disk01' -Disk $diskConfig
+$diskSas = Grant-AzDiskAccess -ResourceGroupName 'ResourceGroup01' -DiskName 'Disk01' -DurationInSecond 86400 -Access 'Write'
+# Upload VHD to $diskSas using AzCopy
+Revoke-AzDiskAccess -ResourceGroupName 'ResourceGroup01' -DiskName 'Disk01'
+```
+
+Creation of managed disk using CreateOption of Upload, with SupportedSecurityOption as TrustedLaunchSupported. When this disk is attached to a VM, it can be used to create a Trusted Launch VM.
+
 ## PARAMETERS
 
 ### -AcceleratedNetwork

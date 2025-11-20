@@ -24,6 +24,9 @@
 * Updated Azure.Core from 1.45.0 to 1.47.3
 * Added `-EnableAutomaticUpgrade` and `-TreatFailureAsDeploymentFailure` parameters (Bool) to `New-AzVmGalleryApplication` and `New-AzVmssGalleryApplication` cmdlets.
 * Added `-EnableAutomaticUpgrade` and `-TreatFailureAsDeploymentFailure` parameters (Switch) to `Add-AzVmGalleryApplication` and `Add-AzVmssGalleryApplication` cmdlets.
+* Enhanced `-SupportedSecurityOption` parameter support for `New-AzDiskConfig` cmdlet
+    - Added comprehensive test coverage for Upload CreateOption scenarios
+    - Updated documentation with examples for Import and Upload scenarios with Trusted Launch support
 
 ## Version 10.5.0
 * Added `-Redeploy` switch parameter for `Update-AzHost` cmdlet to enable dedicated host redeployment.

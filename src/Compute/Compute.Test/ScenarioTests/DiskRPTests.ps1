@@ -1964,6 +1964,7 @@ function Test-SupportedSecurityOption
     try{
     	New-AzResourceGroup -Name $rgname -Location $loc -Force;
 
+        # Test with CreateOption Empty
         $diskConfig = New-AzDiskConfig -Location $loc -SkuName 'PremiumV2_LRS' -DiskSizeGB 2 -CreateOption Empty -SupportedSecurityOption 'TrustedLaunchSupported';
 		$diskname = "disk" + $rgname;
 		New-AzDisk -ResourceGroupName $rgname -DiskName $diskname -Disk $diskConfig;
@@ -1975,6 +1976,19 @@ function Test-SupportedSecurityOption
         $updateconfig = New-AzDiskUpdateConfig -SupportedSecurityOption "TrustedLaunchAndConfidentialVMSupported";
         $disk = Update-AzDisk -ResourceGroupName $rgname -DiskName $diskname -DiskUpdate $updateconfig;
         Assert-AreEqual "TrustedLaunchAndConfidentialVMSupported" $disk.SupportedCapabilities.SupportedSecurityOption;
+
+        # Test with CreateOption Upload and SupportedSecurityOption
+        $diskname2 = "diskupload" + $rgname;
+        $diskConfig2 = New-AzDiskConfig -Location $loc -SkuName 'Standard_LRS' -OsType 'Windows' `
+                                        -UploadSizeInBytes 35183298347520 -CreateOption 'Upload' `
+                                        -SupportedSecurityOption 'TrustedLaunchSupported';
+        New-AzDisk -ResourceGroupName $rgname -DiskName $diskname2 -Disk $diskConfig2;
+        $disk2 = Get-AzDisk -ResourceGroupName $rgname -DiskName $diskname2;
+        
+        Assert-NotNull $disk2.SupportedCapabilities;
+        Assert-AreEqual "TrustedLaunchSupported" $disk2.SupportedCapabilities.SupportedSecurityOption;
+        Assert-AreEqual "ReadyToUpload" $disk2.DiskState;
+        Assert-AreEqual "Upload" $disk2.CreationData.CreateOption;
     }
 
     finally
