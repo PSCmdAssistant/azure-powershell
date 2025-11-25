@@ -551,3 +551,65 @@ function Test-SimpleNewVmssSkipExtOverprovision
         Clean-ResourceGroup $vmssname
     }
 }
+
+<#
+.SYNOPSIS
+Test Simple Parameter Set for New Vmss with HighSpeedInterconnectPlacement
+#>
+function Test-SimpleNewVmssHighSpeedInterconnectPlacement
+{
+    # Setup
+    $vmssname = Get-ResourceName
+
+    try
+    {
+        $username = "admin01"
+        $password = Get-PasswordForVM | ConvertTo-SecureString -AsPlainText -Force
+        $cred = new-object -typename System.Management.Automation.PSCredential -argumentlist $username, $password
+        [string]$domainNameLabel = "$vmssname$vmssname".tolower();
+
+        # Test with Trunk placement
+        $x = New-AzVmss -Name $vmssname -Credential $cred -DomainNameLabel $domainNameLabel -HighSpeedInterconnectPlacement "Trunk"
+        
+        Assert-AreEqual $vmssname $x.Name;
+        Assert-AreEqual "Trunk" $x.HighSpeedInterconnectPlacement;
+        
+        # Verify with Get
+        $vmss = Get-AzVmss -ResourceGroupName $vmssname -Name $vmssname;
+        Assert-AreEqual "Trunk" $vmss.HighSpeedInterconnectPlacement;
+    }
+    finally
+    {
+        # Cleanup
+        Clean-ResourceGroup $vmssname
+    }
+}
+
+<#
+.SYNOPSIS
+Test New-AzVmssConfig with HighSpeedInterconnectPlacement
+#>
+function Test-VmssConfigHighSpeedInterconnectPlacement
+{
+    # Setup
+    $rgname = Get-ResourceName
+    $vmssName = 'vmss' + $rgname;
+    $vmssType = 'Microsoft.Compute/virtualMachineScaleSets';
+    $loc = Get-Location "Microsoft.Compute" "virtualMachineScaleSets" "West US 2";
+
+    try
+    {
+        # Create the resource group
+        New-AzResourceGroup -Name $rgname -Location $loc -Force;
+        
+        # Create VMSS config with HighSpeedInterconnectPlacement
+        $vmssConfig = New-AzVmssConfig -Location $loc -HighSpeedInterconnectPlacement "None"
+        
+        Assert-AreEqual "None" $vmssConfig.HighSpeedInterconnectPlacement;
+    }
+    finally
+    {
+        # Cleanup
+        Clean-ResourceGroup $rgname
+    }
+}
