@@ -8116,3 +8116,65 @@ function Test-VirtualMachineGalleryApplicationFlags
         Clean-ResourceGroup $resourceGroupName
     }
 }
+
+<#
+.SYNOPSIS
+    Test ScheduledEventsPolicy parameters for VM Update
+#>
+function Test-VirtualMachineScheduledEventsPolicy
+{
+    # Setup
+    $rgname = Get-ComputeTestResourceName
+
+    try
+    {
+        # Common
+        $loc = Get-ComputeVMLocation;
+        New-AzResourceGroup -Name $rgname -Location $loc -Force;
+
+        # Create a VM
+        $vmName = 'vm' + $rgname;
+        $adminUsername = 'Foo12';
+        $adminPassword = $PLACEHOLDER;
+        $securePassword = ConvertTo-SecureString $adminPassword -AsPlainText -Force;
+        $cred = New-Object System.Management.Automation.PSCredential ($adminUsername, $securePassword);
+
+        $vm = New-AzVM -ResourceGroupName $rgname -Location $loc -Name $vmName -Credential $cred
+
+        # Get the VM and update with ScheduledEventsPolicy parameters
+        $apiVersion = "2025-01-01"
+        $vmToUpdate = Get-AzVM -ResourceGroupName $rgname -Name $vmName
+        $vmResult = Update-AzVM -ResourceGroupName $rgname -VM $vmToUpdate `
+            -ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphEnable $true `
+            -ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphApiVersion $apiVersion `
+            -AllInstancesDownAutomaticallyApprove $true
+
+        # Get the updated VM
+        $vmUpdated = Get-AzVM -ResourceGroupName $rgname -Name $vmName
+
+        # Assert ScheduledEventsPolicy is set correctly
+        Assert-NotNull $vmUpdated.ScheduledEventsPolicy
+        Assert-True { $vmUpdated.ScheduledEventsPolicy.ScheduledEventsAdditionalPublishingTargets.EventGridAndResourceGraph.Enable }
+        Assert-AreEqual $apiVersion $vmUpdated.ScheduledEventsPolicy.ScheduledEventsAdditionalPublishingTargets.EventGridAndResourceGraph.ScheduledEventsApiVersion
+        Assert-True { $vmUpdated.ScheduledEventsPolicy.AllInstancesDown.AutomaticallyApprove }
+
+        # Update to disable the settings
+        $vmToUpdate2 = Get-AzVM -ResourceGroupName $rgname -Name $vmName
+        $vmResult2 = Update-AzVM -ResourceGroupName $rgname -VM $vmToUpdate2 `
+            -ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphEnable $false `
+            -AllInstancesDownAutomaticallyApprove $false
+
+        # Get the updated VM again
+        $vmUpdated2 = Get-AzVM -ResourceGroupName $rgname -Name $vmName
+
+        # Assert ScheduledEventsPolicy is updated correctly
+        Assert-False { $vmUpdated2.ScheduledEventsPolicy.ScheduledEventsAdditionalPublishingTargets.EventGridAndResourceGraph.Enable }
+        Assert-False { $vmUpdated2.ScheduledEventsPolicy.AllInstancesDown.AutomaticallyApprove }
+    }
+    finally
+    {
+        # Cleanup
+        Clean-ResourceGroup $rgname
+    }
+}
+

@@ -231,3 +231,53 @@ function Test-AvailabilitySetVM
         Clean-ResourceGroup $rgname
     }
 }
+
+
+<#
+.SYNOPSIS
+    Test ScheduledEventsPolicy parameters for AvailabilitySet Update
+#>
+function Test-AvailabilitySetScheduledEventsPolicy
+{
+    # Setup
+    $rgname = Get-ComputeTestResourceName
+
+    try
+    {
+        # Common
+        $loc = Get-ComputeVMLocation;
+        New-AzResourceGroup -Name $rgname -Location $loc -Force;
+
+        # Create an Availability Set
+        $asetName = 'avs' + $rgname;
+        $aset = New-AzAvailabilitySet -ResourceGroupName $rgname -Name $asetName -Location $loc -Sku Aligned
+
+        # Update AvailabilitySet with ScheduledEventsPolicy parameters
+        $apiVersion = "2025-01-01"
+        $asetResult = Get-AzAvailabilitySet -ResourceGroupName $rgname -Name $asetName | Update-AzAvailabilitySet `
+            -ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphEnable $true `
+            -ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphApiVersion $apiVersion `
+            -AllInstancesDownAutomaticallyApprove $true
+
+        # Assert ScheduledEventsPolicy is set correctly
+        Assert-NotNull $asetResult.ScheduledEventsPolicy
+        Assert-True { $asetResult.ScheduledEventsPolicy.ScheduledEventsAdditionalPublishingTargets.EventGridAndResourceGraph.Enable }
+        Assert-AreEqual $apiVersion $asetResult.ScheduledEventsPolicy.ScheduledEventsAdditionalPublishingTargets.EventGridAndResourceGraph.ScheduledEventsApiVersion
+        Assert-True { $asetResult.ScheduledEventsPolicy.AllInstancesDown.AutomaticallyApprove }
+
+        # Update to disable the settings
+        $asetResult2 = Get-AzAvailabilitySet -ResourceGroupName $rgname -Name $asetName | Update-AzAvailabilitySet `
+            -ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphEnable $false `
+            -AllInstancesDownAutomaticallyApprove $false
+
+        # Assert ScheduledEventsPolicy is updated correctly
+        Assert-False { $asetResult2.ScheduledEventsPolicy.ScheduledEventsAdditionalPublishingTargets.EventGridAndResourceGraph.Enable }
+        Assert-False { $asetResult2.ScheduledEventsPolicy.AllInstancesDown.AutomaticallyApprove }
+    }
+    finally
+    {
+        # Cleanup
+        Clean-ResourceGroup $rgname
+    }
+}
+
