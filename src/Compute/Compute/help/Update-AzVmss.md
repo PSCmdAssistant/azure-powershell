@@ -39,6 +39,9 @@ Update-AzVmss [-ResourceGroupName] <String> [-VMScaleSetName] <String>
  [-SkuProfileAllocationStrategy <String>] [-EnableResilientVMCreate <Boolean>]
  [-EnableResilientVMDelete <Boolean>] [-EnableAutomaticZoneRebalance <Boolean>]
  [-AutomaticZoneRebalanceStrategy <String>] [-AutomaticZoneRebalanceBehavior <String>]
+ [-ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphEnable <Boolean>]
+ [-ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphApiVersion <String>]
+ [-AllInstancesDownAutomaticallyApprove <Boolean>]
  [-DefaultProfile <IAzureContextContainer>] [-WhatIf] [-Confirm]
  [<CommonParameters>]
 ```
@@ -70,6 +73,9 @@ Update-AzVmss [-ResourceGroupName] <String> [-VMScaleSetName] <String>
  [-SkuProfileAllocationStrategy <String>] [-EnableResilientVMCreate <Boolean>]
  [-EnableResilientVMDelete <Boolean>] [-EnableAutomaticZoneRebalance <Boolean>]
  [-AutomaticZoneRebalanceStrategy <String>] [-AutomaticZoneRebalanceBehavior <String>]
+ [-ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphEnable <Boolean>]
+ [-ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphApiVersion <String>]
+ [-AllInstancesDownAutomaticallyApprove <Boolean>]
  [-DefaultProfile <IAzureContextContainer>] [-WhatIf] [-Confirm]
  [<CommonParameters>]
 ```
@@ -1275,6 +1281,51 @@ Required: False
 Position: Named
 Default value: False
 Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphEnable
+Specifies if event grid and resource graph is enabled for Scheduled event related configurations.
+
+```yaml
+Type: System.Boolean
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: True (ByPropertyName)
+Accept wildcard characters: False
+```
+
+### -ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphApiVersion
+Specifies the api-version to determine which Scheduled Events configuration schema version will be delivered.
+
+```yaml
+Type: System.String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: True (ByPropertyName)
+Accept wildcard characters: False
+```
+
+### -AllInstancesDownAutomaticallyApprove
+Specifies if Scheduled Events should be auto-approved when all instances are down.
+
+```yaml
+Type: System.Boolean
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: True (ByPropertyName)
 Accept wildcard characters: False
 ```
 

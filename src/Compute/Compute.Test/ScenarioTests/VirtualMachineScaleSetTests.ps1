@@ -6144,3 +6144,65 @@ function Test-VirtualMachineScaleSetGalleryApplicationFlags
         Clean-ResourceGroup $rgname
     }
 }
+<#
+.SYNOPSIS
+    Test ScheduledEventsPolicy parameters for VMSS Update
+    Create a VMSS, then update it with ScheduledEventsPolicy parameters
+#>
+function Test-VirtualMachineScaleSetScheduledEventsPolicy
+{
+    # Setup
+    $rgname = Get-ComputeTestResourceName
+
+    try
+    {
+        $loc = "eastus2"
+        $vmssName = "scheduledEventsVMSS"
+        
+        # Create Resource Group
+        New-AzResourceGroup -Name $rgname -Location $loc -Force;
+        
+        # Setup credentials
+        $adminUsername = Get-ComputeTestResourceName;
+        $adminPassword = $PLACEHOLDER;
+        $securePassword = ConvertTo-SecureString $adminPassword -AsPlainText -Force;
+        $cred = New-Object System.Management.Automation.PSCredential ($adminUsername, $securePassword);
+
+        # Create a basic VMSS
+        $vmss = New-AzVmss -ResourceGroupName $rgname -VMScaleSetName $vmssName -Credential $cred -Location $loc
+
+        # Update VMSS with ScheduledEventsPolicy parameters
+        $apiVersion = "2025-01-01"
+        $vmssUpdate = Update-AzVmss -ResourceGroupName $rgname -VMScaleSetName $vmssName `
+            -ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphEnable $true `
+            -ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphApiVersion $apiVersion `
+            -AllInstancesDownAutomaticallyApprove $true
+
+        # Get the updated VMSS
+        $vmssResult = Get-AzVmss -ResourceGroupName $rgname -VMScaleSetName $vmssName
+
+        # Assert ScheduledEventsPolicy is set correctly
+        Assert-NotNull $vmssResult.ScheduledEventsPolicy
+        Assert-True { $vmssResult.ScheduledEventsPolicy.ScheduledEventsAdditionalPublishingTargets.EventGridAndResourceGraph.Enable }
+        Assert-AreEqual $apiVersion $vmssResult.ScheduledEventsPolicy.ScheduledEventsAdditionalPublishingTargets.EventGridAndResourceGraph.ScheduledEventsApiVersion
+        Assert-True { $vmssResult.ScheduledEventsPolicy.AllInstancesDown.AutomaticallyApprove }
+
+        # Update to disable the settings
+        $vmssUpdate2 = Update-AzVmss -ResourceGroupName $rgname -VMScaleSetName $vmssName `
+            -ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphEnable $false `
+            -AllInstancesDownAutomaticallyApprove $false
+
+        # Get the updated VMSS again
+        $vmssResult2 = Get-AzVmss -ResourceGroupName $rgname -VMScaleSetName $vmssName
+
+        # Assert ScheduledEventsPolicy is updated correctly
+        Assert-False { $vmssResult2.ScheduledEventsPolicy.ScheduledEventsAdditionalPublishingTargets.EventGridAndResourceGraph.Enable }
+        Assert-False { $vmssResult2.ScheduledEventsPolicy.AllInstancesDown.AutomaticallyApprove }
+    }
+    finally
+    {
+        # Cleanup
+        Clean-ResourceGroup $rgname
+    }
+}
+

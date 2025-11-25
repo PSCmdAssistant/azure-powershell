@@ -24,6 +24,10 @@
 * Updated Azure.Core from 1.45.0 to 1.47.3
 * Added `-EnableAutomaticUpgrade` and `-TreatFailureAsDeploymentFailure` parameters (Bool) to `New-AzVmGalleryApplication` and `New-AzVmssGalleryApplication` cmdlets.
 * Added `-EnableAutomaticUpgrade` and `-TreatFailureAsDeploymentFailure` parameters (Switch) to `Add-AzVmGalleryApplication` and `Add-AzVmssGalleryApplication` cmdlets.
+* Added ScheduledEventsPolicy parameters to `Update-AzVmss`, `Update-AzAvailabilitySet`, and `Update-AzVM` cmdlets.
+    - `-ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphEnable`: Specifies if event grid and resource graph is enabled for Scheduled event related configurations.
+    - `-ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphApiVersion`: Specifies the api-version to determine which Scheduled Events configuration schema version will be delivered.
+    - `-AllInstancesDownAutomaticallyApprove`: Specifies if Scheduled Events should be auto-approved when all instances are down.
 
 ## Version 10.5.0
 * Added `-Redeploy` switch parameter for `Update-AzHost` cmdlet to enable dedicated host redeployment.

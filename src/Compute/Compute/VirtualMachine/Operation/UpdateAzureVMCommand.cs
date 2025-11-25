@@ -201,6 +201,24 @@ namespace Microsoft.Azure.Commands.Compute
         [ValidateNotNullOrEmpty]
         public bool? AlignRegionalDisksToVMZone { get; set; }
 
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "Specifies if event grid and resource graph is enabled for Scheduled event related configurations.")]
+        public bool ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphEnable { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "Specifies the api-version to determine which Scheduled Events configuration schema version will be delivered.")]
+        public string ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphApiVersion { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "Specifies if Scheduled Events should be auto-approved when all instances are down.")]
+        public bool AllInstancesDownAutomaticallyApprove { get; set; }
+
         public override void ExecuteCmdlet()
         {
             if (this.IsParameterBound(c => c.UserData))
@@ -257,7 +275,8 @@ namespace Microsoft.Azure.Commands.Compute
                         ApplicationProfile = ComputeAutoMapperProfile.Mapper.Map<ApplicationProfile>(this.VM.ApplicationProfile),
                         UserData = this.IsParameterBound(c => c.UserData)
                             ? this.UserData
-                            : this.VM.UserData
+                            : this.VM.UserData,
+                        ScheduledEventsPolicy = this.VM.ScheduledEventsPolicy
                     };
 
                     if (parameters.Host != null && string.IsNullOrWhiteSpace(parameters.Host.Id))
@@ -442,6 +461,48 @@ namespace Microsoft.Azure.Commands.Compute
                             parameters.StorageProfile = new StorageProfile();
                         }
                         parameters.StorageProfile.AlignRegionalDisksToVMZone = this.AlignRegionalDisksToVMZone;
+                    }
+
+                    // Handle ScheduledEventsPolicy parameters
+                    if (this.IsParameterBound(c => c.ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphEnable) ||
+                        this.IsParameterBound(c => c.ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphApiVersion) ||
+                        this.IsParameterBound(c => c.AllInstancesDownAutomaticallyApprove))
+                    {
+                        if (parameters.ScheduledEventsPolicy == null)
+                        {
+                            parameters.ScheduledEventsPolicy = new ScheduledEventsPolicy();
+                        }
+
+                        if (this.IsParameterBound(c => c.ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphEnable) ||
+                            this.IsParameterBound(c => c.ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphApiVersion))
+                        {
+                            if (parameters.ScheduledEventsPolicy.ScheduledEventsAdditionalPublishingTargets == null)
+                            {
+                                parameters.ScheduledEventsPolicy.ScheduledEventsAdditionalPublishingTargets = new ScheduledEventsAdditionalPublishingTargets();
+                            }
+                            if (parameters.ScheduledEventsPolicy.ScheduledEventsAdditionalPublishingTargets.EventGridAndResourceGraph == null)
+                            {
+                                parameters.ScheduledEventsPolicy.ScheduledEventsAdditionalPublishingTargets.EventGridAndResourceGraph = new EventGridAndResourceGraph();
+                            }
+
+                            if (this.IsParameterBound(c => c.ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphEnable))
+                            {
+                                parameters.ScheduledEventsPolicy.ScheduledEventsAdditionalPublishingTargets.EventGridAndResourceGraph.Enable = this.ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphEnable;
+                            }
+                            if (this.IsParameterBound(c => c.ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphApiVersion))
+                            {
+                                parameters.ScheduledEventsPolicy.ScheduledEventsAdditionalPublishingTargets.EventGridAndResourceGraph.ScheduledEventsApiVersion = this.ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphApiVersion;
+                            }
+                        }
+
+                        if (this.IsParameterBound(c => c.AllInstancesDownAutomaticallyApprove))
+                        {
+                            if (parameters.ScheduledEventsPolicy.AllInstancesDown == null)
+                            {
+                                parameters.ScheduledEventsPolicy.AllInstancesDown = new AllInstancesDown();
+                            }
+                            parameters.ScheduledEventsPolicy.AllInstancesDown.AutomaticallyApprove = this.AllInstancesDownAutomaticallyApprove;
+                        }
                     }
 
                     if (NoWait.IsPresent)

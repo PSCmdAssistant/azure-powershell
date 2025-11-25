@@ -59,6 +59,24 @@ namespace Microsoft.Azure.Commands.Compute
         [Parameter(Mandatory = false, HelpMessage = "Run cmdlet in the background")]
         public SwitchParameter AsJob { get; set; }
 
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "Specifies if event grid and resource graph is enabled for Scheduled event related configurations.")]
+        public bool ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphEnable { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "Specifies the api-version to determine which Scheduled Events configuration schema version will be delivered.")]
+        public string ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphApiVersion { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "Specifies if Scheduled Events should be auto-approved when all instances are down.")]
+        public bool AllInstancesDownAutomaticallyApprove { get; set; }
+
         public override void ExecuteCmdlet()
         {
             if (this.ShouldProcess(AvailabilitySet.Name, VerbsData.Update))
@@ -76,12 +94,55 @@ namespace Microsoft.Azure.Commands.Compute
                         Sku = new Sku(this.IsParameterBound(c => c.Sku) ? this.Sku : this.AvailabilitySet.Sku, null, null),
                         ProximityPlacementGroup = this.IsParameterBound(c => c.ProximityPlacementGroupId) 
                                                 ? new SubResource(this.ProximityPlacementGroupId)
-                                                : this.AvailabilitySet.ProximityPlacementGroup
+                                                : this.AvailabilitySet.ProximityPlacementGroup,
+                        ScheduledEventsPolicy = this.AvailabilitySet.ScheduledEventsPolicy
                     };
 
                     if (avSetParams.ProximityPlacementGroup != null && string.IsNullOrEmpty(avSetParams.ProximityPlacementGroup.Id))
                     {
                         avSetParams.ProximityPlacementGroup.Id = null;
+                    }
+
+                    // Handle ScheduledEventsPolicy parameters
+                    if (this.IsParameterBound(c => c.ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphEnable) ||
+                        this.IsParameterBound(c => c.ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphApiVersion) ||
+                        this.IsParameterBound(c => c.AllInstancesDownAutomaticallyApprove))
+                    {
+                        if (avSetParams.ScheduledEventsPolicy == null)
+                        {
+                            avSetParams.ScheduledEventsPolicy = new ScheduledEventsPolicy();
+                        }
+
+                        if (this.IsParameterBound(c => c.ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphEnable) ||
+                            this.IsParameterBound(c => c.ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphApiVersion))
+                        {
+                            if (avSetParams.ScheduledEventsPolicy.ScheduledEventsAdditionalPublishingTargets == null)
+                            {
+                                avSetParams.ScheduledEventsPolicy.ScheduledEventsAdditionalPublishingTargets = new ScheduledEventsAdditionalPublishingTargets();
+                            }
+                            if (avSetParams.ScheduledEventsPolicy.ScheduledEventsAdditionalPublishingTargets.EventGridAndResourceGraph == null)
+                            {
+                                avSetParams.ScheduledEventsPolicy.ScheduledEventsAdditionalPublishingTargets.EventGridAndResourceGraph = new EventGridAndResourceGraph();
+                            }
+
+                            if (this.IsParameterBound(c => c.ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphEnable))
+                            {
+                                avSetParams.ScheduledEventsPolicy.ScheduledEventsAdditionalPublishingTargets.EventGridAndResourceGraph.Enable = this.ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphEnable;
+                            }
+                            if (this.IsParameterBound(c => c.ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphApiVersion))
+                            {
+                                avSetParams.ScheduledEventsPolicy.ScheduledEventsAdditionalPublishingTargets.EventGridAndResourceGraph.ScheduledEventsApiVersion = this.ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphApiVersion;
+                            }
+                        }
+
+                        if (this.IsParameterBound(c => c.AllInstancesDownAutomaticallyApprove))
+                        {
+                            if (avSetParams.ScheduledEventsPolicy.AllInstancesDown == null)
+                            {
+                                avSetParams.ScheduledEventsPolicy.AllInstancesDown = new AllInstancesDown();
+                            }
+                            avSetParams.ScheduledEventsPolicy.AllInstancesDown.AutomaticallyApprove = this.AllInstancesDownAutomaticallyApprove;
+                        }
                     }
 
                     var result = this.AvailabilitySetClient.CreateOrUpdateWithHttpMessagesAsync(
