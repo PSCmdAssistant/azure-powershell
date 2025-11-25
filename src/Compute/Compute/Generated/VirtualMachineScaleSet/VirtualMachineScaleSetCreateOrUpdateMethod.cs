@@ -345,8 +345,42 @@ namespace Microsoft.Azure.Commands.Compute.Automation
             SetDefaultOrchestrationMode(parameters);
             ConfigureFlexibleOrchestrationMode(parameters);
             ConfigureSecuritySettings(parameters);
+            ConfigureScheduledEventsPolicy(parameters);
 
             return parameters;
+        }
+
+        private void ConfigureScheduledEventsPolicy(VirtualMachineScaleSet parameters)
+        {
+            if (this.IsParameterBound(c => c.ScheduledEventsApiVersion))
+            {
+                if (parameters.ScheduledEventsPolicy == null)
+                {
+                    parameters.ScheduledEventsPolicy = new ScheduledEventsPolicy();
+                }
+                if (parameters.ScheduledEventsPolicy.ScheduledEventsAdditionalPublishingTargets == null)
+                {
+                    parameters.ScheduledEventsPolicy.ScheduledEventsAdditionalPublishingTargets = new ScheduledEventsAdditionalPublishingTargets();
+                }
+                if (parameters.ScheduledEventsPolicy.ScheduledEventsAdditionalPublishingTargets.EventGridAndResourceGraph == null)
+                {
+                    parameters.ScheduledEventsPolicy.ScheduledEventsAdditionalPublishingTargets.EventGridAndResourceGraph = new EventGridAndResourceGraph();
+                }
+                parameters.ScheduledEventsPolicy.ScheduledEventsAdditionalPublishingTargets.EventGridAndResourceGraph.ScheduledEventsApiVersion = this.ScheduledEventsApiVersion;
+            }
+
+            if (this.IsParameterBound(c => c.EnableAllInstancesDown))
+            {
+                if (parameters.ScheduledEventsPolicy == null)
+                {
+                    parameters.ScheduledEventsPolicy = new ScheduledEventsPolicy();
+                }
+                if (parameters.ScheduledEventsPolicy.AllInstancesDown == null)
+                {
+                    parameters.ScheduledEventsPolicy.AllInstancesDown = new AllInstancesDown();
+                }
+                parameters.ScheduledEventsPolicy.AllInstancesDown.AutomaticallyApprove = this.EnableAllInstancesDown;
+            }
         }
 
         private void CheckImageVersionWarning(VirtualMachineScaleSet parameters)
@@ -473,6 +507,19 @@ namespace Microsoft.Azure.Commands.Compute.Automation
             Mandatory = true,
             ValueFromPipeline = true)]
         public PSVirtualMachineScaleSet VirtualMachineScaleSet { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            HelpMessage = "Specifies the API version to determine which scheduled events schema version will be delivered. Format: YYYY-MM-DD",
+            ValueFromPipelineByPropertyName = true)]
+        [ValidateNotNullOrEmpty]
+        public string ScheduledEventsApiVersion { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            HelpMessage = "Specifies if scheduled events should be auto-approved when all instances are down.",
+            ValueFromPipelineByPropertyName = true)]
+        public bool? EnableAllInstancesDown { get; set; }
 
         [Parameter(Mandatory = false, HelpMessage = "Run cmdlet in the background")]
         public SwitchParameter AsJob { get; set; }
