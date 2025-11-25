@@ -160,5 +160,7 @@ namespace Microsoft.Azure.Commands.Compute.Models
 
         // Gets or sets the AddProxyAgentExtension
         public bool? AddProxyAgentExtension { get; set; }
+
+        public ScheduledEventsPolicy ScheduledEventsPolicy { get; set; }
     }
 }

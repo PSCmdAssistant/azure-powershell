@@ -82,5 +82,7 @@ namespace Microsoft.Azure.Commands.Compute.Models
         public string Sku { get; set; }
 
         public SubResource ProximityPlacementGroup { get; set; }
+
+        public ScheduledEventsPolicy ScheduledEventsPolicy { get; set; }
     }
 }

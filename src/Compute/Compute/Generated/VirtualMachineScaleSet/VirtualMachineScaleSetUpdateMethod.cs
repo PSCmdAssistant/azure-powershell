@@ -463,6 +463,24 @@ namespace Microsoft.Azure.Commands.Compute.Automation
         [PSArgumentCompleter("CreateBeforeDelete")]
         public string AutomaticZoneRebalanceBehavior { get; set; }
 
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "Specifies if event grid and resource graph is enabled for Scheduled event related configurations.")]
+        public bool ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphEnable { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "Specifies the api-version to determine which Scheduled Events configuration schema version will be delivered.")]
+        public string ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphApiVersion { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "Specifies if Scheduled Events should be auto-approved when all instances are down.")]
+        public bool AllInstancesDownAutomaticallyApprove { get; set; }
+
         private void BuildPatchObject()
         {
             if (this.IsParameterBound(c => c.AutomaticOSUpgrade))
@@ -1511,6 +1529,58 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                 InitializeAutomaticZoneRebalancingPolicy();
                 this.VirtualMachineScaleSetUpdate.ResiliencyPolicy.AutomaticZoneRebalancingPolicy.RebalanceBehavior = this.AutomaticZoneRebalanceBehavior;
             }
+
+            // ScheduledEventsPolicy parameters - using PUT since ScheduledEventsPolicy is not on VirtualMachineScaleSetUpdate
+            if (this.IsParameterBound(c => c.ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphEnable) || 
+                this.IsParameterBound(c => c.ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphApiVersion) ||
+                this.IsParameterBound(c => c.AllInstancesDownAutomaticallyApprove))
+            {
+                if (this.VirtualMachineScaleSet == null)
+                {
+                    var currVMSS = VirtualMachineScaleSetsClient.Get(this.ResourceGroupName, this.VMScaleSetName);
+                    this.VirtualMachineScaleSet = new PSVirtualMachineScaleSet();
+                    ComputeAutomationAutoMapperProfile.Mapper.Map<VirtualMachineScaleSet, PSVirtualMachineScaleSet>(currVMSS, this.VirtualMachineScaleSet);
+                }
+
+                if (this.VirtualMachineScaleSet.ScheduledEventsPolicy == null)
+                {
+                    this.VirtualMachineScaleSet.ScheduledEventsPolicy = new ScheduledEventsPolicy();
+                }
+
+                if (this.IsParameterBound(c => c.ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphEnable) ||
+                    this.IsParameterBound(c => c.ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphApiVersion))
+                {
+                    if (this.VirtualMachineScaleSet.ScheduledEventsPolicy.ScheduledEventsAdditionalPublishingTargets == null)
+                    {
+                        this.VirtualMachineScaleSet.ScheduledEventsPolicy.ScheduledEventsAdditionalPublishingTargets = new ScheduledEventsAdditionalPublishingTargets();
+                    }
+                    if (this.VirtualMachineScaleSet.ScheduledEventsPolicy.ScheduledEventsAdditionalPublishingTargets.EventGridAndResourceGraph == null)
+                    {
+                        this.VirtualMachineScaleSet.ScheduledEventsPolicy.ScheduledEventsAdditionalPublishingTargets.EventGridAndResourceGraph = new EventGridAndResourceGraph();
+                    }
+
+                    if (this.IsParameterBound(c => c.ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphEnable))
+                    {
+                        this.VirtualMachineScaleSet.ScheduledEventsPolicy.ScheduledEventsAdditionalPublishingTargets.EventGridAndResourceGraph.Enable = this.ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphEnable;
+                    }
+                    if (this.IsParameterBound(c => c.ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphApiVersion))
+                    {
+                        this.VirtualMachineScaleSet.ScheduledEventsPolicy.ScheduledEventsAdditionalPublishingTargets.EventGridAndResourceGraph.ScheduledEventsApiVersion = this.ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphApiVersion;
+                    }
+                }
+
+                if (this.IsParameterBound(c => c.AllInstancesDownAutomaticallyApprove))
+                {
+                    if (this.VirtualMachineScaleSet.ScheduledEventsPolicy.AllInstancesDown == null)
+                    {
+                        this.VirtualMachineScaleSet.ScheduledEventsPolicy.AllInstancesDown = new AllInstancesDown();
+                    }
+                    this.VirtualMachineScaleSet.ScheduledEventsPolicy.AllInstancesDown.AutomaticallyApprove = this.AllInstancesDownAutomaticallyApprove;
+                }
+
+                // Clear the VirtualMachineScaleSetUpdate to force using PUT
+                this.VirtualMachineScaleSetUpdate = null;
+            }
         }
 
         private void BuildPutObject()
@@ -2363,6 +2433,48 @@ namespace Microsoft.Azure.Commands.Compute.Automation
             {
                 InitializeAutomaticZoneRebalancingPolicy();
                 this.VirtualMachineScaleSetUpdate.ResiliencyPolicy.AutomaticZoneRebalancingPolicy.RebalanceBehavior = this.AutomaticZoneRebalanceBehavior;
+            }
+
+            // ScheduledEventsPolicy parameters for BuildPutObject
+            if (this.IsParameterBound(c => c.ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphEnable) ||
+                this.IsParameterBound(c => c.ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphApiVersion) ||
+                this.IsParameterBound(c => c.AllInstancesDownAutomaticallyApprove))
+            {
+                if (this.VirtualMachineScaleSet.ScheduledEventsPolicy == null)
+                {
+                    this.VirtualMachineScaleSet.ScheduledEventsPolicy = new ScheduledEventsPolicy();
+                }
+
+                if (this.IsParameterBound(c => c.ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphEnable) ||
+                    this.IsParameterBound(c => c.ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphApiVersion))
+                {
+                    if (this.VirtualMachineScaleSet.ScheduledEventsPolicy.ScheduledEventsAdditionalPublishingTargets == null)
+                    {
+                        this.VirtualMachineScaleSet.ScheduledEventsPolicy.ScheduledEventsAdditionalPublishingTargets = new ScheduledEventsAdditionalPublishingTargets();
+                    }
+                    if (this.VirtualMachineScaleSet.ScheduledEventsPolicy.ScheduledEventsAdditionalPublishingTargets.EventGridAndResourceGraph == null)
+                    {
+                        this.VirtualMachineScaleSet.ScheduledEventsPolicy.ScheduledEventsAdditionalPublishingTargets.EventGridAndResourceGraph = new EventGridAndResourceGraph();
+                    }
+
+                    if (this.IsParameterBound(c => c.ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphEnable))
+                    {
+                        this.VirtualMachineScaleSet.ScheduledEventsPolicy.ScheduledEventsAdditionalPublishingTargets.EventGridAndResourceGraph.Enable = this.ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphEnable;
+                    }
+                    if (this.IsParameterBound(c => c.ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphApiVersion))
+                    {
+                        this.VirtualMachineScaleSet.ScheduledEventsPolicy.ScheduledEventsAdditionalPublishingTargets.EventGridAndResourceGraph.ScheduledEventsApiVersion = this.ScheduledEventAdditionalPublishingTargetEventGridAndResourceGraphApiVersion;
+                    }
+                }
+
+                if (this.IsParameterBound(c => c.AllInstancesDownAutomaticallyApprove))
+                {
+                    if (this.VirtualMachineScaleSet.ScheduledEventsPolicy.AllInstancesDown == null)
+                    {
+                        this.VirtualMachineScaleSet.ScheduledEventsPolicy.AllInstancesDown = new AllInstancesDown();
+                    }
+                    this.VirtualMachineScaleSet.ScheduledEventsPolicy.AllInstancesDown.AutomaticallyApprove = this.AllInstancesDownAutomaticallyApprove;
+                }
             }
         }
     }
