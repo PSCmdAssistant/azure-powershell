@@ -6144,3 +6144,48 @@ function Test-VirtualMachineScaleSetGalleryApplicationFlags
         Clean-ResourceGroup $rgname
     }
 }
+
+<#
+.SYNOPSIS
+Test Virtual Machine Scale Set ResiliencyView parameter
+#>
+function Test-VirtualMachineScaleSetResiliencyView
+{
+    # Setup
+    $rgname = Get-ComputeTestResourceName
+
+    try
+    {
+        # Common
+        $loc = Get-ComputeVMLocation;
+        New-AzResourceGroup -Name $rgname -Location $loc -Force;
+
+        # New VMSS Parameters
+        $vmssName = 'vmss' + $rgname;
+        $vmssType = 'Microsoft.Compute/virtualMachineScaleSets';
+        
+        $adminUsername = 'Foo12';
+        $adminPassword = Get-PasswordForVM | ConvertTo-SecureString -AsPlainText -Force;
+
+        $vmssConfig = New-AzVmssConfig -Location $loc -SkuCapacity 2 -SkuName 'Standard_DS1_v2' -UpgradePolicyMode 'Manual';
+
+        $vmss = New-AzVmss -ResourceGroupName $rgname -Name $vmssName -VirtualMachineScaleSet $vmssConfig;
+
+        # Test ResiliencyView parameter
+        $vmssVMList = Get-AzVmssVM -ResourceGroupName $rgname -VMScaleSetName $vmssName -ResiliencyView;
+        Assert-NotNull $vmssVMList;
+        Assert-True { $vmssVMList.Count -ge 1 };
+
+        # Test ResiliencyView with specific instance
+        $vmssVM = Get-AzVmssVM -ResourceGroupName $rgname -VMScaleSetName $vmssName -InstanceId $vmssVMList[0].InstanceId -ResiliencyView;
+        Assert-NotNull $vmssVM;
+        Assert-NotNull $vmssVM.InstanceId;
+        # ResilientVMDeletionStatus property should be available when ResiliencyView is requested
+        # Note: The property may be null if Resilient Delete is not enabled on the VMSS
+    }
+    finally
+    {
+        # Cleanup
+        Clean-ResourceGroup $rgname
+    }
+}
