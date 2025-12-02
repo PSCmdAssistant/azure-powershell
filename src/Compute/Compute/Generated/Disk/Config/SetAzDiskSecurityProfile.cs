@@ -1,4 +1,4 @@
-﻿// ----------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------
 //
 // Copyright Microsoft Corporation
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,6 +23,7 @@ using Microsoft.Azure.Management.Compute.Models;
 using Microsoft.Azure.Commands.Compute.Automation.Models;
 using Microsoft.Azure.Commands.ResourceManager.Common.ArgumentCompleters;
 using Microsoft.WindowsAzure.Commands.Utilities.Common;
+using System.Reflection;
 
 namespace Microsoft.Azure.Commands.Compute
 {
@@ -53,6 +54,14 @@ namespace Microsoft.Azure.Commands.Compute
            ValueFromPipelineByPropertyName = true,
            HelpMessage = "ResourceId of the disk encryption set to use for enabling encryption at rest.")]
         public string SecureVMDiskEncryptionSet { get; set; }
+
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "Specifies the Shield setting for the disk security profile. Possible values include: ShieldOn, ShieldGone, ShieldDown")]
+        [PSArgumentCompleter("ShieldOn", "ShieldGone", "ShieldDown")]
+        [ValidateSet("ShieldOn", "ShieldGone", "ShieldDown", IgnoreCase = true)]
+        public string Shield { get; set; }
 
         protected override void ProcessRecord()
         {
@@ -92,6 +101,44 @@ namespace Microsoft.Azure.Commands.Compute
                     this.Disk.SecurityProfile = new DiskSecurityProfile();
                 }
                 this.Disk.SecurityProfile.SecureVMDiskEncryptionSetId = this.SecureVMDiskEncryptionSet;
+            }
+
+            if (this.IsParameterBound(c => c.Shield))
+            {
+                if (this.Disk.SecurityProfile == null)
+                {
+                    this.Disk.SecurityProfile = new DiskSecurityProfile();
+                }
+
+                bool shieldSet = false;
+                Type dspType = this.Disk.SecurityProfile.GetType();
+                PropertyInfo shieldProperty = dspType.GetProperty("Shield", BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+                if (shieldProperty != null && shieldProperty.CanWrite)
+                {
+                    shieldProperty.SetValue(this.Disk.SecurityProfile, this.Shield);
+                    shieldSet = true;
+                }
+                else
+                {
+                    // Attempt to use AdditionalProperties dictionary if available
+                    PropertyInfo additionalPropsProperty = dspType.GetProperty("AdditionalProperties", BindingFlags.Public | BindingFlags.Instance);
+                    if (additionalPropsProperty != null)
+                    {
+                        var dict = additionalPropsProperty.GetValue(this.Disk.SecurityProfile) as IDictionary<string, object>;
+                        if (dict == null)
+                        {
+                            dict = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+                            additionalPropsProperty.SetValue(this.Disk.SecurityProfile, dict);
+                        }
+                        dict["shield"] = this.Shield;
+                        shieldSet = true;
+                    }
+                }
+
+                if (!shieldSet)
+                {
+                    WriteWarning("Shield parameter is specified but could not be applied because the current DiskSecurityProfile model does not expose a suitable property.");
+                }
             }
 
             WriteObject(this.Disk);

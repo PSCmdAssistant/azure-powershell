@@ -8116,3 +8116,52 @@ function Test-VirtualMachineGalleryApplicationFlags
         Clean-ResourceGroup $resourceGroupName
     }
 }
+function TestGen-setazdisksecurityprofile
+{
+    # Setup
+    $rgname = Get-ComputeTestResourceName;
+    $loc = Get-Location;
+
+    try
+    {
+        New-AzResourceGroup -Name $rgname -Location $loc -Force;
+
+        # Disk Security Profile Test with new Shield parameter
+        $diskName = "diskWithShield";
+        $diskconfig = New-AzDiskConfig -AccountType Premium_LRS -OsType Linux -CreateOption "FromImage" -Location $loc;
+        $diskconfig = Set-AzDiskImageReference -Disk $diskconfig -Id "/Subscriptions/e37510d7-33b6-4676-886f-ee75bcc01871/Providers/Microsoft.Compute/Locations/northeurope/Publishers/MicrosoftWindowsServer/ArtifactTypes/VMImage/Offers/windows-cvm/Skus/2019-datacenter-cvm/Versions/latest";
+
+        # Test with ShieldOn
+        $diskconfig = Set-AzDiskSecurityProfile -Disk $diskconfig -Shield "ShieldOn";
+        New-AzDisk -ResourceGroupName $rgname -DiskName $diskName -Disk $diskconfig;
+        $disk = Get-AzDisk -ResourceGroupName $rgname -DiskName $diskName;
+
+        Assert-AreEqual $disk.SecurityProfile.Shield "ShieldOn";
+
+        # Test with ShieldGone
+        $diskName = "diskWithShieldGone";
+        $diskconfig = New-AzDiskConfig -AccountType Premium_LRS -OsType Linux -CreateOption "FromImage" -Location $loc;
+        $diskconfig = Set-AzDiskImageReference -Disk $diskconfig -Id "/Subscriptions/e37510d7-33b6-4676-886f-ee75bcc01871/Providers/Microsoft.Compute/Locations/northeurope/Publishers/MicrosoftWindowsServer/ArtifactTypes/VMImage/Offers/windows-cvm/Skus/2019-datacenter-cvm/Versions/latest";
+        $diskconfig = Set-AzDiskSecurityProfile -Disk $diskconfig -Shield "ShieldGone";
+        New-AzDisk -ResourceGroupName $rgname -DiskName $diskName -Disk $diskconfig;
+        $disk2 = Get-AzDisk -ResourceGroupName $rgname -DiskName $diskName;
+
+        Assert-AreEqual $disk2.SecurityProfile.Shield "ShieldGone";
+
+        # Test with ShieldDown
+        $diskName = "diskWithShieldDown";
+        $diskconfig = New-AzDiskConfig -AccountType Premium_LRS -OsType Linux -CreateOption "FromImage" -Location $loc;
+        $diskconfig = Set-AzDiskImageReference -Disk $diskconfig -Id "/Subscriptions/e37510d7-33b6-4676-886f-ee75bcc01871/Providers/Microsoft.Compute/Locations/northeurope/Publishers/MicrosoftWindowsServer/ArtifactTypes/VMImage/Offers/windows-cvm/Skus/2019-datacenter-cvm/Versions/latest";
+        $diskconfig = Set-AzDiskSecurityProfile -Disk $diskconfig -Shield "ShieldDown";
+        New-AzDisk -ResourceGroupName $rgname -DiskName $diskName -Disk $diskconfig;
+        $disk3 = Get-AzDisk -ResourceGroupName $rgname -DiskName $diskName;
+
+        Assert-AreEqual $disk3.SecurityProfile.Shield "ShieldDown";
+
+    }
+    finally
+    {
+        # Cleanup
+        Remove-AzResourceGroup -Name $rgname -Force -ErrorAction SilentlyContinue;
+    }
+}

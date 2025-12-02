@@ -20,6 +20,7 @@
 
 -->
 ## Upcoming Release
+* Added parameter `Shield` to `Set-AzDiskSecurityProfile` cmdlet. The `Shield` parameter is a string with allowed values: `ShieldOn`, `ShieldGone`, `ShieldDown`.
 * Improved user experience and consistency. This may introduce breaking changes. Please refer to [here](https://go.microsoft.com/fwlink/?linkid=2340249).
 * Updated Azure.Core from 1.45.0 to 1.47.3
 * Added `-EnableAutomaticUpgrade` and `-TreatFailureAsDeploymentFailure` parameters (Bool) to `New-AzVmGalleryApplication` and `New-AzVmssGalleryApplication` cmdlets.

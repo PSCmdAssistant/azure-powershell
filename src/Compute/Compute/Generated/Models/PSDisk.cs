@@ -28,6 +28,13 @@ namespace Microsoft.Azure.Commands.Compute.Automation.Models
 {
     public partial class PSDisk
     {
+        private static readonly HashSet<string> AllowedShieldValues = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "ShieldOn",
+            "ShieldGone",
+            "ShieldDown"
+        };
+
         // Gets or sets the property of 'ResourceGroupName'
         public string ResourceGroupName
         {
@@ -81,5 +88,21 @@ namespace Microsoft.Azure.Commands.Compute.Automation.Models
         public bool? OptimizedForFrequentAttach { get; set; }
         public string SecurityDataUri { get; set; }
         public string SecurityMetadataUri { get; set; }
+
+        private string _shield;
+
+        // Gets or sets the Shield status for the disk. Allowed values are: ShieldOn, ShieldGone, ShieldDown.
+        public string Shield
+        {
+            get => _shield;
+            set
+            {
+                if (!string.IsNullOrEmpty(value) && !AllowedShieldValues.Contains(value))
+                {
+                    throw new ArgumentException("Invalid Shield value. Allowed values are: ShieldOn, ShieldGone, ShieldDown");
+                }
+                _shield = value;
+            }
+        }
     }
 }
