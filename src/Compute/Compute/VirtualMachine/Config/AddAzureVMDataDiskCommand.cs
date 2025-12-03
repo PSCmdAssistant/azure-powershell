@@ -20,6 +20,7 @@ using Microsoft.Azure.Commands.Compute.Common;
 using CM = Microsoft.Azure.Commands.Compute.Models;
 using Microsoft.Azure.Commands.ResourceManager.Common.ArgumentCompleters;
 using Microsoft.Azure.Management.Compute.Models;
+using Microsoft.WindowsAzure.Commands.Utilities.Common;
 
 namespace Microsoft.Azure.Commands.Compute
 {
@@ -125,7 +126,7 @@ namespace Microsoft.Azure.Commands.Compute
             ValueFromPipelineByPropertyName = true,
             HelpMessage = HelpMessages.VMManagedDiskAccountType)]
         [ValidateNotNullOrEmpty]
-        [PSArgumentCompleter("Standard_LRS", "Premium_LRS", "StandardSSD_LRS", "UltraSSD_LRS")]
+        [PSArgumentCompleter("Standard_LRS", "Premium_LRS", "StandardSSD_LRS", "UltraSSD_LRS", "PremiumV2_LRS")]
         public string StorageAccountType { get; set; }
 
         [Parameter(
@@ -151,6 +152,20 @@ namespace Microsoft.Azure.Commands.Compute
             HelpMessage = "ARM ID of snapshot or disk restore point from which to create a disk.")]
         [ValidateNotNullOrEmpty]
         public string SourceResourceId { get; set; }
+
+        [Parameter(
+            ParameterSetName = VmManagedDiskParameterSet,
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "Specifies the Read-Write IOPS for the managed disk. Should be used only when StorageAccountType is UltraSSD_LRS or PremiumV2_LRS. If not specified, a default value would be assigned based on diskSizeGB.")]
+        public long DiskIOPSReadWrite { get; set; }
+
+        [Parameter(
+            ParameterSetName = VmManagedDiskParameterSet,
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "Specifies the bandwidth in MB per second for the managed disk. Should be used only when StorageAccountType is UltraSSD_LRS or PremiumV2_LRS. If not specified, a default value would be assigned based on diskSizeGB.")]
+        public long DiskMBpsReadWrite { get; set; }
 
         public override void ExecuteCmdlet()
         {
@@ -229,7 +244,9 @@ namespace Microsoft.Azure.Commands.Compute
                     SourceResource = string.IsNullOrEmpty(this.SourceResourceId) ? null : new ApiEntityReference
                     {
                         Id = this.SourceResourceId
-                    }
+                    },
+                    DiskIOPSReadWrite = this.IsParameterBound(c => c.DiskIOPSReadWrite) ? this.DiskIOPSReadWrite : (long?)null,
+                    DiskMBpsReadWrite = this.IsParameterBound(c => c.DiskMBpsReadWrite) ? this.DiskMBpsReadWrite : (long?)null
                 });
 
                 this.VM.StorageProfile = storageProfile;

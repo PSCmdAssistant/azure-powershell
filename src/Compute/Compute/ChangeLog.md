@@ -24,6 +24,7 @@
 * Updated Azure.Core from 1.45.0 to 1.47.3
 * Added `-EnableAutomaticUpgrade` and `-TreatFailureAsDeploymentFailure` parameters (Bool) to `New-AzVmGalleryApplication` and `New-AzVmssGalleryApplication` cmdlets.
 * Added `-EnableAutomaticUpgrade` and `-TreatFailureAsDeploymentFailure` parameters (Switch) to `Add-AzVmGalleryApplication` and `Add-AzVmssGalleryApplication` cmdlets.
+* Added `-DiskIOPSReadWrite` and `-DiskMBpsReadWrite` parameters to `Add-AzVMDataDisk` cmdlet for setting IOPS and bandwidth during implicit disk creation of UltraSSD or Premium V2 data disks.
 
 ## Version 10.5.0
 * Added `-Redeploy` switch parameter for `Update-AzHost` cmdlet to enable dedicated host redeployment.

@@ -446,3 +446,53 @@ function Test-VirtualMachineProfileWithoutAUC
     Assert-False {$p.OSProfile.WindowsConfiguration.ProvisionVMAgent};
 
 }
+
+<#
+.SYNOPSIS
+Test Virtual Machine Data Disk with IOPS and MBPS parameters
+#>
+function Test-VirtualMachineDataDiskIOPSMBPS
+{
+    Get-AzVmss -ResourceGroupName "fakeresource" -VMScaleSetName "fakevmss" -ErrorAction SilentlyContinue
+
+    # VM Profile & Hardware
+    $vmsize = 'Standard_D2s_v3';
+    $vmname = 'pstestvm' + ((Get-Random) % 10000);
+    $p = New-AzVMConfig -VMName $vmname -VMSize $vmsize -EnableUltraSSD;
+    Assert-AreEqual $p.HardwareProfile.VmSize $vmsize;
+    Assert-True { $p.AdditionalCapabilities.UltraSSDEnabled };
+
+    # Add managed data disk with DiskIOPSReadWrite and DiskMBpsReadWrite
+    $managedDataDiskId = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rggroup/providers/Microsoft.Compute/disks/testUltraDataDisk";
+    $diskIOPS = 1000;
+    $diskMBps = 100;
+    
+    $p = Add-AzVMDataDisk -VM $p -Name 'testUltraDataDisk' -Caching 'None' -DiskSizeInGB 10 -Lun 0 -CreateOption Empty `
+                          -ManagedDiskId $managedDataDiskId -StorageAccountType UltraSSD_LRS `
+                          -DiskIOPSReadWrite $diskIOPS -DiskMBpsReadWrite $diskMBps;
+    
+    Assert-AreEqual $managedDataDiskId $p.StorageProfile.DataDisks[0].ManagedDisk.Id;
+    Assert-AreEqual "UltraSSD_LRS" $p.StorageProfile.DataDisks[0].ManagedDisk.StorageAccountType;
+    Assert-AreEqual $diskIOPS $p.StorageProfile.DataDisks[0].DiskIOPSReadWrite;
+    Assert-AreEqual $diskMBps $p.StorageProfile.DataDisks[0].DiskMBpsReadWrite;
+    Assert-AreEqual 0 $p.StorageProfile.DataDisks[0].Lun;
+    Assert-AreEqual 10 $p.StorageProfile.DataDisks[0].DiskSizeGB;
+    Assert-AreEqual 'None' $p.StorageProfile.DataDisks[0].Caching;
+    Assert-AreEqual 'Empty' $p.StorageProfile.DataDisks[0].CreateOption;
+
+    # Add another disk without IOPS/MBPS (should be null)
+    $managedDataDiskId2 = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rggroup/providers/Microsoft.Compute/disks/testDataDisk2";
+    $p = Add-AzVMDataDisk -VM $p -Name 'testDataDisk2' -Caching 'ReadOnly' -DiskSizeInGB 20 -Lun 1 -CreateOption Empty `
+                          -ManagedDiskId $managedDataDiskId2 -StorageAccountType Premium_LRS;
+    
+    Assert-AreEqual $managedDataDiskId2 $p.StorageProfile.DataDisks[1].ManagedDisk.Id;
+    Assert-AreEqual "Premium_LRS" $p.StorageProfile.DataDisks[1].ManagedDisk.StorageAccountType;
+    Assert-Null $p.StorageProfile.DataDisks[1].DiskIOPSReadWrite;
+    Assert-Null $p.StorageProfile.DataDisks[1].DiskMBpsReadWrite;
+    Assert-AreEqual 1 $p.StorageProfile.DataDisks[1].Lun;
+    Assert-AreEqual 20 $p.StorageProfile.DataDisks[1].DiskSizeGB;
+    Assert-AreEqual 'ReadOnly' $p.StorageProfile.DataDisks[1].Caching;
+    
+    # Verify disk count
+    Assert-AreEqual 2 $p.StorageProfile.DataDisks.Count;
+}
