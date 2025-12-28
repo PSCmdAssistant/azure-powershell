@@ -6144,3 +6144,79 @@ function Test-VirtualMachineScaleSetGalleryApplicationFlags
         Clean-ResourceGroup $rgname
     }
 }
+function TestGen-newazvmssconfig
+{
+    # Setup
+    $rgname = Get-ComputeTestResourceName;
+    $loc = Get-Location;
+
+    try
+    {
+        # Common
+        New-AzResourceGroup -Name $rgname -Location $loc -Force;
+        $vmssName = 'vmss' + $rgname;
+
+        # Test New-AzVmssConfig with HighSpeedInterconnectPlacement parameter
+        $vmssConfigNone = New-AzVmssConfig -Location $loc -HighSpeedInterconnectPlacement "none";
+        Assert-AreEqual $vmssConfigNone.HighSpeedInterconnectPlacement "none";
+
+        $vmssConfigTrunk = New-AzVmssConfig -Location $loc -HighSpeedInterconnectPlacement "trunk";
+        Assert-AreEqual $vmssConfigTrunk.HighSpeedInterconnectPlacement "trunk";
+
+        # Test New-AzVmss with HighSpeedInterconnectPlacement parameter
+        $vmssNoneName = $vmssName + "None";
+        New-AzVmss -ResourceGroupName $rgname -VMScaleSetName $vmssNoneName -VirtualMachineScaleSet $vmssConfigNone;
+        $vmssNoneGet = Get-AzVmss -ResourceGroupName $rgname -VMScaleSetName $vmssNoneName;
+        Assert-AreEqual $vmssNoneGet.VirtualMachineProfile.NetworkProfile.HighSpeedInterconnectPlacement "none";
+
+        $vmssTrunkName = $vmssName + "Trunk";
+        New-AzVmss -ResourceGroupName $rgname -VMScaleSetName $vmssTrunkName -VirtualMachineScaleSet $vmssConfigTrunk;
+        $vmssTrunkGet = Get-AzVmss -ResourceGroupName $rgname -VMScaleSetName $vmssTrunkName;
+        Assert-AreEqual $vmssTrunkGet.VirtualMachineProfile.NetworkProfile.HighSpeedInterconnectPlacement "trunk";
+
+    }
+    finally
+    {
+        # Cleanup
+        Remove-AzResourceGroup -Name $rgname -Force -ErrorAction SilentlyContinue;
+    }
+}
+
+function TestGen-newazvmss
+{
+    # Setup
+    $rgname = Get-ComputeTestResourceName;
+    $loc = Get-Location;
+
+    try
+    {
+        # Common
+        New-AzResourceGroup -Name $rgname -Location $loc -Force;
+
+        $vmssName = 'vs' + $rgname;
+
+        $domainNameLabel1 = "d1" + $rgname;
+        $enable = $true;
+        $securityTypeST = "Standard";
+        $adminUsername = Get-ComputeTestResourceName;
+        $password = Get-PasswordForVM;
+        $adminPassword = $password | ConvertTo-SecureString -AsPlainText -Force;
+        $cred = New-Object System.Management.Automation.PSCredential ($adminUsername, $adminPassword);
+
+        # Test for HighSpeedInterconnectPlacement parameter
+        $highSpeedInterconnectPlacement = "trunk";
+
+        $vmss = New-AzVmss -ResourceGroupName $rgname -Credential $cred -VMScaleSetName $vmssName -SecurityType $securityTypeST -DomainNameLabel $domainNameLabel1 -HighSpeedInterconnectPlacement $highSpeedInterconnectPlacement;
+
+        # Assertions
+        Assert-AreEqual $vmss.OrchestrationMode "Flexible";
+        Assert-Null $vmss.SecurityProfile;
+        Assert-AreEqual $vmss.VirtualMachineProfile.StorageProfile.ImageReference.Sku "2022-datacenter-azure-edition";
+        Assert-AreEqual $vmss.VirtualMachineProfile.NetworkProfile.HighSpeedInterconnectPlacement $highSpeedInterconnectPlacement;
+    }
+    finally
+    {
+        # Cleanup
+        Remove-AzResourceGroup -Name $rgname -Force -ErrorAction SilentlyContinue;
+    }
+}

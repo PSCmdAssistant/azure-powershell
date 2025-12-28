@@ -493,5 +493,19 @@ namespace Microsoft.Azure.Commands.Compute.Test.ScenarioTests
         {
             TestRunner.RunTestScript("Test-VirtualMachineScaleSetGalleryApplicationFlags");
         }
-    }
+
+        [Fact]
+        [Trait(Category.AcceptanceType, Category.CheckIn)]
+        public void testgennewazvmssconfig()
+        {
+            TestRunner.RunTestScript("TestGen-newazvmssconfig");
+        }
+
+        [Fact]
+        [Trait(Category.AcceptanceType, Category.CheckIn)]
+        public void testgennewazvmss()
+        {
+            TestRunner.RunTestScript("TestGen-newazvmss");
+        }
+            }
 }
