@@ -1,4 +1,4 @@
-//
+ //
 // Copyright (c) Microsoft and contributors.  All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -272,6 +272,13 @@ namespace Microsoft.Azure.Commands.Compute.Automation
         [PSArgumentCompleter("TrustedLaunchSupported", "TrustedLaunchAndConfidentialVMSupported")]
         public string SupportedSecurityOption { get; set; }
 
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "Specifies the action on disk delay policy. Values: None to remove the opt-in (Default), AutomaticReattach (Opt-in).")]
+        [PSArgumentCompleter("None", "AutomaticReattach")]
+        public string AvailabilityPolicyActionOnDiskDelay { get; set; }
+
         protected override void ProcessRecord()
         {
             if (ShouldProcess("Disk", "New"))
@@ -299,6 +306,9 @@ namespace Microsoft.Azure.Commands.Compute.Automation
 
             // SupportedCapabilities
             SupportedCapabilities vSupportedCapabilities = null;
+
+            // AvailabilityPolicy
+            DiskAvailabilityPolicy vAvailabilityPolicy = null;
 
             if (this.IsParameterBound(c => c.SkuName))
             {
@@ -507,6 +517,15 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                 vSupportedCapabilities.SupportedSecurityOption = this.SupportedSecurityOption;
             }
 
+            if (this.IsParameterBound(c => c.AvailabilityPolicyActionOnDiskDelay))
+            {
+                if (vAvailabilityPolicy == null)
+                {
+                    vAvailabilityPolicy = new DiskAvailabilityPolicy();
+                }
+                vAvailabilityPolicy.ActionOnDiskDelay = this.AvailabilityPolicyActionOnDiskDelay;
+            }
+
             var vDisk = new PSDisk
             {
                 Zones = this.IsParameterBound(c => c.Zone) ? this.Zone : null,
@@ -534,7 +553,8 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                 SupportedCapabilities = vSupportedCapabilities,
                 PublicNetworkAccess = this.IsParameterBound(c => c.PublicNetworkAccess) ? PublicNetworkAccess : null,
                 DataAccessAuthMode = this.IsParameterBound(c => c.DataAccessAuthMode) ? DataAccessAuthMode : null,
-                OptimizedForFrequentAttach = this.IsParameterBound(c => c.OptimizedForFrequentAttach) ? OptimizedForFrequentAttach : null
+                OptimizedForFrequentAttach = this.IsParameterBound(c => c.OptimizedForFrequentAttach) ? OptimizedForFrequentAttach : null,
+                AvailabilityPolicy = vAvailabilityPolicy
             };
 
             WriteObject(vDisk);

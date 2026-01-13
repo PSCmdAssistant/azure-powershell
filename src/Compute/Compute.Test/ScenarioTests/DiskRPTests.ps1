@@ -1983,3 +1983,111 @@ function Test-SupportedSecurityOption
 		Clean-ResourceGroup $rgname
     }
 }
+
+function TestGen-newazdiskconfig
+{
+    $rgname = Get-ComputeTestResourceName;
+    $loc = Get-Location;
+
+    try
+    {
+        New-AzResourceGroup -Name $rgname -Location $loc -Force;
+
+        # Setup
+        $diskName = 'disk' + $rgname;
+        $diskAccountType = 'Premium_LRS';
+        $createOption = 'Empty';
+        $diskSize = 32;
+        $actionOnDiskDelay1 = 'None';
+        $actionOnDiskDelay2 = 'AutomaticReattach';
+
+        # Test New-AzDiskConfig with availabilityPolicy.actionOnDiskDelay parameter
+        $diskConfig = New-AzDiskConfig -Location $loc -AccountType $diskAccountType -CreateOption $createOption -DiskSizeGB $diskSize -AvailabilityPolicy @{ actionOnDiskDelay = $actionOnDiskDelay1 };
+        New-AzDisk -ResourceGroupName $rgname -DiskName $diskName -Disk $diskConfig;
+        $disk = Get-AzDisk -ResourceGroupName $rgname -DiskName $diskName;
+        Assert-AreEqual $disk.AvailabilityPolicy.actionOnDiskDelay $actionOnDiskDelay1;
+
+        # Test New-AzDiskUpdateConfig with availabilityPolicy.actionOnDiskDelay parameter
+        $diskUpdateConfig = New-AzDiskUpdateConfig -AvailabilityPolicy @{ actionOnDiskDelay = $actionOnDiskDelay2 };
+        Update-AzDisk -ResourceGroupName $rgname -DiskName $diskName -DiskUpdate $diskUpdateConfig;
+        $diskUpdated = Get-AzDisk -ResourceGroupName $rgname -DiskName $diskName;
+        Assert-AreEqual $diskUpdated.AvailabilityPolicy.actionOnDiskDelay $actionOnDiskDelay2;
+    }
+    finally
+    {
+        # Cleanup
+        Remove-AzResourceGroup -Name $rgname -Force -ErrorAction SilentlyContinue;
+    }
+}
+
+function TestGen-newazdiskupdateconfig
+{
+    $rgname = Get-ComputeTestResourceName;
+    $loc = Get-Location;
+
+    try
+    {
+        # Create a new resource group
+        New-AzResourceGroup -Name $rgname -Location $loc -Force;
+
+        # Create a new disk configuration with the availability policy parameter
+        $diskConfig = New-AzDiskConfig -Location $loc -SkuName 'Premium_LRS' -CreateOption 'Empty' -DiskSizeGB 2 -AvailabilityPolicy @{ actionOnDiskDelay = 'AutomaticReattach' };
+        $diskname = "disk" + $rgname;
+
+        # Create a new disk using the configuration
+        $diskPr = New-AzDisk -ResourceGroupName $rgname -DiskName $diskname -Disk $diskConfig;
+
+        # Retrieve the created disk and validate the availability policy
+        $disk = Get-AzDisk -ResourceGroupName $rgname -DiskName $diskname;
+        Assert-AreEqual $disk.AvailabilityPolicy.ActionOnDiskDelay "AutomaticReattach";
+
+        # Update the disk configuration to change the availability policy
+        $diskupdateconfig = New-AzDiskUpdateConfig -AvailabilityPolicy @{ actionOnDiskDelay = 'None' };
+        Update-AzDisk -ResourceGroupName $rgname -DiskName $diskname -DiskUpdate $diskupdateconfig;
+
+        # Retrieve the updated disk and validate the availability policy
+        $updatedDisk = Get-AzDisk -ResourceGroupName $rgname -DiskName $diskname;
+        Assert-AreEqual $updatedDisk.AvailabilityPolicy.ActionOnDiskDelay "None";
+    }
+    finally
+    {
+        # Clean up the resource group
+        Remove-AzResourceGroup -Name $rgname -Force -ErrorAction SilentlyContinue;
+    }
+}
+
+function TestGen-newazdisk
+{
+    $rgname = Get-ComputeTestResourceName;
+    $loc = Get-Location;
+
+    try
+    {
+        New-AzResourceGroup -Name $rgname -Location $loc -Force;
+
+        # Setup
+        $diskName = 'disk' + $rgname;
+        $diskAccountType = 'Premium_LRS';
+        $createOption = 'Empty';
+        $diskSize = 32;
+        $actionOnDiskDelay1 = 'None';
+        $actionOnDiskDelay2 = 'AutomaticReattach';
+
+        # Test Disk Creation with availabilityPolicy.actionOnDiskDelay
+        $diskConfig = New-AzDiskConfig -Location $loc -AccountType $diskAccountType -CreateOption $createOption -DiskSizeGB $diskSize -AvailabilityPolicy @{ actionOnDiskDelay = $actionOnDiskDelay1 };
+        New-AzDisk -ResourceGroupName $rgname -DiskName $diskName -Disk $diskConfig;
+        $disk = Get-AzDisk -ResourceGroupName $rgname -DiskName $diskName;
+        Assert-AreEqual $disk.AvailabilityPolicy.actionOnDiskDelay $actionOnDiskDelay1;
+
+        # Test Disk Update with availabilityPolicy.actionOnDiskDelay
+        $diskUpdateConfig = New-AzDiskUpdateConfig -AvailabilityPolicy @{ actionOnDiskDelay = $actionOnDiskDelay2 };
+        Update-AzDisk -ResourceGroupName $rgname -DiskName $diskName -DiskUpdate $diskUpdateConfig;
+        $diskUpdated = Get-AzDisk -ResourceGroupName $rgname -DiskName $diskName;
+        Assert-AreEqual $diskUpdated.AvailabilityPolicy.actionOnDiskDelay $actionOnDiskDelay2;
+    }
+    finally
+    {
+        # Cleanup
+        Remove-AzResourceGroup -Name $rgname -Force -ErrorAction SilentlyContinue;
+    }
+}

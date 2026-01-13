@@ -81,5 +81,11 @@ namespace Microsoft.Azure.Commands.Compute.Automation.Models
         public bool? OptimizedForFrequentAttach { get; set; }
         public string SecurityDataUri { get; set; }
         public string SecurityMetadataUri { get; set; }
+        public AvailabilityPolicy AvailabilityPolicy { get; set; }
+    }
+
+    public partial class AvailabilityPolicy
+    {
+        public string ActionOnDiskDelay { get; set; }
     }
 }

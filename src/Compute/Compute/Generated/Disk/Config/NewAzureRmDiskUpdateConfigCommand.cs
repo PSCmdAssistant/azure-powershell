@@ -1,4 +1,4 @@
-//
+ //
 // Copyright (c) Microsoft and contributors.  All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -186,6 +186,14 @@ namespace Microsoft.Azure.Commands.Compute.Automation
         [PSArgumentCompleter("TrustedLaunchSupported", "TrustedLaunchAndConfidentialVMSupported")]
         public string SupportedSecurityOption { get; set; }
 
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            HelpMessage = "Specifies the action on disk delay policy. Values: None to remove the opt-in (Default), AutomaticReattach (Opt-in).")]
+        [Alias("availabilityPolicy.actionOnDiskDelay")]
+        [PSArgumentCompleter("None", "AutomaticReattach")]
+        public string AvailabilityPolicyActionOnDiskDelay { get; set; }
+
         protected override void ProcessRecord()
         {
             if (ShouldProcess("DiskUpdate", "New"))
@@ -210,6 +218,9 @@ namespace Microsoft.Azure.Commands.Compute.Automation
 
             // SupportedCapabilities
             SupportedCapabilities vSupportedCapabilities = null;
+
+            // AvailabilityPolicy
+            DiskAvailabilityPolicy vAvailabilityPolicy = null;
 
             if (this.IsParameterBound(c => c.EncryptionSettingsEnabled))
             {
@@ -316,6 +327,15 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                 vSupportedCapabilities.SupportedSecurityOption = this.SupportedSecurityOption;
             }
 
+            if (this.IsParameterBound(c => c.AvailabilityPolicyActionOnDiskDelay))
+            {
+                if (vAvailabilityPolicy == null)
+                {
+                    vAvailabilityPolicy = new DiskAvailabilityPolicy();
+                }
+                vAvailabilityPolicy.ActionOnDiskDelay = this.AvailabilityPolicyActionOnDiskDelay;
+            }
+
             var vDiskUpdate = new PSDiskUpdate
             {
                 OsType = this.IsParameterBound(c => c.OsType) ? this.OsType : (OperatingSystemTypes?)null,
@@ -337,7 +357,8 @@ namespace Microsoft.Azure.Commands.Compute.Automation
                 SupportsHibernation = this.IsParameterBound(c => c.SupportsHibernation) ? SupportsHibernation : null,
                 SupportedCapabilities = vSupportedCapabilities,
                 PublicNetworkAccess = this.IsParameterBound(c => c.PublicNetworkAccess) ? PublicNetworkAccess : null,
-                DataAccessAuthMode = this.IsParameterBound(c => c.DataAccessAuthMode) ? DataAccessAuthMode : null
+                DataAccessAuthMode = this.IsParameterBound(c => c.DataAccessAuthMode) ? DataAccessAuthMode : null,
+                AvailabilityPolicy = vAvailabilityPolicy
             };
 
             WriteObject(vDiskUpdate);
