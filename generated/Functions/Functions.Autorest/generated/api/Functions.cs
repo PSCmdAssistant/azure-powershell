@@ -182,7 +182,6 @@ namespace Microsoft.Azure.PowerShell.Cmdlets.Functions
                 await eventListener.AssertNotNull(nameof(resourceGroupName),resourceGroupName);
                 await eventListener.AssertMinimumLength(nameof(resourceGroupName),resourceGroupName,1);
                 await eventListener.AssertMaximumLength(nameof(resourceGroupName),resourceGroupName,90);
-                await eventListener.AssertRegEx(nameof(resourceGroupName),resourceGroupName,@"^[-\w\._\(\)]+$");
                 await eventListener.AssertNotNull(nameof(subscriptionId),subscriptionId);
                 await eventListener.AssertNotNull(nameof(resourceName),resourceName);
                 await eventListener.AssertNotNull(nameof(body), body);
@@ -352,7 +351,6 @@ namespace Microsoft.Azure.PowerShell.Cmdlets.Functions
                 await eventListener.AssertNotNull(nameof(resourceGroupName),resourceGroupName);
                 await eventListener.AssertMinimumLength(nameof(resourceGroupName),resourceGroupName,1);
                 await eventListener.AssertMaximumLength(nameof(resourceGroupName),resourceGroupName,90);
-                await eventListener.AssertRegEx(nameof(resourceGroupName),resourceGroupName,@"^[-\w\._\(\)]+$");
                 await eventListener.AssertNotNull(nameof(subscriptionId),subscriptionId);
                 await eventListener.AssertNotNull(nameof(resourceName),resourceName);
                 await eventListener.AssertNotNull(nameof(keyId),keyId);
@@ -521,7 +519,6 @@ namespace Microsoft.Azure.PowerShell.Cmdlets.Functions
                 await eventListener.AssertNotNull(nameof(resourceGroupName),resourceGroupName);
                 await eventListener.AssertMinimumLength(nameof(resourceGroupName),resourceGroupName,1);
                 await eventListener.AssertMaximumLength(nameof(resourceGroupName),resourceGroupName,90);
-                await eventListener.AssertRegEx(nameof(resourceGroupName),resourceGroupName,@"^[-\w\._\(\)]+$");
                 await eventListener.AssertNotNull(nameof(subscriptionId),subscriptionId);
                 await eventListener.AssertNotNull(nameof(resourceName),resourceName);
                 await eventListener.AssertNotNull(nameof(keyId),keyId);
@@ -685,7 +682,6 @@ namespace Microsoft.Azure.PowerShell.Cmdlets.Functions
                 await eventListener.AssertNotNull(nameof(resourceGroupName),resourceGroupName);
                 await eventListener.AssertMinimumLength(nameof(resourceGroupName),resourceGroupName,1);
                 await eventListener.AssertMaximumLength(nameof(resourceGroupName),resourceGroupName,90);
-                await eventListener.AssertRegEx(nameof(resourceGroupName),resourceGroupName,@"^[-\w\._\(\)]+$");
                 await eventListener.AssertNotNull(nameof(subscriptionId),subscriptionId);
                 await eventListener.AssertNotNull(nameof(resourceName),resourceName);
             }
@@ -23854,7 +23850,6 @@ namespace Microsoft.Azure.PowerShell.Cmdlets.Functions
                 await eventListener.AssertNotNull(nameof(resourceGroupName),resourceGroupName);
                 await eventListener.AssertMinimumLength(nameof(resourceGroupName),resourceGroupName,1);
                 await eventListener.AssertMaximumLength(nameof(resourceGroupName),resourceGroupName,90);
-                await eventListener.AssertRegEx(nameof(resourceGroupName),resourceGroupName,@"^[-\w\._\(\)]+$");
                 await eventListener.AssertNotNull(nameof(subscriptionId),subscriptionId);
                 await eventListener.AssertNotNull(nameof(resourceName),resourceName);
                 await eventListener.AssertNotNull(nameof(body), body);
@@ -24026,7 +24021,6 @@ namespace Microsoft.Azure.PowerShell.Cmdlets.Functions
                 await eventListener.AssertNotNull(nameof(resourceGroupName),resourceGroupName);
                 await eventListener.AssertMinimumLength(nameof(resourceGroupName),resourceGroupName,1);
                 await eventListener.AssertMaximumLength(nameof(resourceGroupName),resourceGroupName,90);
-                await eventListener.AssertRegEx(nameof(resourceGroupName),resourceGroupName,@"^[-\w\._\(\)]+$");
                 await eventListener.AssertNotNull(nameof(subscriptionId),subscriptionId);
                 await eventListener.AssertNotNull(nameof(resourceName),resourceName);
             }
@@ -24235,7 +24229,6 @@ namespace Microsoft.Azure.PowerShell.Cmdlets.Functions
                 await eventListener.AssertNotNull(nameof(resourceGroupName),resourceGroupName);
                 await eventListener.AssertMinimumLength(nameof(resourceGroupName),resourceGroupName,1);
                 await eventListener.AssertMaximumLength(nameof(resourceGroupName),resourceGroupName,90);
-                await eventListener.AssertRegEx(nameof(resourceGroupName),resourceGroupName,@"^[-\w\._\(\)]+$");
                 await eventListener.AssertNotNull(nameof(subscriptionId),subscriptionId);
                 await eventListener.AssertNotNull(nameof(resourceName),resourceName);
                 await eventListener.AssertNotNull(nameof(purgeId),purgeId);
@@ -24356,7 +24349,6 @@ namespace Microsoft.Azure.PowerShell.Cmdlets.Functions
                 await eventListener.AssertNotNull(nameof(resourceGroupName),resourceGroupName);
                 await eventListener.AssertMinimumLength(nameof(resourceGroupName),resourceGroupName,1);
                 await eventListener.AssertMaximumLength(nameof(resourceGroupName),resourceGroupName,90);
-                await eventListener.AssertRegEx(nameof(resourceGroupName),resourceGroupName,@"^[-\w\._\(\)]+$");
                 await eventListener.AssertNotNull(nameof(subscriptionId),subscriptionId);
                 await eventListener.AssertNotNull(nameof(resourceName),resourceName);
             }
@@ -24548,7 +24540,6 @@ namespace Microsoft.Azure.PowerShell.Cmdlets.Functions
                 await eventListener.AssertNotNull(nameof(resourceGroupName),resourceGroupName);
                 await eventListener.AssertMinimumLength(nameof(resourceGroupName),resourceGroupName,1);
                 await eventListener.AssertMaximumLength(nameof(resourceGroupName),resourceGroupName,90);
-                await eventListener.AssertRegEx(nameof(resourceGroupName),resourceGroupName,@"^[-\w\._\(\)]+$");
                 await eventListener.AssertNotNull(nameof(subscriptionId),subscriptionId);
             }
         }
@@ -24841,7 +24832,6 @@ namespace Microsoft.Azure.PowerShell.Cmdlets.Functions
                 await eventListener.AssertNotNull(nameof(resourceGroupName),resourceGroupName);
                 await eventListener.AssertMinimumLength(nameof(resourceGroupName),resourceGroupName,1);
                 await eventListener.AssertMaximumLength(nameof(resourceGroupName),resourceGroupName,90);
-                await eventListener.AssertRegEx(nameof(resourceGroupName),resourceGroupName,@"^[-\w\._\(\)]+$");
                 await eventListener.AssertNotNull(nameof(subscriptionId),subscriptionId);
                 await eventListener.AssertNotNull(nameof(resourceName),resourceName);
                 await eventListener.AssertNotNull(nameof(body), body);
@@ -25019,7 +25009,6 @@ namespace Microsoft.Azure.PowerShell.Cmdlets.Functions
                 await eventListener.AssertNotNull(nameof(resourceGroupName),resourceGroupName);
                 await eventListener.AssertMinimumLength(nameof(resourceGroupName),resourceGroupName,1);
                 await eventListener.AssertMaximumLength(nameof(resourceGroupName),resourceGroupName,90);
-                await eventListener.AssertRegEx(nameof(resourceGroupName),resourceGroupName,@"^[-\w\._\(\)]+$");
                 await eventListener.AssertNotNull(nameof(subscriptionId),subscriptionId);
                 await eventListener.AssertNotNull(nameof(resourceName),resourceName);
                 await eventListener.AssertNotNull(nameof(body), body);

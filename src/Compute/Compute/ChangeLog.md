@@ -20,6 +20,28 @@
 
 -->
 ## Upcoming Release
+* Updated Compute SDK to be generated with autorest.powershell, replacing track 1 SDK
+* Added new cmdlets for Availability Set to Virtual Machine Scale Set (VMSS) Flex migration (Public Preview)
+    - `Convert-AzAvailabilitySet`: Converts an Availability Set to a new Flexible Virtual Machine Scale Set without downtime
+    - `Test-AzAvailabilitySetMigration`: Validates that VMs in an Availability Set can be migrated to a VMSS
+    - `Start-AzAvailabilitySetMigration`: Starts migration of an Availability Set to an existing Flexible VMSS    
+    - `Stop-AzAvailabilitySetMigration`: Cancels a migration operation on an Availability Set
+    - `Move-AzVirtualMachineToVmss`: Migrates a VM from an Availability Set to a Flexible VMSS
+
+## Version 11.2.0
+* Added `-HighSpeedInterconnectPlacement` parameter to `New-AzVmssConfig` and `New-AzVmss` cmdlets.
+* Added new parameters `ZonePlacementPolicy`, `IncludeZone`, `ExcludeZone`, `MaxZoneCount`, `EnableMaxInstancePercentPerZone` and `MaxInstancePercentPerZoneValue` to `New-AzVmssConfig` cmdlet.
+* Added new parameters `ZonePlacementPolicy`, `IncludeZone` and `ExcludeZone` to `New-AzVmss` cmdlet.
+* Added new parameters `MaxZoneCount`, `EnableMaxInstancePercentPerZone` and `MaxInstancePercentPerZoneValue` to `Update-AzVmss` cmdlet.
+* Updated Azure.Core from 1.47.3 to 1.50.0
+
+## Version 11.1.0
+* Added `-ResiliencyView` parameter to `Get-AzVmssVM` cmdlet
+    - Retrieves the resilient VM deletion status for Virtual Machine Scale Set (VMSS) VMs
+    - Indicates whether automatic delete retries are in progress, failed, or not started
+    - Supports monitoring the real-time status of the Resilient Delete feature
+
+## Version 11.0.0
 * Improved user experience and consistency. This may introduce breaking changes. Please refer to [here](https://go.microsoft.com/fwlink/?linkid=2340249).
 * Updated Azure.Core from 1.45.0 to 1.47.3
 * Added `-EnableAutomaticUpgrade` and `-TreatFailureAsDeploymentFailure` parameters (Bool) to `New-AzVmGalleryApplication` and `New-AzVmssGalleryApplication` cmdlets.
@@ -38,7 +60,7 @@
 * Updated SDK to use 2025-04-01 version of the ComputeRP API for Compute related cmdlets.
 
 ## Version 10.3.0
-* Fixed typo 'DeyAll' to 'DenyAll' in NetworkAccessPolicy description. 
+* Fixed typo 'DeyAll' to 'DenyAll' in NetworkAccessPolicy description.
 * Preannounced breaking changes. Please refer to https://go.microsoft.com/fwlink/?linkid=2333229
 * Updated New-AzDiskConfig to include `SecurityMetadataUri` and `SecurityDataUri` parameters.
 * Updated Grant-AzDisk to return `SecurityMetadataAccessSAS` property.

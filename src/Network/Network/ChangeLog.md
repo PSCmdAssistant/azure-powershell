@@ -19,6 +19,27 @@
 --->
 
 ## Upcoming Release
+* Added `-IpVersionType` parameter to `New-AzPrivateEndpoint` cmdlet to specify the IP version type for private IPs of the private endpoint. Allowed values are IPv4, IPv6, or DualStack.
+* Added new cmdlets for VirtualNetworkAppliance resource:
+    - `Get-AzVirtualNetworkAppliance`: Get a Virtual Network Appliance resource by name, resource group, or list all.
+    - `New-AzVirtualNetworkAppliance`: Create a new Virtual Network Appliance resource.
+    - `Remove-AzVirtualNetworkAppliance`: Remove a Virtual Network Appliance resource.
+    - `Update-AzVirtualNetworkAppliance`: Update tags on a Virtual Network Appliance resource.
+
+## Version 7.24.1
+* Onboarded `Microsoft.Security/privateLinks` to Private Link Common Cmdlets
+
+## Version 7.24.0
+* Added support for `RecordType` property in `New-AzNetworkWatcherFlowLog` and `Set-AzNetworkWatcherFlowLog` cmdlets.
+* Added property "NvaInterfaceConfiguration" to Network Virtual Appliances, as well as support for them in following cmdlets:
+    - `New-AzNetworkVirtualAppliance`
+    - `Get-AzNetworkVirtualAppliance`
+* Added cmdlet to take the NvaInterfaceConfigurations properties on the Network Virtual Appliance:
+    - `New-AzNvaInterfaceConfiguration`  to build individual interface configuration for network virtual appliance.
+* Removed the None from the accepted value for the property 'Sensitivity'
+    - Updated `New-AzApplicationGatewayFirewallPolicyManagedRuleOverride` cmdlet
+
+## Version 7.23.1
 * Onboarded `Microsoft.Security/privateLinks` to Private Link Common Cmdlets
 
 ## Version 7.23.0
