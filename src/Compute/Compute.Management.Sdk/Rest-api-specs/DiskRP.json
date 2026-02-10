@@ -1941,13 +1941,13 @@
       "properties": {
         "actionOnDiskDelay": {
           "$ref": "#/definitions/AvailabilityPolicyDiskDelay",
-          "description": "Determines on how to handle disks with slow I/O."
+          "description": "Determines how to handle disks with slow I/O."
         }
       }
     },
     "AvailabilityPolicyDiskDelay": {
       "type": "string",
-      "description": "Determines on how to handle disks with slow I/O.",
+      "description": "Determines how to handle disks with slow I/O.",
       "enum": [
         "None",
         "AutomaticReattach"
