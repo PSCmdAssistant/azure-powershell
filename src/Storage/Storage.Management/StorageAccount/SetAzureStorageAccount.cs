@@ -437,8 +437,7 @@ namespace Microsoft.Azure.Commands.Management.Storage
         [Parameter(
             Mandatory = false,
             HelpMessage = "The minimum TLS version to be permitted on requests to storage.")]
-        [ValidateSet(StorageModels.MinimumTlsVersion.TLS10,
-            StorageModels.MinimumTlsVersion.TLS11,
+        [ValidateSet(
             StorageModels.MinimumTlsVersion.TLS12,
             StorageModels.MinimumTlsVersion.TLS13,
             IgnoreCase = true)]
